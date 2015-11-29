@@ -9,13 +9,6 @@ use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Parser;
 
 Database::init();
-
-if(isset($_GET['logout'])) {
-    session_unset();
-}
-
-
-
 if(isset($_GET['token'])) {
     $urlToken = $_GET['token'];
     
@@ -36,15 +29,15 @@ if(isset($_GET['token'])) {
     
     
 }
-$continue = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-
+$rqu = (!empty($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/logout.php") ? $_SERVER['REQUEST_URI'] : "";
+$continue = 'http://' . $_SERVER['HTTP_HOST'] . $rqu;
 echo "<h1>Domain 1</h1>";
 
 if(isset($_SESSION['uid'])) {
     echo "UID: " . $_SESSION['uid'];
-    echo '<a href="./?logout=1">Logout</a>';
+    echo '<a href="./logout.php">Logout</a>';
 } else {
-    echo '<iframe src="http://sso.localhost/jwt.php?continue=' . $continue . '" frameborder="0"></iframe>';
+    echo '<iframe src="'. CFG_AUTH_SERVER .'/jwt.php?continue=' . $continue . '" frameborder="0"></iframe>';
 }
 
 

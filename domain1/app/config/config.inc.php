@@ -4,7 +4,8 @@ define('CFG_SQL_HOST', 'localhost');
 define('CFG_SQL_DBNAME', 'sso');
 define('CFG_SQL_USERNAME', 'root');
 define('CFG_SQL_PASSWORD', '');
-define('CFG_JWT_AUD', 'http://domain1.localhost/');
+define('CFG_JWT_AUD', 'http://domain1.local');
+define('CFG_AUTH_SERVER', 'http://sso.local');
 
 class Database {
     public static $pdo = null;

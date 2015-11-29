@@ -1,14 +1,14 @@
 <?php
+require_once 'vendor/autoload.php';
 
 define('CFG_SQL_HOST', 'localhost');
 define('CFG_SQL_DBNAME', 'sso');
 define('CFG_SQL_USERNAME', 'root');
 define('CFG_SQL_PASSWORD', '');
-define('CFG_JWT_ISSUER', 'http://sso.localhost/');
+define('CFG_JWT_ISSUER', 'http://sso.local/');
 
-$whiteList = array("http://domain1.local", "http://domain2.local");
+$whiteList = array("http://domain1.local", "http://domain2.local", 'http://sso.local');
 
-require_once 'vendor/autoload.php';
 
 class Database {
     public static $pdo = null;
@@ -24,6 +24,14 @@ class Database {
         } catch (PDOException $e) {
             die('Connection failed: ' . $e->getMessage());
         }
+    }
+}
+
+class Logger {
+    public static function log($what, $path = 'C:/wamp/logs/ssoLog.txt') {
+        $fp = fopen($path, "a+");
+        fwrite($fp, print_r($what, true));
+        fclose($fp);
     }
 }
 
@@ -46,4 +54,3 @@ function generateJWT($uid, $aud) {
                             ->getToken(); // Retrieves the generated token
     return $token;
 }
-
