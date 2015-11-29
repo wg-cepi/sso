@@ -8,6 +8,7 @@ function login() {
     if(isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $whiteList)){
         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
         header('Content-Type: application/json');
+        header('Access-Control-Allow-Credentials: true');
     
         if(!empty($_GET['email']) && !empty($_GET['password'])) {
             $query = Database::$pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
@@ -36,6 +37,7 @@ function checkCookie() {
     global $whiteList;
     if(isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $whiteList)){
         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+        //header('Access-Control-Allow-Credentials: true');
         header('Content-Type: application/json');
         if(isset($_GET['checkCookie']) && $_GET['checkCookie'] == 1){
             if(!isset($_COOKIE['sso_cookie'])) {

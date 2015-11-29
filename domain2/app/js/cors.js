@@ -42,7 +42,7 @@ function login() {
             success: function( response ) {
                 console.log(response); // server response
                 console.log(response.token);
-                window.location.replace("http://domain1.local/?token=" + response.token);
+                window.location.replace("http://domain2.local/?token=" + response.token);
             },
             error: function (response) {
                 console.log(response);
