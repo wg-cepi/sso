@@ -5,7 +5,7 @@ define('CFG_SQL_HOST', 'localhost');
 define('CFG_SQL_DBNAME', 'sso');
 define('CFG_SQL_USERNAME', 'root');
 define('CFG_SQL_PASSWORD', '');
-define('CFG_JWT_ISSUER', 'http://sso.local/');
+define('CFG_JWT_ISSUER', 'sso.local/');
 
 $whiteList = array("http://domain1.local", "http://domain2.local", 'http://sso.local');
 
@@ -26,11 +26,12 @@ class Database {
         }
     }
 }
+Database::init();
 
 class Logger {
     public static function log($what, $path = 'C:/wamp/logs/ssoLog.txt') {
         $fp = fopen($path, "a+");
-        fwrite($fp, print_r($what, true));
+        fwrite($fp, print_r($what, true). "\n");
         fclose($fp);
     }
 }
@@ -53,4 +54,37 @@ function generateJWT($uid, $aud) {
                             ->sign($signer,  $keychain->getPrivateKey($pk)) // creates a signature using your private key
                             ->getToken(); // Retrieves the generated token
     return $token;
+}
+
+function getContinueUrl($url) {
+    $result = parse_url($url);
+    $path = $host = "";
+    if(isset($result['path']) && isset($result['host'])) {
+        $host = $result['host'];
+        $path = $result['path'];
+    }
+    return $host . $path;
+}
+
+function getContinue(){
+    $continue = "";
+    if(!empty($_GET['continue'])) {
+        $continue = $_GET['continue'];
+        $_SESSION['continue'] = $continue;
+    } else if(isset($_SEVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
+        $result = parse_url($_SERVER['REQUEST_URI']);
+        $path = "";
+        if(isset($result['path'])) {
+            $path = $result['path'];
+        }
+        $continue = CFG_JWT_ISSUER . $path;
+        $_SESSION['continue'] = $continue;
+    } else {
+        if(!isset($_SESSION['continue'])) {
+            $continue = CFG_JWT_ISSUER . "/login.php";
+        } else {
+            $continue = $_SESSION['continue'];
+        }
+    }
+    return $continue;
 }

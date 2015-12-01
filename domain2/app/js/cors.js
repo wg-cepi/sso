@@ -12,7 +12,9 @@ function checkSSOCookie() {
         success: function( response ) {
            console.log( response ); // server response
            if(response.status == "ok") {
-               $("#loginArea").html("<a href='./?token=" + response.token + "'>Login with SSO</a>");
+               if($("#userLogged").length) {
+                   $("#loginArea").remove();
+               } else $("#loginArea").html("<a href='./?token=" + response.token + "'>Login with SSO</a>");
            }
            if(response.status == "no_cookie") {
                $("#loginArea").append("<p>No cookie</p>");
