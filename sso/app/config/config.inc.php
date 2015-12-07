@@ -5,10 +5,15 @@ define('CFG_SQL_HOST', 'localhost');
 define('CFG_SQL_DBNAME', 'sso');
 define('CFG_SQL_USERNAME', 'root');
 define('CFG_SQL_PASSWORD', '');
-define('CFG_JWT_ISSUER', 'sso.local/');
+define('CFG_JWT_ISSUER', 'sso.local');
 
 $whiteList = array("http://domain1.local", "http://domain2.local", 'http://sso.local');
 
+function redirect($url, $code = 303) {
+    http_response_code($code);
+    header("Location: http://" . $url);
+    exit();
+}
 
 class Database {
     public static $pdo = null;
@@ -77,7 +82,7 @@ function getContinue(){
         if(isset($result['path'])) {
             $path = $result['path'];
         }
-        $continue = CFG_JWT_ISSUER . $path;
+        $continue = CFG_JWT_ISSUER . '/' . $path;
         $_SESSION['continue'] = $continue;
     } else {
         if(!isset($_SESSION['continue'])) {

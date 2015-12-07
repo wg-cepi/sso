@@ -29,18 +29,13 @@ $continue = getContinue();
 <div>
     <p>You are logged in as <strong><?php echo $user['email'];?></strong></p>
     <ul>
-        <li><a href="http://<?php echo CFG_JWT_ISSUER ?>login.php?login=1&continue=<?php echo $continue;?>" title="Continue as <?php echo $user['email'] ?>"> Continue as <?php echo $user['email'];?></a></li>
+        <li><a href="http://<?php echo CFG_JWT_ISSUER ?>/login.php?login=1&continue=<?php echo $continue;?>" title="Continue as <?php echo $user['email'] ?>"> Continue as <?php echo $user['email'];?></a></li>
         <li><a href="http://sso.local/login.php?relog=1&continue=<?php echo $continue; ?>" title="Log in as another user">Log in as another user</a>
     </ul>
 </div>
 <?php endif; ?>
 
 <?php
-function redirect($url, $code = 303) {
-    http_response_code($code);
-    header("Location: http://" . $url);
-    exit();
-}
 if(!empty($_GET['email']) && !empty($_GET['password']) && isset($_GET['continue'])) {
         $aud = $_GET['continue'];
         $query = Database::$pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");

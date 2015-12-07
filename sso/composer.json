@@ -1,5 +1,8 @@
 {
     "require": {
-        "lcobucci/jwt": "^3.1"
+        "lcobucci/jwt": "^3.1",
+        "facebook/php-sdk-v4" : "~5.0",
+        "google/apiclient": "1.0.*@beta",
+        "abraham/twitteroauth": "^0.6.2"
     }
 }
