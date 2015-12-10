@@ -11,8 +11,8 @@ $whiteList = array("http://domain1.local", "http://domain2.local", 'http://sso.l
 
 function redirect($url, $code = 303) {
     http_response_code($code);
-    header("Location: http://" . $url);
-    exit();
+    header("Location: " . $url);
+    exit;
 }
 
 class Database {

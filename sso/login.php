@@ -49,7 +49,7 @@ if(!empty($_GET['email']) && !empty($_GET['password']) && isset($_GET['continue'
             $token = generateJWT($user["id"], $aud);
             
             $url = getContinueUrl("http://" . $aud) . "?token=" . $token;
-            redirect($url);
+            redirect("http://" . $url);
         }
 }
 
@@ -59,7 +59,7 @@ if(isset($_COOKIE['sso_cookie']) && isset($_GET['login'])) {
     $token = generateJWT($user["id"], $aud);
     Logger::log($aud);
     $url = getContinueUrl("http://" . $aud) . "?token=" . $token;
-    redirect($url);   
+    redirect("http://" . $url);   
 }
 
 function getUserFromCookie() {
