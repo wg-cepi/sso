@@ -17,19 +17,19 @@ function login() {
             $token = generateJWT($user["id"], $aud);
             jsRedirect($aud, $token);
         } else {
-            showLoginForm($params);
+            showLoginForm($continue);
         }
     } else {
-        showLoginForm($params);
+        showLoginForm($continue);
     }
 }
 
-function showLoginForm(Array $params) {
+function showLoginForm($continue) {
     //echo "<script>alert(window.parent.location);</script>";
     echo '<form method="get" action="http://sso.local/jwt.php">'
         . '<label>Email:<input type="text" name="email"/></label><br/>'
         . '<label>Password:<input type="password" name="password"/></label><br/>'
-        . '<input type="hidden" name="continue" value="'.$params['continue'].'"/>'
+        . '<input type="hidden" name="continue" value="'. $continue .'"/>'
         . '<input type="submit" value="login"/>'
         . '</form>';
 }
