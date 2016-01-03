@@ -1,11 +1,12 @@
 <?php
-require_once 'vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 define('CFG_SQL_HOST', 'localhost');
 define('CFG_SQL_DBNAME', 'sso');
 define('CFG_SQL_USERNAME', 'root');
 define('CFG_SQL_PASSWORD', '');
 define('CFG_JWT_AUD', 'domain2.local');
+define('CFG_AUTH_SERVER_ENDPOINT', 'http://sso.local/app/module_sso/module_sso.php');
 define('CFG_AUTH_SERVER', 'sso.local');
 
 class Database {

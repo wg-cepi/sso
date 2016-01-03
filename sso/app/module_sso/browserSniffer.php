@@ -85,4 +85,4 @@ echo BrowserSniffer::getVersion();
 echo "<br>";
 echo BrowserSniffer::isMobileOrTablet();
 echo "<br>";
- */
+*/
