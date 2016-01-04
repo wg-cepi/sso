@@ -11,9 +11,9 @@ define('CFG_SSO_ENDPOINT_URL', 'http://sso.local/app/module_sso/module_sso.php')
 $whiteList = array("http://domain1.local", "http://domain2.local", 'http://sso.local');
 
 $loginMethodPriorities = array(
-    1 => 'cors',
-    2 => 'iframe',
-    3 => 'noscript'
+    'cors',
+    'iframe',
+    'noscript'
 );
 
 function redirect($url, $code = 303) {

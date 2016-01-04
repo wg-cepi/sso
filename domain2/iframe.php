@@ -2,7 +2,7 @@
 session_start();
 require_once 'app/config/config.inc.php';
 
-$continue =  CFG_JWT_AUD . getContinuePath();
+$continue = 'http://' .  CFG_JWT_AUD . getContinuePath();
 parseToken();
 
 echo "<h1>Domain 2</h1>";
@@ -11,7 +11,7 @@ if(isset($_SESSION['uid'])) {
     echo "<p>Logged UID: " . $_SESSION['uid'] . "</p>";
 } else {
     echo "<div>";
-    echo '<iframe src="http://'. CFG_AUTH_SERVER .'/jwt.php?continue=' . $continue . '" frameborder="0"></iframe>';
+    echo '<iframe src="'. CFG_AUTH_SERVER_ENDPOINT .'?continue=' . $continue . '" frameborder="0"></iframe>';
     echo "</div>";
 }
 
