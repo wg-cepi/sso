@@ -1,7 +1,7 @@
 
 function checkSSOCookie() {
     $.ajax({
-        url: "http://sso.local/jwtCORS.php?checkCookie=1&continue=" + window.location.hostname,
+        url: "http://sso.local/app/module_sso/module_sso.php?checkCookie=1&continue=" + window.location.origin,
         type: "GET",
         dataType: "json",
         xhrFields: {
@@ -10,15 +10,27 @@ function checkSSOCookie() {
 
         // Work with the response
         success: function( response ) {
-           console.log( response ); // server response
-           if(response.status == "ok") {
-               if($("#userLogged").length) {
-                   $("#loginArea").remove();
-               } else $("#loginArea").html("<a href='./?token=" + response.token + "'>Login with SSO</a>");
-           }
-           if(response.status == "no_cookie") {
-               $("#loginArea").append("<p>No cookie</p>");
-           }
+            console.log( response ); // server response
+            if(response.status == "ok") {
+                 if($("#userLogged").length) {
+                    $("#loginArea").remove();
+                 } else {
+                    var html = "<ul id='ssoLinks'><li><a href='./?token=" + response.token + "' title='" + response.email + "'>Continue as " + response.email + "</a></li>";
+                    html += "<li><a id='relog' href='#' title='Log in as another user'>Login in as another user</a></li></ul>";
+                
+                    $("#loginArea").after(html);
+                    $("#loginArea").hide();
+
+                    $("#relog").click(function(e){
+                        e.preventDefault();
+                        $("#loginArea").show();
+                        $("#ssoLinks").hide();
+                    });
+                 }
+            }
+            if(response.status == "no_cookie") {
+                $("#loginArea").append("<p>No cookie</p>");
+            }
         },
         error: function (response) {
             console.log(response);
@@ -30,7 +42,7 @@ function login() {
     var password = $("input[name='password']").prop("value");
     if(email && password){
         $.ajax({
-            url: "http://sso.local/jwtCORS.php",
+            url: "http://sso.local/app/module_sso/module_sso.php?login=1",
             type: "GET",
             dataType: "json",
             data: {
@@ -58,7 +70,10 @@ function login() {
         e.preventDefault();
         login();
     });
+    
     checkSSOCookie();
+    
+    console.log(window.location);
  });
 
 

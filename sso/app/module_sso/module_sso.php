@@ -259,7 +259,7 @@ abstract class LoginMethod implements ILoginMethod
         } catch (EHostNotFoundInURL $e) {
             $continueUrl = new ContinueUrl(CFG_SSO_ENDPOINT_URL);
         } catch (EEmptyURL $e) {
-            $continueUrl = new ContinueUrl(CFG_SSO_ENDPOINT_URL);;
+            $continueUrl = new ContinueUrl(CFG_SSO_ENDPOINT_URL);
         }
         if(isset($_GET['email']) && isset($_GET['password'])) {
             $email =  $_GET['email'];
@@ -270,9 +270,7 @@ abstract class LoginMethod implements ILoginMethod
             $user = $query->fetch();
             if($user) {
                 $this->setCookies($user['id']);
-
-                $jwt = new JWT();
-                $token = $jwt->generate(array('uid' => $user['id']));
+                $token = (new JWT())->generate(array('uid' => $user['id']));
 
                 $url = $continueUrl->getUrl() .  "?token=" . $token;
                 $this->redirect($url);
@@ -287,8 +285,7 @@ abstract class LoginMethod implements ILoginMethod
                 //user not found or cookies deleted/forged
             }
             if($user !== null) {
-                $jwt = new JWT();
-                $token = $jwt->generate(array('uid' => $user['id']));
+                $token = (new JWT())->generate(array('uid' => $user['id']));
 
                 $url = $continueUrl->getUrl() . "?token=" . $token;
                 $this->redirect($url);
@@ -299,6 +296,11 @@ abstract class LoginMethod implements ILoginMethod
         else {
             $this->showHTML($continueUrl);
         }
+    }
+    
+    public function run()
+    {
+        $this->login();
     }
     
 }
@@ -320,12 +322,77 @@ class IframeLogin extends LoginMethod
         echo "<script>window.parent.location = '" . $url . "';</script>";
     }
 }
+
+class CORSLogin extends LoginMethod
+{
+    public function checkCookie()
+    {
+        header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+        header('Access-Control-Allow-Credentials: true');
+        header('Content-Type: application/json');
+        if(!isset($_COOKIE['SID']) || !isset($_COOKIE['SLLT'])) {
+            echo json_encode(array("status" => "no_cookie"));
+        } else {
+            $sid = $_COOKIE['SID'];
+            $time = $_COOKIE['SLLT'];
+            $query = Database::$pdo->prepare("SELECT * FROM users WHERE logged = $time AND cookie = '$sid'");
+            $query->execute(array());
+            $user = $query->fetch();
+            if($user) {
+                $token = (new JWT())->generate(array('uid' => $user['id']));
+                echo '{"status": "ok", "token": "' . $token . '", "email": "' . $user['email'] .'"}';
+            }
+        }
+    }
+    
+    public function login()
+    {
+
+        header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Credentials: true');
+
+        if(!empty($_GET['email']) && !empty($_GET['password'])) {
+            $query = Database::$pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
+            $query->execute(array($_GET['email'], $_GET['password']));
+            $user = $query->fetch();
+            if($user) {
+                $this->setCookies($user['id']);
+                $token = (new JWT())->generate(array('uid' => $user['id']));
+
+                echo '{"status": "ok", "token": "' . $token . '"}';
+            } else {
+                echo json_encode(array("status" => "fail"));
+            }
+        } else {
+            echo json_encode(array("status" => "bad_login"));
+        }
+
+        
+    }
+    
+    public function run()
+    {
+        global $whiteList;
+        if(isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $whiteList)){
+            if(isset($_GET['login']) && $_GET['login'] == 1) {
+                $this->login();
+            } else if(isset($_GET['checkCookie']) && $_GET['checkCookie'] == 1) {
+                $this->checkCookie();
+            }
+        }
+        
+    }
+}
 //$rdl = new NoScriptLogin();
 //$rdl->login('joe@example.com', 'joe', 'http://sso.local/joe.html');
 
 $module_sso = new ModuleSSO();
-$module_sso->pickLoginMethod();
-//$module_sso->loginMethod = new IframeLogin();
+//$module_sso->pickLoginMethod();
+$module_sso->loginMethod = new CORSLogin();
 
-$module_sso->loginMethod->login();
+$module_sso->loginMethod->run();
 
+echo "<pre>";
+print_r($_SERVER);
+echo "</pre>";

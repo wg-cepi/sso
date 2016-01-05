@@ -9,15 +9,16 @@ echo '<a href="./">Home</a>';
 
 if(isset($_SESSION['uid'])) {
     echo "<p id='userLogged'>Logged UID: " . $_SESSION['uid'] . "</p>";
+} else {
+
+    echo '<div id="loginArea">';
+    echo '<form>'
+        . '<label>Email:<input type="text" name="email"/></label><br/>'
+        . '<label>Password:<input type="password" name="password"/></label><br/>'
+        . '<input type="hidden" name="continue" value="http://' . CFG_JWT_AUD .'/cors.php"/>'
+        . '<input type="button" id="loginButton" value="login"/>'
+    . '</form>';
+    echo '</div>';
 }
 
-echo '<div id="loginArea">';
-echo '<form>'
-    . '<label>Email:<input type="text" name="email"/></label><br/>'
-    . '<label>Password:<input type="password" name="password"/></label><br/>'
-    . '<input type="hidden" name="continue" value="http://' . CFG_JWT_AUD .'/cors.php"/>'
-    . '<input type="button" id="loginButton" value="login"/>'
-. '</form>';
-echo '</div>';
-
-
+echo "<a href='http://sso.local/app/module_sso/module_sso.php'>awddwa</a>";
