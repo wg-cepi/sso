@@ -11,7 +11,7 @@ if(isset($_SESSION['uid'])) {
     echo "<p>Logged UID: " . $_SESSION['uid'] . "</p>";
 } else {
     echo "<div>";
-    echo '<iframe src="'. CFG_AUTH_SERVER_ENDPOINT .'?continue=' . $continue . '" frameborder="0"></iframe>';
+    echo '<iframe src="'. CFG_AUTH_SERVER_ENDPOINT .'?m=2&continue=' . $continue . '" frameborder="0"></iframe>';
     echo "</div>";
 }
 

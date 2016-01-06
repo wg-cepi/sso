@@ -20,5 +20,3 @@ if(isset($_SESSION['uid'])) {
     . '</form>';
     echo '</div>';
 }
-
-echo "<a href='http://sso.local/app/module_sso/module_sso.php'>awddwa</a>";

@@ -1,7 +1,7 @@
 
 function checkSSOCookie() {
     $.ajax({
-        url: "http://sso.local/app/module_sso/module_sso.php?checkCookie=1&continue=" + window.location.origin,
+        url: "http://sso.local/app/module_sso/module_sso.php?m=3&checkCookie=1&continue=" + window.location.origin,
         type: "GET",
         dataType: "json",
         xhrFields: {
@@ -42,7 +42,7 @@ function login() {
     var password = $("input[name='password']").prop("value");
     if(email && password){
         $.ajax({
-            url: "http://sso.local/app/module_sso/module_sso.php?login=1",
+            url: "http://sso.local/app/module_sso/module_sso.php?m=3&login=1",
             type: "GET",
             dataType: "json",
             data: {

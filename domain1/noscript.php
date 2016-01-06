@@ -11,6 +11,7 @@ $continue = 'http://' . CFG_JWT_AUD . getContinuePath();
 <?php if(!isset($_SESSION['uid'])): ?>
 <form method="get" action="<?php echo CFG_AUTH_SERVER_ENDPOINT ?>">
     <input type="hidden" name="continue" value="<?php echo $continue;?>"/>
+    <input type="hidden" name="m" value="1"/>
     <input type="submit" value="Login with SSO"/>
 </form>
 <?php endif; ?>
