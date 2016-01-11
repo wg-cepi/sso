@@ -41,3 +41,9 @@ class Logger {
         fclose($fp);
     }
 }
+
+function redirect($url, $code = 303) {
+    http_response_code($code);
+    header("Location: " . $url);
+    exit;
+}

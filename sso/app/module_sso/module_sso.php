@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ .'/../config/config.inc.php';
+require 'AntiCSRF.php';
 require_once 'browserSniffer.php';
 
 use Lcobucci\JWT\Builder;
@@ -202,7 +203,7 @@ class JWT
 class ContinueUrl
 {
     const CONTINUE_URL_KEY = 'continue';
-    private $whiteList = array();
+    private $whiteList = array();    
     public function __construct()
     {        
         //TODO load from config or DB
@@ -233,8 +234,7 @@ class ContinueUrl
             }
         } else {
             return CFG_SSO_ENDPOINT_URL;
-        }
-        
+        }  
     }
     
     public function isInWhitelist($domain)
@@ -304,12 +304,15 @@ abstract class LoginMethod implements ILoginMethod
 class NoScriptLogin extends LoginMethod
 {
     public $continueUrl = null;
+    public $domain = null;
     
     public static function clientHTML($continue)
     {
         echo '<form method="get" action="'. CFG_SSO_ENDPOINT_URL .'">
                 <input type="hidden" name="continue" value="' . $continue . '"/>
                 <input type="hidden" name="m" value="1"/>
+                <input type="hidden" name="anti_csrf" value="' . AntiCSRF::generate(CFG_DOMAIN_NAME) . '"/>
+                <input type="hidden" name="d" value="' .CFG_DOMAIN_NAME . '"/>
                 <input type="submit" value="Login with SSO"/>
             </form>';
         
@@ -345,6 +348,8 @@ class NoScriptLogin extends LoginMethod
                 <br>
                 <input type="hidden" name="continue" value="' . $this->continueUrl .  '"/>
                 <input type="hidden" name="m" value="1"/>
+                <input type="hidden" name="d" value="' . $this->domain . '"/>
+                <input type="hidden" name="anti_csrf" value="' . AntiCSRF::generate($this->domain) . '"/>
                 <input type="submit" value="Login"/>
            </form>';
         
@@ -352,13 +357,14 @@ class NoScriptLogin extends LoginMethod
     
     public function showHTMLUserInfo($user)
     {
+        $csrfToken = AntiCSRF::generate($this->domain);
         $html = '<div>
                <p>You are logged in as <strong>' . $user['email'] . '</strong></p>
                <ul>';
                if ($this->continueUrl !== CFG_SSO_ENDPOINT_URL) {
-                   $html .= '<li><a href="' . CFG_SSO_ENDPOINT_URL . '?m=1&login=1&continue=' . $this->continueUrl . '" title="Continue as ' . $user['email'] . '"> Continue as ' . $user['email'] . '</a></li>';
+                   $html .= '<li><a href="' . CFG_SSO_ENDPOINT_URL . '?m=1&login=1&continue=' . $this->continueUrl . '&anti_csrf=' . $csrfToken . '&d=' . $this->domain . '" title="Continue as ' . $user['email'] . '"> Continue as ' . $user['email'] . '</a></li>';
                }
-               $html .= '<li><a href="' . CFG_SSO_ENDPOINT_URL . '?m=1&relog=1&continue=' . $this->continueUrl . '" title="Log in as another user">Log in as another user</a>
+               $html .= '<li><a href="' . CFG_SSO_ENDPOINT_URL . '?m=1&relog=1&continue=' . $this->continueUrl . '&anti_csrf=' . $csrfToken . '&d=' . $this->domain . '" title="Log in as another user">Log in as another user</a>
                </ul>
            </div>';
         return $html;
@@ -367,7 +373,22 @@ class NoScriptLogin extends LoginMethod
     
     public function login()
     {
-        $this->continueUrl = (new ContinueUrl())->getUrl();
+        //if no token, stop login process
+        if(!isset($_GET['anti_csrf']) || !AntiCSRF::check($_GET['anti_csrf'])){
+            echo $this->showHTMLLoginForm();
+            return;
+        }
+        
+        //domain
+        if(isset($_GET['d'])){
+            //todo check
+            $this->domain = $_GET['d'];
+        } else {
+            echo $this->showHTMLLoginForm();
+            return;
+        }
+
+        $this->continueUrl = (new ContinueUrl())->getUrl();        
         if(isset($_GET['email']) && isset($_GET['password'])) {
             $email =  $_GET['email'];
             $password =  $_GET['password'];
@@ -378,9 +399,7 @@ class NoScriptLogin extends LoginMethod
             if($user) {
                 $this->setCookies($user['id']);
                 $token = (new JWT())->generate(array('uid' => $user['id']));
-
                 $url = $this->continueUrl .  "?token=" . $token;
-                Logger::log($this->continueUrl);
                 $this->redirect($url);
             } else {
                 echo $this->showHTMLLoginForm();
@@ -391,7 +410,6 @@ class NoScriptLogin extends LoginMethod
                 if($user) {
                     $token = (new JWT())->generate(array('uid' => $user['id']));
                     $url = $this->continueUrl .  "?token=" . $token;
-                    Logger::log($this->continueUrl);
                     $this->redirect($url);
                 } else {
                     echo $this->showHTMLLoginForm();

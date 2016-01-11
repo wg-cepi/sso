@@ -15,6 +15,8 @@ $continue = $client->getContinueUrl();
 <form method="get" action="<?php echo CFG_SSO_ENDPOINT_URL ?>">
     <input type="hidden" name="continue" value="<?php echo $continue;?>"/>
     <input type="hidden" name="m" value="1"/>
+    <input type="hidden" name="anti_csrf" value="<?php echo AntiCSRF::generate(CFG_DOMAIN_NAME) ?>"/>
+    <input type="hidden" name="d" value="<?php echo CFG_DOMAIN_NAME ?>"/>
     <input type="submit" value="Login with SSO"/>
 </form>
 <?php endif; ?>
