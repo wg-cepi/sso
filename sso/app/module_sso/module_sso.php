@@ -1,21 +1,47 @@
 <?php
-session_start();
 require_once __DIR__ .'/../config/config.inc.php';
 require_once 'browserSniffer.php';
 
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Keychain;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
+use Lcobucci\JWT\Parser;
 
-class ModuleSSO
+abstract class ModuleSSO
 {
-    /**
-     * @var LoginMethod $loginMethod
-     */
-    public $loginMethod = null;
+    abstract public function run();  
+}
+
+class Client extends ModuleSSO
+{
+    const TOKEN_KEY = 'token';
+    private $returnUrl = '';
     
+    public function __construct($returnUrl)
+    {
+        $this->returnUrl = $returnUrl;
+    }
     
-    //TODO will be client method
+    public function getContinueUrl()
+    {
+        //load server path from db
+        $base = CFG_DOMAIN_URL;
+        $rqu = "";
+        if(!empty($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/logout.php") {
+            $rqu = $_SERVER['REQUEST_URI'];
+            $result = parse_url($rqu);
+            $path = "";
+            if(isset($result['path'])) {
+                $path = $result['path'];
+                return  $base . $path;
+            } else {
+                return $base;
+            }
+        } else {
+            return $base;
+        }
+    }
+    
     public function pickLoginMethod()
     {
         //CORS supported browsers
@@ -33,26 +59,60 @@ class ModuleSSO
         global $loginMethodPriorities;
         foreach ($loginMethodPriorities as $method) {
             if($method === 'cors') {
-                // TODO JS ENABLED
                 $browser = new BrowserSniffer();
                 if(isset($supportedBrowsers[$browser->getName()])) {
                     if($browser->getVersion() >= $supportedBrowsers[$browser->getName()]) {
-                        $this->loginMethod = new CORSLogin();
+                        CORSLogin::clientHTML($this->getContinueUrl());
                         break;
                     }
                 }   
             }
             else if($method === 'iframe') {
-                // TODO JS ENABLED
-                $this->loginMethod = new IframeLogin();
+                IframeLogin::clientHTML($this->getContinueUrl());
                 break;
             }
             else if($method === 'noscript') {
-                 $this->loginMethod = new NoScriptLogin();
+                 NoScriptLogin::clientHTML($this->getContinueUrl());
                  break;
             }
         } 
     }
+    
+    //todo continue URL
+    public function login() {
+        if(isset($_GET[self::TOKEN_KEY])) {
+            $urlToken = $_GET[self::TOKEN_KEY];
+
+            $pubkey = file_get_contents('app/config/pk.pub');
+            $token = (new Parser())->parse((string) $urlToken); // Parses from a string
+            $signer = new Sha256();
+            $keychain = new Keychain();
+            if($token->verify($signer, $keychain->getPublicKey($pubkey))) {
+                $query = Database::$pdo->prepare("SELECT * FROM users WHERE id = ?");
+                $query->execute(array($token->getClaim('uid')));
+                $user = $query->fetch();
+                if($user) {
+                    $_SESSION['uid'] = $user['id'];
+                    header("Location: " .  $this->returnUrl);
+                }
+            }  
+        } else {
+            //prompt bad login
+        }
+    }
+    
+    public function run()
+    {
+        $this->login();
+    }    
+}
+
+class EndPoint extends ModuleSSO
+{
+    /**
+     * @var LoginMethod $loginMethod
+     */
+    public $loginMethod = null;
     
     public function run()
     {
@@ -75,6 +135,7 @@ class ModuleSSO
             $this->loginMethod->run();
         }
     }
+    
 }
 
 class JWT
@@ -128,7 +189,6 @@ class JWT
         foreach ($values as $name => $value)
         {
             $builder->set($name, $value);
-
         }
         
         $token = $builder->sign($signer, $keychain->getPrivateKey($this->privateKey)) // Creates a signature using your private key
@@ -196,7 +256,15 @@ abstract class LoginMethod implements ILoginMethod
 {
     public function setCookies($userId)
     {
+        
         //user ID and last login time cookie
+        //TODO
+        /*
+         * The cookie value is linked to the active ticket-granting ticket,
+         *  the remote IP address that initiated the request as well as the user agent that submitted the request.
+         *  The final cookie value is then encrypted and signed using AES_128_CBC_HMAC_SHA_256 and HMAC_SHA512 respectively.
+         */
+        
         $time = time();
         $sLastLoggedTime = hash('sha256', $time);
         $sID = hash('sha256', $userId);
@@ -236,6 +304,16 @@ abstract class LoginMethod implements ILoginMethod
 class NoScriptLogin extends LoginMethod
 {
     public $continueUrl = null;
+    
+    public static function clientHTML($continue)
+    {
+        echo '<form method="get" action="'. CFG_SSO_ENDPOINT_URL .'">
+                <input type="hidden" name="continue" value="' . $continue . '"/>
+                <input type="hidden" name="m" value="1"/>
+                <input type="submit" value="Login with SSO"/>
+            </form>';
+        
+    }
     
     public function redirect($url, $code = 302)
     {
@@ -332,6 +410,13 @@ class NoScriptLogin extends LoginMethod
 
 class IframeLogin extends LoginMethod
 {   
+    public static function clientHTML($continue)
+    {
+        echo "<div>";
+        echo '<iframe src="'. CFG_SSO_ENDPOINT_URL .'?m=2&continue=' . $continue . '" frameborder="0"></iframe>';
+        echo "</div>";
+    }
+    
     public function redirect($url)
     {
         echo "<script>window.parent.location = '" . $url . "';</script>";
@@ -425,6 +510,19 @@ class IframeLogin extends LoginMethod
 
 class CORSLogin extends LoginMethod
 {
+    public static function clientHTML()
+    {
+        echo "<script src='http://code.jquery.com/jquery-2.1.4.min.js'></script>";
+        echo "<script src='http://sso.local/app/module_sso/cors.js'></script>";
+        echo '<div id="loginArea">';
+        echo '<form>'
+                . '<label>Email:<input type="text" name="email"/></label><br/>'
+                . '<label>Password:<input type="password" name="password"/></label><br/>'
+                . '<input type="hidden" name="continue" value="http://' . CFG_DOMAIN_URL .'/cors.php"/>'
+                . '<input type="button" id="loginButton" value="login"/>'
+            . '</form>';
+        echo '</div>';
+    }
     public function checkCookie()
     {
         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
@@ -553,6 +651,3 @@ class DirectLogin extends LoginMethod
         return $html;
     }
 }
-
-$module_sso = new ModuleSSO();
-$module_sso->run();

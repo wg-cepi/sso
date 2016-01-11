@@ -1,5 +1,5 @@
 <?php
-require_once '../../vendor/autoload.php';
+//require_once '../../vendor/autoload.php';
 use phpbrowscap\Browscap;
 
 class BrowserSniffer
@@ -76,6 +76,7 @@ class BrowserSniffer
         return $isMobileOrTablet;
     }
 }
+//BrowserSniffer::dump();
 /*
 BrowserSniffer::dump();
 echo "<br>";

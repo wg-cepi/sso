@@ -9,14 +9,18 @@ $client = new Client(CFG_DOMAIN_URL);
 $client->run();
 
 echo "<h1>Domain 2</h1>";
-echo '<a href="./logout.php">Local logout</a>';
-echo '<a href="./cross.php">Login Crossroads</a>';
-
 if(isset($_SESSION['uid'])) {
     echo "<p>Logged UID: " . $_SESSION['uid'] . "</p>";
 } else {
     echo '<noscript>
             <meta http-equiv="refresh" content="0;url=noscript.php">
         </noscript>';
-    $client->pickLoginMethod();
 }
+?>
+
+<ul>
+    <li><a href="./iframe.php">Iframe method</a></li>
+    <li><a href="./cors.php">AJAX + CORS method</a></li>
+    <li><a href="./noscript.php">Noscript method</a></li>
+    <li><a href="./logout.php">Local logout</a></li>
+</ul>
