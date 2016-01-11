@@ -202,12 +202,10 @@ class JWT
 
 class ContinueUrl
 {
-    const CONTINUE_URL_KEY = 'continue';
-    private $whiteList = array();    
+    const CONTINUE_URL_KEY = 'continue';  
     public function __construct()
     {        
-        //TODO load from config or DB
-        $this->whiteList = array('domain1.local', 'domain2.local', 'sso.local');
+        // this class will probably use static methods
     }
     
     public function getUrl()
@@ -237,9 +235,11 @@ class ContinueUrl
         }  
     }
     
-    public function isInWhitelist($domain)
+    public function isInWhitelist($domainName)
     {
-        if(in_array($domain, $this->whiteList)) {
+        $query = Database::$pdo->prepare("SELECT * FROM domains WHERE name = '$domainName'");
+        $domain = $query->execute();
+        if($domain) {
             return true;
         } else {
             return false;
@@ -588,12 +588,15 @@ class CORSLogin extends LoginMethod
     
     public function run()
     {
-        global $whiteList;
-        if(isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $whiteList)){
-            if(isset($_GET['login']) && $_GET['login'] == 1) {
-                $this->login();
-            } else if(isset($_GET['checkCookie']) && $_GET['checkCookie'] == 1) {
-                $this->checkCookie();
+        if(isset($_SERVER['HTTP_ORIGIN'])){
+            $query = Database::$pdo->prepare("SELECT * FROM domains WHERE name = '" . $_SERVER['HTTP_ORIGIN'] . "'");
+            $domain = $query->execute();
+            if($domain) {
+                if(isset($_GET['login']) && $_GET['login'] == 1) {
+                    $this->login();
+                } else if(isset($_GET['checkCookie']) && $_GET['checkCookie'] == 1) {
+                    $this->checkCookie();
+                }
             }
         }
         
