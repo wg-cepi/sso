@@ -268,8 +268,8 @@ abstract class LoginMethod implements ILoginMethod
         $time = time();
         $sLastLoggedTime = hash('sha256', $time);
         $sID = hash('sha256', $userId);
-        setcookie('SID', $sID);
-        setcookie('SLLT', $sLastLoggedTime);
+        setcookie('SID', $sID, null, null, null, null, true);
+        setcookie('SLLT', $sLastLoggedTime, null, null, null, null, true);
         $query = Database::$pdo->prepare("UPDATE users SET cookie = '$sID',logged = '$sLastLoggedTime' WHERE id = $userId");
         $query->execute();
         
