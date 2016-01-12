@@ -11,8 +11,8 @@ define('CFG_SSO_ENDPOINT_URL', 'http://sso.local/login.php');
 $whiteList = array("http://domain1.local", "http://domain2.local", 'http://sso.local');
 
 $loginMethodPriorities = array(
-    'cors',
-    'iframe',
+    //'cors',
+    //'iframe',
     'noscript'
 );
 

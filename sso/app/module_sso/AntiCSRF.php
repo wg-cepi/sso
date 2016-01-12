@@ -35,7 +35,7 @@ class AntiCSRF
             $query->execute(array($domain['id'], $token, time() + 3600, 0));
             return $token;
         } else {
-            throw new Exception("adwadw");
+            throw new Exception("Domain -- $domainName -- not in whitelist");
         }
         
     }

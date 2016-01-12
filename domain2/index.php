@@ -9,8 +9,8 @@ $client = new Client(CFG_DOMAIN_URL);
 $client->run();
 
 echo "<h1>Domain 2</h1>";
-echo '<a href="./logout.php">Local logout</a>';
-echo '<a href="./cross.php">Login Crossroads</a>';
+echo '<a href="./logout.php">Local logout</a>&nbsp;';
+echo '<a href="./cross.php">Login crossroads</a>';
 
 if(isset($_SESSION['uid'])) {
     echo "<p>Logged UID: " . $_SESSION['uid'] . "</p>";

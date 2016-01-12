@@ -13,8 +13,9 @@ echo '<a href="./">Home</a>';
 if(isset($_SESSION['uid'])) {
     echo "<p>Logged UID: " . $_SESSION['uid'] . "</p>";
 } else {
+    $src = CFG_SSO_ENDPOINT_URL . '?m=2&continue=' . $continue . '&d=' . CFG_DOMAIN_NAME . '&anti_csrf=' . AntiCSRF::generate(CFG_DOMAIN_NAME);
     echo "<div>";
-    echo '<iframe src="'. CFG_SSO_ENDPOINT_URL .'?m=2&continue=' . $continue . '" frameborder="0"></iframe>';
+    echo '<iframe src="' . $src . '" frameborder="0"></iframe>';
     echo "</div>";
 }
 

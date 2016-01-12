@@ -40,8 +40,7 @@ class BrowserSniffer
     }
     
     /**
-     * 
-     * Dumps browser data
+     * Ladici vypis informaci o prohlizeci
      */
     public static function dump()
     {
@@ -53,7 +52,7 @@ class BrowserSniffer
     }
     
     /**
-     * Returns 1 if device is mobile or tablet, otherwise returns 0
+     * Vraci 1, pokud je zarizeni mobil nebo tablet. Jinak vraci 0.
      * @return int
      */
     public static function isMobileOrTablet()
@@ -74,6 +73,26 @@ class BrowserSniffer
             $isMobileOrTablet |= $info['isMobileDevice'];
         }
         return $isMobileOrTablet;
+    }
+    
+    /**
+     * 
+     * @return string spojeny z IP adresy, jazyka prohlizece a nazvu prohlizece
+     */
+    public static function getFingerprint()
+    {
+        //get IP
+        $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
+                
+        //get language
+        $lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '';
+        
+        //browser info
+        $browscap = new Browscap('C:\wamp\tmp');
+        $info = $browscap->getBrowser(null, true);
+        $name = isset($info['browser_name']) ? $info['browser_name'] : '';
+        
+        return $ip . $lang . $name;
     }
 }
 //BrowserSniffer::dump();
