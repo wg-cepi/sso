@@ -1,7 +1,5 @@
 <?php
 require_once __DIR__ .'/../config/config.inc.php';
-require 'AntiCSRF.php';
-require_once 'browserSniffer.php';
 
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Keychain;
@@ -29,27 +27,29 @@ class Cookie
         }
     }
 }
+
 abstract class ModuleSSO
 {
     const TOKEN_KEY = 'token';
     const RELOG_KEY = 'relog';
     const LOGIN_KEY = 'login';
-    const CSRF_KEY = 'anti_csrf';
-    const DOMAIN_KEY = 'd';
     const METHOD_KEY = 'm';
     const CONTINUE_KEY = 'continue';
     const FORCED_METHOD_KEY = 'f';
+    const LOGOUT_KEY = 'logout';
+    const GLOBAL_LOGOUT_KEY = 'glogout';
     
     abstract public function run();  
 }
 
 class Client extends ModuleSSO
 {
-    private $returnUrl = '';
+    private $publicKey = '';
+    private $loginMethod = null;
     
-    public function __construct($returnUrl)
+    public function __construct($pubKeyPath = 'app/config/pk.pub')
     {
-        $this->returnUrl = $returnUrl;
+        $this->publicKey = file_get_contents($pubKeyPath);
     }
     
     public function getContinueUrl()
@@ -57,7 +57,7 @@ class Client extends ModuleSSO
         //load server path from db
         $base = CFG_DOMAIN_URL;
         $rqu = "";
-        if(!empty($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != "/logout.php") {
+        if(!empty($_SERVER['REQUEST_URI'])) {
             $rqu = $_SERVER['REQUEST_URI'];
             $result = parse_url($rqu);
             $path = "";
@@ -74,10 +74,20 @@ class Client extends ModuleSSO
     
     public function pickLoginMethod()
     {
-        if(isset($_GET[ModuleSSO::FORCED_METHOD_KEY]) && $_GET[ModuleSSO::FORCED_METHOD_KEY] == 1) {
-            NoScriptLogin::clientHTML($this->getContinueUrl());
+        if(isset($_GET[ModuleSSO::FORCED_METHOD_KEY])) {
+            $m = $_GET[ModuleSSO::FORCED_METHOD_KEY];
+            if($m == NoScriptLogin::METHOD_NUMBER) {
+                $this->loginMethod = new NoScriptLogin();
+            } else if($m == IframeLogin::METHOD_NUMBER) {
+                $this->loginMethod = new IframeLogin();
+            } else if($m == CORSLogin::METHOD_NUMBER) {
+                $this->loginMethod = new CORSLogin();
+            } else {
+                 $this->loginMethod = new NoScriptLogin();
+            }
             return;
         }
+        
         //CORS supported browsers
         //http://caniuse.com/#feat=cors
         $supportedBrowsers = array(
@@ -96,49 +106,78 @@ class Client extends ModuleSSO
                 $browser = new BrowserSniffer();
                 if(isset($supportedBrowsers[$browser->getName()])) {
                     if($browser->getVersion() >= $supportedBrowsers[$browser->getName()]) {
-                        CORSLogin::clientHTML($this->getContinueUrl());
+                        $this->loginMethod = new CORSLogin();
                         break;
                     }
                 }   
             }
             else if($method === 'iframe') {
-                IframeLogin::clientHTML($this->getContinueUrl());
+                $this->loginMethod = new IframeLogin();
                 break;
             }
             else if($method === 'noscript') {
-                NoScriptLogin::clientHTML($this->getContinueUrl());
+                $this->loginMethod = new NoScriptLogin();
                 break;
             }
         } 
     }
     
-    //todo continue URL
     public function login() {
         if(isset($_GET[ModuleSSO::TOKEN_KEY])) {
             $urlToken = $_GET[ModuleSSO::TOKEN_KEY];
-
-            $pubkey = file_get_contents('app/config/pk.pub');
-            $token = (new Parser())->parse((string) $urlToken); // Parses from a string
+;
+            $token = (new Parser())->parse((string) $urlToken);
             $signer = new Sha256();
             $keychain = new Keychain();
-            if($token->verify($signer, $keychain->getPublicKey($pubkey))) {
-                $query = Database::$pdo->prepare("SELECT * FROM users WHERE id = ?");
-                $query->execute(array($token->getClaim('uid')));
-                $user = $query->fetch();
-                if($user) {
-                    $_SESSION['uid'] = $user['id'];
-                    header("Location: " .  $this->returnUrl);
+            
+            try {
+                if($token->verify($signer, $keychain->getPublicKey($this->publicKey))) {
+                    $query = Database::$pdo->prepare("SELECT * FROM users WHERE id = ?");
+                    $query->execute(array($token->getClaim('uid')));
+                    $user = $query->fetch();
+                    if($user) {
+                        $_SESSION['uid'] = $user['id'];
+                        header("Location: " .  $this->getContinueUrl());
+                    }
+                } else {
+                    echo $this->showHTMLLoginFailed();
                 }
-            }  
-        } else {
-            //prompt bad login
+            } catch (Exception $e) {
+                echo $this->showHTMLLoginFailed();
+            }
+            
+        }
+    }
+    
+    public function logout() {
+        if(isset($_GET[ModuleSSO::LOGOUT_KEY]) && $_GET[ModuleSSO::LOGOUT_KEY] == 1) {
+            unset($_SESSION["uid"]);
+            header("Location: " . CFG_DOMAIN_URL);
+        } else if(isset($_GET[ModuleSSO::GLOBAL_LOGOUT_KEY]) && $_GET[ModuleSSO::GLOBAL_LOGOUT_KEY] == 1) {
+             unset($_SESSION["uid"]);
+             header("Location: " . CFG_SSO_ENDPOINT_URL . '?' . ModuleSSO::LOGOUT_KEY . '=1&' . ModuleSSO::CONTINUE_KEY . '=' . CFG_DOMAIN_URL);
         }
     }
     
     public function run()
     {
         $this->login();
-    }    
+        $this->logout();
+    }
+    
+    public function showHTMLLoginFailed()
+    {
+        return "<div class='message warn'>Login failed, please try again</div>";
+    }
+    
+    public function appendScripts()
+    {
+        echo $this->loginMethod->appendScripts();
+    }
+    
+    public function showLoginMethodHTML() {
+        echo $this->loginMethod->clientHTML($this->getContinueUrl());
+    }
 }
 
 class EndPoint extends ModuleSSO
@@ -152,24 +191,20 @@ class EndPoint extends ModuleSSO
     {
         if(isset($_GET[ModuleSSO::METHOD_KEY])) {
             $method = $_GET[ModuleSSO::METHOD_KEY];
-            if($method == 1) {
+            if($method == NoScriptLogin::METHOD_NUMBER) {
                 $this->loginMethod = new NoScriptLogin();
-                $this->loginMethod->run();
-            } else if($method == 2) {
+            } else if($method == IframeLogin::METHOD_NUMBER) {
                 $this->loginMethod = new IframeLogin();
-                $this->loginMethod->run();
-            } else if($method == 3) {
+            } else if($method == CORSLogin::METHOD_NUMBER) {
                 $this->loginMethod = new CORSLogin();
-                $this->loginMethod->run();
             } else {
-                //TODO if method not 1,2,3?
+                $this->loginMethod = new DirectLogin();
             }
         } else {
             $this->loginMethod = new DirectLogin();
-            $this->loginMethod->run();
         }
+        $this->loginMethod->run();
     }
-    
 }
 
 class JWT
@@ -183,21 +218,19 @@ class JWT
     public $token = null;
     
     private $privateKey = null;
-    private $publicKey = null;
     
-    public function __construct()
+    public function __construct($issuer = CFG_JWT_ISSUER, $expiration = null, $issuedAt = null, $notBefore = null, $privKeyPath = null)
     {
-        //todo load $issuer, $expiration, $notBefore from config
-        
-        $this->privateKey = file_get_contents(__DIR__ . '/../config/pk.pem');
-        $this->issuer = CFG_JWT_ISSUER;
-        $this->expiration = time() + 3600;
-        $this->issuedAt = time();
-        $this->notBefore = time() + 60;
+        $this->privateKey = $privKeyPath ? file_get_contents($privKeyPath) : file_get_contents(__DIR__ . '/../config/pk.pem');
+        $this->issuer = $issuer;
+       
+        $this->expiration = $expiration ? $expiration : time() + 3600;
+        $this->issuedAt = $issuedAt ? $issuedAt : time();
+        $this->notBefore = $notBefore ? $notBefore : time();
     }
     
     /**
-     * Generates and return JWT based on input values and config variables
+     * Generates and returns JWT based on input values and config variables
      * @param array $values
      * @return string $token
      */
@@ -225,22 +258,82 @@ class JWT
             $builder->set($name, $value);
         }
         
-        $token = $builder->sign($signer, $keychain->getPrivateKey($this->privateKey)) // Creates a signature using your private key
-                ->getToken(); // Retrieves the generated token
+        $token = $builder->sign($signer, $keychain->getPrivateKey($this->privateKey))
+                ->getToken();
 
         $this->token = $token;
         return $token;
     }
 }
 
-class ContinueUrl
-{  
-    public function __construct()
-    {        
-        // this class will probably use static methods
+interface ILoginMethod
+{
+    /*
+     * Takes care of login process
+     */
+    public function login();
+}
+
+abstract class LoginMethod implements ILoginMethod
+{   
+    public $domain = '';
+    public $continueUrl = '';
+    
+    /*
+     * Sets and updates SSO cookies
+     */
+    public function setCookies($userId)
+    { 
+        $time = time();
+        $ssoCookie = Cookie::generateHash($userId);
+        setcookie(Cookie::SSOC, $ssoCookie, null, null, null, null, true);
+        
+        $query = Database::$pdo->prepare("UPDATE users SET cookie = '$ssoCookie',logged = '$time' WHERE id = $userId");
+        $query->execute();
+        
     }
     
-    public function getUrl()
+    /*
+     * Unsets SSO cookies
+     */
+    public function unsetCookies()
+    {
+        setcookie(Cookie::SSOC, null, -1, '/');
+    }
+    
+    public function getUserFromCookie()
+    {
+        if(isset($_COOKIE[Cookie::SSOC])) {
+            $ssoCookie = $_COOKIE[Cookie::SSOC];
+            $query = Database::$pdo->prepare("SELECT * FROM users WHERE cookie = '$ssoCookie'");
+            $query->execute();
+            $user = $query->fetch();
+            if($user) {
+                $userId = $user['id'];
+                $userCookie = $user['cookie'];
+                if(Cookie::verifyHash($userCookie, $userId)) {
+                    return $user;
+                } else {
+                    return null;
+                }
+                
+            } else {
+                //throw new \Exception("Cookie user not found");
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+    
+    public function run()
+    {
+        $this->logout();
+        $this->login();
+    }
+    
+        
+    public function getContinueUrl()
     {
         if(isset($_GET[ModuleSSO::CONTINUE_KEY])) {
             $url = $_GET[ModuleSSO::CONTINUE_KEY];
@@ -277,70 +370,129 @@ class ContinueUrl
             return false;
         }
     }
-}
-
-interface ILoginMethod
-{
-    public function login();
-}
-
-abstract class LoginMethod implements ILoginMethod
-{   
-    public $domain = '';
-    public $continueUrl = '';
     
-    public function setCookies($userId)
-    { 
-        $time = time();
-        $ssoCookie = Cookie::generateHash($userId);
-        setcookie(Cookie::SSOC, $ssoCookie, null, null, null, null, true);
-        
-        $query = Database::$pdo->prepare("UPDATE users SET cookie = '$ssoCookie',logged = '$time' WHERE id = $userId");
-        $query->execute();
+    public function appendScripts()
+    {
         
     }
     
-    public function getUserFromCookie()
+    public function logout()
     {
-        if(isset($_COOKIE[Cookie::SSOC])) {
-            $ssoCookie = $_COOKIE[Cookie::SSOC];
-            $query = Database::$pdo->prepare("SELECT * FROM users WHERE cookie = '$ssoCookie'");
-            $query->execute();
-            $user = $query->fetch();
-            if($user) {
-                $userId = $user['id'];
-                $userCookie = $user['cookie'];
-                if(Cookie::verifyHash($userCookie, $userId)) {
-                    return $user;
-                } else {
-                    return null;
-                }
-                
-            } else {
-                //throw new \Exception("Cookie user not found");
-                return null;
-            }
-        } else {
-            return null;
+        if(isset($_GET[ModuleSSO::LOGOUT_KEY]) && $_GET[ModuleSSO::LOGOUT_KEY] == 1) {
+            session_destroy();
+            $this->unsetCookies();
+            $this->redirect($this->getContinueUrl());
         }
     }
     
-    public function run()
-    {
-        $this->login();
-    }
-    
 }
 
-class NoScriptLogin extends LoginMethod
-{   
-    public static function clientHTML($continue)
+abstract class ClassicLogin extends LoginMethod
+{
+    public function login()
     {
-        echo '<form method="get" action="'. CFG_SSO_ENDPOINT_URL .'">
+        $this->continueUrl = $this->getContinueUrl();
+        if(isset($_GET['email']) && isset($_GET['password'])) {
+            $email =  $_GET['email'];
+            $password =  $_GET['password'];
+
+            $query = Database::$pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
+            $query->execute(array($email, $password));
+            $user = $query->fetch();
+            if($user) {
+                $this->setCookies($user['id']);
+                $token = (new JWT())->generate(array('uid' => $user['id'], 'continue' => $this->continueUrl));
+
+                $url = $this->continueUrl .  "?" . ModuleSSO::TOKEN_KEY . "=" . $token;
+                $this->redirect($url);
+            } else {
+                echo $this->showHTMLLoginForm();
+            }
+        } else if(isset($_GET['login'])) {
+            if(isset($_COOKIE[Cookie::SSOC])) {
+                $user = $this->getUserFromCookie();
+                if($user) {
+                    $token = (new JWT())->generate(array('uid' => $user['id'], 'continue' => $this->continueUrl));
+                    $url = $this->continueUrl .  "?" . ModuleSSO::TOKEN_KEY . "=" . $token;
+                    $this->redirect($url);
+                } else {
+                    echo $this->showHTMLLoginForm();
+                }
+            } else {
+                echo $this->showHTMLLoginForm();
+            }
+        }
+        else if (isset($_GET[ModuleSSO::RELOG_KEY])){
+            echo $this->showHTMLLoginForm();
+        }
+        else if(isset($_GET[ModuleSSO::LOGOUT_KEY])) {
+            echo $this->showHTMLLoginForm();
+        } else {
+            $this->showHTML();
+        }
+    }
+    
+        public function showHTMLLoginForm()
+    {
+        return '<form method="get">
+                <label>
+                    Email:<input type="text" name="email"/>
+                </label>
+                <br>
+                <label>
+                    Password:<input type="password" name="password"/>
+                </label>
+                <br>
+                <input type="hidden" name="' . ModuleSSO::CONTINUE_KEY . '" value="' . $this->continueUrl .  '"/>
+                <input type="hidden" name="' . ModuleSSO::METHOD_KEY . '" value="' . static::METHOD_NUMBER . '"/>
+                <input type="submit" value="Login with SSO"/>
+           </form>';
+        
+    }
+    
+    public function showHTMLUserInfo($user)
+    {
+        $html = '<div><p>You are logged in as <strong>' . $user['email'] . '</strong> at <a href="' . CFG_SSO_ENDPOINT_URL . '">Webgarden SSO</a></p><ul>';
+        if ($this->continueUrl !== CFG_SSO_ENDPOINT_URL) {
+            $data = array(
+                ModuleSSO::METHOD_KEY => static::METHOD_NUMBER,
+                ModuleSSO::LOGIN_KEY => 1,
+                ModuleSSO::CONTINUE_KEY => $this->continueUrl
+                );
+            $query = http_build_query($data);
+            $src = CFG_SSO_ENDPOINT_URL . '?' . $query;
+            $html .= '<li><a href="' . $src . '" title="Continue as ' . $user['email'] . '"> Continue as ' . $user['email'] . '</a></li>';
+        }
+        $data = array(
+                ModuleSSO::METHOD_KEY => static::METHOD_NUMBER,
+                ModuleSSO::RELOG_KEY => 1,
+                ModuleSSO::CONTINUE_KEY => $this->continueUrl
+                );
+        $query = http_build_query($data);
+        $src = CFG_SSO_ENDPOINT_URL . '?' . $query;
+        $html .= '<li><a href="' . $src . '" title="Log in as another user">Log in as another user</a></ul></div>';
+        return $html; 
+    }
+    
+    public function showHTML()
+    {
+        $user = $this->getUserFromCookie();
+        if($user !== null) {
+            echo $this->showHTMLUserInfo($user);
+        } else {
+            echo $this->showHTMLLoginForm();
+        }
+    } 
+}
+
+class NoScriptLogin extends ClassicLogin
+{   
+    const METHOD_NUMBER = 1;
+    public function clientHTML($continue)
+    {
+        return '<form method="get" action="'. CFG_SSO_ENDPOINT_URL .'">
                 <input type="hidden" name="' . ModuleSSO::CONTINUE_KEY . '" value="' . $continue . '"/>
-                <input type="hidden" name="' . ModuleSSO::METHOD_KEY . '" value="1"/>
-                <input type="hidden" name="' . ModuleSSO::CSRF_KEY . '" value="' . AntiCSRF::generate(CFG_DOMAIN_NAME) . '"/>
-                <input type="hidden" name="' . ModuleSSO::DOMAIN_KEY . '" value="' . CFG_DOMAIN_NAME . '"/>
+                <input type="hidden" name="' . ModuleSSO::METHOD_KEY . '" value="' . self::METHOD_NUMBER . '"/>
                 <input type="submit" value="Login with SSO"/>
             </form>';
         
@@ -352,247 +504,47 @@ class NoScriptLogin extends LoginMethod
         header("Location: " . $url);
         exit;
     }
-    
-    public function showHTML()
-    {
-        $user = $this->getUserFromCookie();
-        if($user !== null) {
-            echo $this->showHTMLUserInfo($user);
-        } else {
-            echo $this->showHTMLLoginForm();
-        }
-    }
-    
-    public function showHTMLLoginForm()
-    {
-        return '<form method="get">
-                <label>
-                    Email:<input type="text" name="email"/>
-                </label>
-                <br>
-                <label>
-                    Password:<input type="password" name="password"/>
-                </label>
-                <br>
-                <input type="hidden" name="' . ModuleSSO::CONTINUE_KEY . '" value="' . $this->continueUrl .  '"/>
-                <input type="hidden" name="' . ModuleSSO::METHOD_KEY . '" value="1"/>
-                <input type="hidden" name="' . ModuleSSO::DOMAIN_KEY . '" value="' . $this->domain . '"/>
-                <input type="hidden" name="' . ModuleSSO::CSRF_KEY . '" value="' . AntiCSRF::generate($this->domain) . '"/>
-                <input type="submit" value="Login"/>
-           </form>';
-        
-    }
-    
-    public function showHTMLUserInfo($user)
-    {
-        $csrfToken = AntiCSRF::generate($this->domain);
-        $html = '<div>
-               <p>You are logged in as <strong>' . $user['email'] . '</strong></p>
-               <ul>';
-               if ($this->continueUrl !== CFG_SSO_ENDPOINT_URL) {
-                   $src = CFG_SSO_ENDPOINT_URL . '?' . ModuleSSO::METHOD_KEY . '=1&login=1&' . ModuleSSO::CONTINUE_KEY . '=' . $this->continueUrl . '&' . ModuleSSO::CSRF_KEY . '=' . $csrfToken . '&' . ModuleSSO::DOMAIN_KEY . '=' . $this->domain;
-                   $html .= '<li><a href="' . $src . '" title="Continue as ' . $user['email'] . '"> Continue as ' . $user['email'] . '</a></li>';
-               }
-               $src = CFG_SSO_ENDPOINT_URL . '?' . ModuleSSO::METHOD_KEY . '=1&relog=1&' . ModuleSSO::CONTINUE_KEY . '=' . $this->continueUrl . '&' . ModuleSSO::CSRF_KEY . '=' . $csrfToken . '&' . ModuleSSO::DOMAIN_KEY . '=' . $this->domain;
-               $html .= '<li><a href="' . $src . '" title="Log in as another user">Log in as another user</a>
-               </ul>
-           </div>';
-        return $html;
-        
-    }
-    
-    public function login()
-    {
-        $this->continueUrl = (new ContinueUrl())->getUrl();
-        //if no token, stop login process
-        if(!isset($_GET[ModuleSSO::CSRF_KEY]) || !AntiCSRF::check($_GET[ModuleSSO::CSRF_KEY])){
-            $this->redirect($this->continueUrl);
-            return;
-        }
-        
-        //domain
-        if(isset($_GET[ModuleSSO::DOMAIN_KEY])){
-            $this->domain = $_GET[ModuleSSO::DOMAIN_KEY];
-        } else {
-            $this->redirect($this->continueUrl);
-            return;
-        }
-
-        $this->continueUrl = (new ContinueUrl())->getUrl();        
-        if(isset($_GET['email']) && isset($_GET['password'])) {
-            $email =  $_GET['email'];
-            $password =  $_GET['password'];
-
-            $query = Database::$pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-            $query->execute(array($email, $password));
-            $user = $query->fetch();
-            if($user) {
-                $this->setCookies($user['id']);
-                $token = (new JWT())->generate(array('uid' => $user['id']));
-                $url = $this->continueUrl .  "?" . ModuleSSO::TOKEN_KEY . "=" . $token;
-                $this->redirect($url);
-            } else {
-                echo $this->showHTMLLoginForm();
-            }
-        } else if(isset($_GET['login'])) {
-            if(isset($_COOKIE[Cookie::SSOC])) {
-                $user = $this->getUserFromCookie();
-                if($user) {
-                    $token = (new JWT())->generate(array('uid' => $user['id']));
-                    $url = $this->continueUrl .  "?" . ModuleSSO::TOKEN_KEY . "=" . $token;
-                    $this->redirect($url);
-                } else {
-                    echo $this->showHTMLLoginForm();
-                }
-            } else {
-                echo $this->showHTMLLoginForm();
-            }
-        }
-        else if (isset($_GET['relog'])){
-            echo $this->showHTMLLoginForm();
-        } else {
-            $this->showHTML();
-        }
-    }
 }
 
-class IframeLogin extends LoginMethod
+class IframeLogin extends ClassicLogin
 {   
-    public static function clientHTML($continue)
+    const METHOD_NUMBER = 2;
+    public function clientHTML($continue)
     {
-        $src = CFG_SSO_ENDPOINT_URL . '?' . ModuleSSO::METHOD_KEY . '=2&' . ModuleSSO::CONTINUE_KEY . '=' . $continue . '&' . ModuleSSO::CSRF_KEY . '=' . AntiCSRF::generate(CFG_DOMAIN_NAME) . '&' . ModuleSSO::DOMAIN_KEY . '=' . CFG_DOMAIN_NAME;
-        echo "<div>";
-        echo '<iframe src="'. $src . '" frameborder="0"></iframe>';
-        echo "</div>";
+        $data = array(
+                ModuleSSO::METHOD_KEY => self::METHOD_NUMBER,
+                ModuleSSO::CONTINUE_KEY => $continue
+                );
+        $query = http_build_query($data);
+        $src = CFG_SSO_ENDPOINT_URL . '?' . $query;
+        return "<div><iframe src='$src' width='100%' frameborder='0'></iframe></div>";
     }
     
     public function redirect($url)
     {
         echo "<script>window.parent.location = '" . $url . "';</script>";
     }
-    
-    public function showHTML()
-    {
-        $user = $this->getUserFromCookie();
-        if($user !== null) {
-            echo $this->showHTMLUserInfo($user);
-        } else {
-            echo $this->showHTMLLoginForm();
-        }
-    }
-    
-    public function showHTMLLoginForm()
-    {
-        return '<form method="get">
-                <label>
-                    Email:<input type="text" name="email"/>
-                </label>
-                <br>
-                <label>
-                    Password:<input type="password" name="password"/>
-                </label>
-                <br>
-                <input type="hidden" name="' . ModuleSSO::CONTINUE_KEY . '" value="' . $this->continueUrl .  '"/>
-                <input type="hidden" name="' . ModuleSSO::METHOD_KEY . '" value="2"/>
-                <input type="hidden" name="' . ModuleSSO::DOMAIN_KEY . '" value="' . $this->domain . '"/>
-                <input type="hidden" name="' . ModuleSSO::CSRF_KEY . '" value="' . AntiCSRF::generate($this->domain) . '"/>
-                <input type="submit" value="Login"/>
-           </form>';
-        
-    }
-    
-    public function showHTMLUserInfo($user)
-    {
-        $html = '<div>
-                <p>You are logged in as <strong>' . $user['email'] . '</strong></p>
-                <ul>';
-                $csrfToken = AntiCSRF::generate($this->domain);
-                if ($this->continueUrl !== CFG_SSO_ENDPOINT_URL) {
-                    $src = CFG_SSO_ENDPOINT_URL . '?' . ModuleSSO::METHOD_KEY . '=2&relog=1&' . ModuleSSO::CONTINUE_KEY . '=' . $this->continueUrl . '&' . ModuleSSO::CSRF_KEY . '=' . $csrfToken . '&' . ModuleSSO::DOMAIN_KEY . '=' . $this->domain;
-                    $html .= '<li><a href="' . $src . '" title="Continue as ' . $user['email'] . '"> Continue as ' . $user['email'] . '</a></li>';
-                }
-                $src = CFG_SSO_ENDPOINT_URL . '?' . ModuleSSO::METHOD_KEY . '=1&login=1&' . ModuleSSO::CONTINUE_KEY . '=' . $this->continueUrl . '&' . ModuleSSO::CSRF_KEY . '=' . $csrfToken . '&' . ModuleSSO::DOMAIN_KEY . '=' . $this->domain;
-                $html .= '<li><a href="' . $src . '" title="Log in as another user">Log in as another user</a>
-                </ul>
-           </div>';
-        return $html;
-        
-    }
-    
-    public function tokenMismatch()
-    {
-        echo '<a href="' . $this->continueUrl . '">Token mismatch, continue here</a>';  
-    }
-    
-    public function login()
-    {
-        $this->continueUrl = (new ContinueUrl())->getUrl();
-        //if no token, stop login process
-        if(!isset($_GET[ModuleSSO::CSRF_KEY]) || !AntiCSRF::check($_GET[ModuleSSO::CSRF_KEY])){
-            $this->redirect($this->continueUrl);
-            return;
-        }
-        
-        //domain
-        if(isset($_GET[ModuleSSO::DOMAIN_KEY])){
-            $this->domain = $_GET[ModuleSSO::DOMAIN_KEY];
-        } else {
-            $this->redirect($this->continueUrl);
-            return;
-        }
-        
-        if(isset($_GET['email']) && isset($_GET['password'])) {
-            $email =  $_GET['email'];
-            $password =  $_GET['password'];
-
-            $query = Database::$pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-            $query->execute(array($email, $password));
-            $user = $query->fetch();
-            if($user) {
-                $this->setCookies($user['id']);
-                $token = (new JWT())->generate(array('uid' => $user['id']));
-
-                $url = $this->continueUrl .  "?" . ModuleSSO::TOKEN_KEY . "=" . $token;
-                $this->redirect($url);
-            } else {
-                echo $this->showHTMLLoginForm();
-            }
-        } else if(isset($_GET['login'])) {
-            if(isset($_COOKIE[Cookie::SSOC])) {
-                $user = $this->getUserFromCookie();
-                if($user) {
-                    $token = (new JWT())->generate(array('uid' => $user['id']));
-                    $url = $this->continueUrl .  "?" . ModuleSSO::TOKEN_KEY . "=" . $token;
-                    $this->redirect($url);
-                } else {
-                    echo $this->showHTMLLoginForm();
-                }
-            } else {
-                echo $this->showHTMLLoginForm();
-            }
-        }
-        else if (isset($_GET['relog'])){
-            echo $this->showHTMLLoginForm();
-        } else {
-            $this->showHTML();
-        }
-    }
 }
 
 class CORSLogin extends LoginMethod
 {
-    public static function clientHTML()
+    const METHOD_NUMBER = 3;
+    public function clientHTML()
     {
-        //echo "<script src='http://code.jquery.com/jquery-2.1.4.min.js'></script>";
-        echo "<script src='http://sso.local/app/module_sso/prototype.js'></script>";
-        echo "<script src='http://sso.local/app/module_sso/cors.js'></script>";
-        echo '<div id="id-login-area">';
-        echo '<form id="id-sso-form" method="GET" action="' . CFG_SSO_ENDPOINT_URL . '">'
-                . '<label>Email:<input type="text" name="email"/></label><br/>'
-                . '<label>Password:<input type="password" name="password"/></label><br/>'
-                . '<input type="submit" id="id-login-button" value="login"/>'
+        $str = '<div id="id-login-area">';
+        $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_URL . '">'
+                . '<label>'
+                    . 'Email: <input type="text" name="email"/>'
+                . '</label>'
+                . '<br/>'
+                . '<label>'
+                    . 'Password: <input type="password" name="password"/>'
+                . '</label>'
+                . '<br/>'
+                . '<input type="submit" id="id-login-button" value="Login with SSO"/>'
             . '</form>';
-        echo '</div>';
+        $str .= '</div>';
+        return $str;
     }
     public function checkCookie()
     {
@@ -631,7 +583,7 @@ class CORSLogin extends LoginMethod
 
                 echo '{"status": "ok", "' . ModuleSSO::TOKEN_KEY . '": "' . $token . '"}';
             } else {
-                echo json_encode(array("status" => "fail"));
+                echo json_encode(array("status" => "user_not_found"));
             }
         } else {
             echo json_encode(array("status" => "bad_login"));
@@ -655,47 +607,21 @@ class CORSLogin extends LoginMethod
         }
         
     }
+    
+    public function appendScripts()
+    {
+        return "<script src='http://sso.local/app/module_sso/prototype.js'></script>
+        <script src='http://sso.local/app/module_sso/cors.js'></script>";
+        
+    }
 }
 
-class DirectLogin extends LoginMethod
+class DirectLogin extends ClassicLogin
 {
-    public function login()
+    public function redirect($url = CFG_SSO_ENDPOINT_URL, $code = 302)
     {
-        if(isset($_GET['email']) && isset($_GET['password'])) {
-             $email =  $_GET['email'];
-             $password =  $_GET['password'];
-
-             $query = Database::$pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-             $query->execute(array($email, $password));
-             $user = $query->fetch();
-             if($user) {
-                 $this->setCookies($user['id']);
-                 $this->redirect();
-             } else {
-                 echo $this->showHTMLLoginForm();
-             }
-         }
-         else if (isset($_GET['relog'])){
-             echo $this->showHTMLLoginForm();
-         } else {
-             $this->showHTML();
-         }
-    }
-    
-    public function showHTML()
-    {
-        $user = $this->getUserFromCookie();
-        if($user !== null) {
-            echo $this->showHTMLUserInfo($user);
-        } else {
-            echo $this->showHTMLLoginForm();
-        }
-    }
-    
-    public function redirect()
-    {
-        http_response_code(302);
-        header("Location: " . CFG_SSO_ENDPOINT_URL);
+        http_response_code($code);
+        header("Location: " . $url);
         exit;
 
     }
@@ -714,15 +640,13 @@ class DirectLogin extends LoginMethod
                 <input type="submit" value="Login"/>
            </form>';
     }
-    
+   
     public function showHTMLUserInfo($user)
     {
-        $html = '<div>
-               <p>You are logged in as <strong>' . $user['email'] . '</strong></p>
-               <ul>';
-               $html .= '<li><a href="' . CFG_SSO_ENDPOINT_URL . '?relog=1" title="Log in as another user">Log in as another user</a>
-               </ul>
-           </div>';
+        $html = '<div><p>You are logged in as <strong>' . $user['email'] . '</strong> at Webgarden SSO</p><ul>';
+        $html .= '<li><a href="' . CFG_SSO_ENDPOINT_URL . '?' . ModuleSSO::RELOG_KEY . '=1" title="Log in as another user">Log in as another user to Webgarden SSO</a>';
+        $html .= '<li><a href="?' . ModuleSSO::LOGOUT_KEY. '=1" title="Logout">Logout from Webgarden SSO</a>';
+        $html .= '</ul></div>';
         return $html;
     }
 }

@@ -4,6 +4,11 @@ use phpbrowscap\Browscap;
 
 class BrowserSniffer
 {  
+    public static $browscap = null;
+    public static function init($path = 'C:\wamp\tmp')
+    {
+        self::$browscap = new Browscap($path);
+    }
     /**
      * 
      * @return string
@@ -11,32 +16,36 @@ class BrowserSniffer
      */
     public static function getVersion()
     {
-        $browscap = new Browscap('C:\wamp\tmp');
-        $info = $browscap->getBrowser(null, true);
-        if(isset($info['Version'])) {
-            return $info['Version'];
+        if(self::$browscap) {
+            $info = self::$browscap->getBrowser(null, true);
+            if(isset($info['Version'])) {
+                return $info['Version'];
+            } else {
+                throw new \Exception("BrowserSniffer failed, Version not set");
+            }
         } else {
-            throw new \Exception("BrowserSniffer failed, Version not set");
+            throw new \Exception("BrowserSniffer failed, browscap is not initialized");
         }
         
     }
     
     /**
-     * 
+     * Vraci nazev prohlizece v kratke forme, napr. 'chrome', 'firefox'
      * @return string
      * @throws \Exception
      */
     public static function getName()
     {
-        $browscap = new Browscap('C:\wamp\tmp');
-        $info = $browscap->getBrowser(null, true);
-        if(isset($info['Browser'])) {
-            return strtolower($info['Browser']);
+        if(self::$browscap) {
+            $info = self::$browscap->getBrowser(null, true);
+            if(isset($info['Browser'])) {
+                return strtolower($info['Browser']);
+            } else {
+                throw new \Exception("BrowserSniffer failed, Browser not set");
+            }
         } else {
-            throw new \Exception("BrowserSniffer failed, Browser not set");
+            throw new \Exception("BrowserSniffer failed, browscap is not initialized");
         }
-        //TODO add more checks
-        
     }
     
     /**
@@ -44,11 +53,14 @@ class BrowserSniffer
      */
     public static function dump()
     {
-        $browscap = new Browscap('C:\wamp\tmp');
-        $info = $browscap->getBrowser(null, true);
-        echo "<pre>";
-        print_r($info);
-        echo "</pre>";
+        if(self::$browscap) {
+            $info = self::$browscap->getBrowser(null, true);
+            echo "<pre>";
+            print_r($info);
+            echo "</pre>";
+        } else {
+            throw new \Exception("BrowserSniffer failed, browscap is not initialized");
+        }
     }
     
     /**
@@ -57,22 +69,25 @@ class BrowserSniffer
      */
     public static function isMobileOrTablet()
     {
-        $isMobileOrTablet = 0;
-        $browscap = new Browscap('C:\wamp\tmp');
-        $info = $browscap->getBrowser(null, true);
-        
-        if(!isset($info['isTablet']) && !isset($info['isMobileDevice'])) {
-            throw new Exception("BrowserSniffer failed, isTablet and isMobileDevice not set");
+        if(self::$browscap) {
+            $isMobileOrTablet = 0;
+            $info = self::$browscap->getBrowser(null, true);
+
+            if(!isset($info['isTablet']) && !isset($info['isMobileDevice'])) {
+                throw new Exception("BrowserSniffer failed, isTablet and isMobileDevice not set");
+            }
+
+            if(isset($info['isTablet'])) {
+                $isMobileOrTablet |= $info['isTablet'];
+            }
+            if(isset($info['isMobileDevice']))
+            {
+                $isMobileOrTablet |= $info['isMobileDevice'];
+            }
+            return $isMobileOrTablet;
+        } else {
+            throw new \Exception("BrowserSniffer failed, browscap is not initialized");
         }
-        
-        if(isset($info['isTablet'])) {
-            $isMobileOrTablet |= $info['isTablet'];
-        }
-        if(isset($info['isMobileDevice']))
-        {
-            $isMobileOrTablet |= $info['isMobileDevice'];
-        }
-        return $isMobileOrTablet;
     }
     
     /**
@@ -88,13 +103,19 @@ class BrowserSniffer
         $lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '';
         
         //browser info
-        $browscap = new Browscap('C:\wamp\tmp');
-        $info = $browscap->getBrowser(null, true);
-        $name = isset($info['browser_name']) ? $info['browser_name'] : '';
+        $name = '';
+        if(self::$browscap) {
+            $browscap = new Browscap('C:\wamp\tmp');
+            $info = $browscap->getBrowser(null, true);
+            $name = isset($info['browser_name']) ? $info['browser_name'] : '';
+        } else {
+            throw new \Exception("BrowserSniffer failed, browscap is not initialized");
+        }
         
         return $ip . $lang . $name;
     }
 }
+BrowserSniffer::init();
 //BrowserSniffer::dump();
 /*
 BrowserSniffer::dump();

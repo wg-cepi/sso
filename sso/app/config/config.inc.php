@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../module_sso/browserSniffer.php';
 
 define('CFG_SQL_HOST', 'localhost');
 define('CFG_SQL_DBNAME', 'sso');
@@ -8,11 +9,10 @@ define('CFG_SQL_PASSWORD', '');
 define('CFG_JWT_ISSUER', 'sso.local');
 define('CFG_SSO_ENDPOINT_URL', 'http://sso.local/login.php');
 
-$whiteList = array("http://domain1.local", "http://domain2.local", 'http://sso.local');
 
 $loginMethodPriorities = array(
-    //'cors',
-    //'iframe',
+    'cors',
+    'iframe',
     'noscript'
 );
 
