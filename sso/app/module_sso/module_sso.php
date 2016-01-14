@@ -13,18 +13,11 @@ class Cookie
      * Vypocita se jako sha1(browser fingerprint) . sha1(user_id)
      */
     const SSOC = 'SSSOC';
+    const SALT = 'PEPPER';
     
     public static function generateHash($userId)
     {
         return base64_encode(sha1(BrowserSniffer::getFingerprint()) . sha1($userId)); 
-    }
-    public static function verifyHash($hash, $userId)
-    {
-        if($hash === self::generateHash($userId)) {
-            return true;
-        } else {
-            return false;
-        }
     }
 }
 
@@ -38,6 +31,7 @@ abstract class ModuleSSO
     const FORCED_METHOD_KEY = 'f';
     const LOGOUT_KEY = 'logout';
     const GLOBAL_LOGOUT_KEY = 'glogout';
+    const MESSAGES_KEY = 'messages';
     
     abstract public function run();  
 }
@@ -125,25 +119,39 @@ class Client extends ModuleSSO
     public function login() {
         if(isset($_GET[ModuleSSO::TOKEN_KEY])) {
             $urlToken = $_GET[ModuleSSO::TOKEN_KEY];
-;
+
             $token = (new Parser())->parse((string) $urlToken);
             $signer = new Sha256();
             $keychain = new Keychain();
             
             try {
-                if($token->verify($signer, $keychain->getPublicKey($this->publicKey))) {
-                    $query = Database::$pdo->prepare("SELECT * FROM users WHERE id = ?");
-                    $query->execute(array($token->getClaim('uid')));
-                    $user = $query->fetch();
-                    if($user) {
-                        $_SESSION['uid'] = $user['id'];
-                        header("Location: " .  $this->getContinueUrl());
+                if($token->verify($signer, $keychain->getPublicKey($this->publicKey)) && $token->getClaim('exp') > time()) {
+                    $query = Database::$pdo->prepare("SELECT * FROM tokens WHERE value = '$urlToken' AND used = 0");
+                    $query->execute();
+                    $dbtoken = $query->fetch();
+                    if($dbtoken) {
+                        $query = Database::$pdo->prepare("SELECT * FROM users WHERE id = ?");
+                        $query->execute(array($token->getClaim('uid')));
+                        $user = $query->fetch();
+                        if($user) {
+                            $query = Database::$pdo->prepare("UPDATE tokens SET used = 1 WHERE value = '$urlToken'");
+                            $query->execute();
+                            
+                            $_SESSION['uid'] = $user['id'];
+                            header("Location: " .  $this->getContinueUrl());
+                            exit();
+                        }
                     }
+                    
                 } else {
-                    echo $this->showHTMLLoginFailed();
+                    $this->insertMessage('warn', 'Login failed, please try again');
+                    header("Location: " .  $this->getContinueUrl());
+                    exit();
                 }
             } catch (Exception $e) {
-                echo $this->showHTMLLoginFailed();
+                $this->insertMessage('warn', 'Login failed, please try again');
+                header("Location: " .  $this->getContinueUrl());
+                exit();
             }
             
         }
@@ -165,9 +173,23 @@ class Client extends ModuleSSO
         $this->logout();
     }
     
-    public function showHTMLLoginFailed()
+    public function insertMessage($text, $class = 'success')
     {
-        return "<div class='message warn'>Login failed, please try again</div>";
+        $_SESSION[ModuleSSO::MESSAGES_KEY][] = array('class' => $class, 'text' => $text);
+    }
+    
+    public function showMessages()
+    {
+        if(!empty($_SESSION[ModuleSSO::MESSAGES_KEY])) {
+            $str = '';
+            foreach ($_SESSION[ModuleSSO::MESSAGES_KEY] as $k => $message) {
+                $str .= '<div class="message ' . $message['class'] . '">' . $message['text'] . '</div>';
+                unset($_SESSION[ModuleSSO::MESSAGES_KEY][$k]);
+            }
+            return $str;
+        } else {
+            return;
+        }
     }
     
     public function appendScripts()
@@ -218,15 +240,17 @@ class JWT
     public $token = null;
     
     private $privateKey = null;
+    private $domain = null;
     
-    public function __construct($issuer = CFG_JWT_ISSUER, $expiration = null, $issuedAt = null, $notBefore = null, $privKeyPath = null)
+    public function __construct($domain = CFG_JWT_ISSUER, $issuer = CFG_JWT_ISSUER, $expiration = null, $issuedAt = null, $notBefore = null, $privKeyPath = null)
     {
         $this->privateKey = $privKeyPath ? file_get_contents($privKeyPath) : file_get_contents(__DIR__ . '/../config/pk.pem');
         $this->issuer = $issuer;
+        $this->domain = $domain;
        
-        $this->expiration = $expiration ? $expiration : time() + 3600;
+        $this->expiration = $expiration ? $expiration : time() + 60;
         $this->issuedAt = $issuedAt ? $issuedAt : time();
-        $this->notBefore = $notBefore ? $notBefore : time();
+        $this->notBefore = $notBefore ? $notBefore : time();       
     }
     
     /**
@@ -252,6 +276,9 @@ class JWT
         if($this->issuedAt !== null) {
             $builder->setIssuedAt($this->issuedAt);
         }
+        if($this->expiration !== null) {
+            $builder->setExpiration($this->expiration);
+        }
         
         foreach ($values as $name => $value)
         {
@@ -262,6 +289,16 @@ class JWT
                 ->getToken();
 
         $this->token = $token;
+        
+        //update database tables
+        $query = Database::$pdo->prepare("SELECT * FROM domains WHERE name = '$this->domain'");
+        $query->execute();
+        $domain = $query->fetch();
+        if($domain) {
+            $query = Database::$pdo->prepare("INSERT INTO tokens (domain_id, value, used, expires) VALUES (" . $domain['id'] . ", '$token', 0, $this->expiration)");
+            $query->execute();
+        }
+        
         return $token;
     }
 }
@@ -276,7 +313,7 @@ interface ILoginMethod
 
 abstract class LoginMethod implements ILoginMethod
 {   
-    public $domain = '';
+    public $domain = CFG_JWT_ISSUER;
     public $continueUrl = '';
     
     /*
@@ -284,11 +321,13 @@ abstract class LoginMethod implements ILoginMethod
      */
     public function setCookies($userId)
     { 
-        $time = time();
-        $ssoCookie = Cookie::generateHash($userId);
-        setcookie(Cookie::SSOC, $ssoCookie, null, null, null, null, true);
+        $identifier = md5(Cookie::SALT . md5(Cookie::generateHash($userId) . Cookie::SALT));
+        $token = md5(uniqid(rand(), TRUE));
+        $timeout = time() + 60 * 60 * 24 * 7;
         
-        $query = Database::$pdo->prepare("UPDATE users SET cookie = '$ssoCookie',logged = '$time' WHERE id = $userId");
+        setcookie(Cookie::SSOC, "$identifier:$token", $timeout, null, null, null, true);
+        
+        $query = Database::$pdo->prepare("UPDATE users SET cookie = '$identifier:$token' WHERE id = $userId");
         $query->execute();
         
     }
@@ -304,21 +343,14 @@ abstract class LoginMethod implements ILoginMethod
     public function getUserFromCookie()
     {
         if(isset($_COOKIE[Cookie::SSOC])) {
-            $ssoCookie = $_COOKIE[Cookie::SSOC];
-            $query = Database::$pdo->prepare("SELECT * FROM users WHERE cookie = '$ssoCookie'");
+            list($identifier, $token) = explode(":", $_COOKIE[Cookie::SSOC]);
+            $query = Database::$pdo->prepare("SELECT * FROM users WHERE cookie = '$identifier:$token'");
             $query->execute();
             $user = $query->fetch();
             if($user) {
-                $userId = $user['id'];
-                $userCookie = $user['cookie'];
-                if(Cookie::verifyHash($userCookie, $userId)) {
-                    return $user;
-                } else {
-                    return null;
-                }
-                
+                $this->setCookies($user['id']);
+                return $user;
             } else {
-                //throw new \Exception("Cookie user not found");
                 return null;
             }
         } else {
@@ -341,6 +373,8 @@ abstract class LoginMethod implements ILoginMethod
             if(!empty($parsed['host'])) {
                 if($this->isInWhitelist($parsed['host'])) {
                     return $url;
+                } else {
+                    return CFG_SSO_ENDPOINT_URL;
                 }
             } else {
                 return CFG_SSO_ENDPOINT_URL;
@@ -351,6 +385,8 @@ abstract class LoginMethod implements ILoginMethod
             if(!empty($parsed['host'])) {
                 if($this->isInWhitelist($parsed['host'])) {
                     return $url;
+                } else {
+                    return CFG_SSO_ENDPOINT_URL;
                 }
             } else {
                 return CFG_SSO_ENDPOINT_URL;
@@ -363,8 +399,10 @@ abstract class LoginMethod implements ILoginMethod
     public function isInWhitelist($domainName)
     {
         $query = Database::$pdo->prepare("SELECT * FROM domains WHERE name = '$domainName'");
-        $domain = $query->execute();
+        $query->execute();
+        $domain = $query->fetch();
         if($domain) {
+            $this->domain = $domain['name'];
             return true;
         } else {
             return false;
@@ -401,7 +439,7 @@ abstract class ClassicLogin extends LoginMethod
             $user = $query->fetch();
             if($user) {
                 $this->setCookies($user['id']);
-                $token = (new JWT())->generate(array('uid' => $user['id'], 'continue' => $this->continueUrl));
+                $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
 
                 $url = $this->continueUrl .  "?" . ModuleSSO::TOKEN_KEY . "=" . $token;
                 $this->redirect($url);
@@ -412,7 +450,7 @@ abstract class ClassicLogin extends LoginMethod
             if(isset($_COOKIE[Cookie::SSOC])) {
                 $user = $this->getUserFromCookie();
                 if($user) {
-                    $token = (new JWT())->generate(array('uid' => $user['id'], 'continue' => $this->continueUrl));
+                    $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
                     $url = $this->continueUrl .  "?" . ModuleSSO::TOKEN_KEY . "=" . $token;
                     $this->redirect($url);
                 } else {
@@ -493,7 +531,7 @@ class NoScriptLogin extends ClassicLogin
         return '<form method="get" action="'. CFG_SSO_ENDPOINT_URL .'">
                 <input type="hidden" name="' . ModuleSSO::CONTINUE_KEY . '" value="' . $continue . '"/>
                 <input type="hidden" name="' . ModuleSSO::METHOD_KEY . '" value="' . self::METHOD_NUMBER . '"/>
-                <input type="submit" value="Login with SSO"/>
+                <input type="submit" class="mdl-button mdl-js-button mdl-button--raised" value="Login with SSO"/>
             </form>';
         
     }
@@ -541,7 +579,7 @@ class CORSLogin extends LoginMethod
                     . 'Password: <input type="password" name="password"/>'
                 . '</label>'
                 . '<br/>'
-                . '<input type="submit" id="id-login-button" value="Login with SSO"/>'
+                . '<input type="submit" class="mdl-button mdl-js-button mdl-button--raised"id="id-login-button" value="Login with SSO"/>'
             . '</form>';
         $str .= '</div>';
         return $str;
@@ -554,15 +592,12 @@ class CORSLogin extends LoginMethod
         if(!isset($_COOKIE[Cookie::SSOC])) {
             echo json_encode(array("status" => "no_cookie"));
         } else {
-            $ssoCookie = $_COOKIE[Cookie::SSOC];
-            $query = Database::$pdo->prepare("SELECT * FROM users WHERE cookie = '$ssoCookie'");
-            $query->execute(array());
-            $user = $query->fetch();
+            $user = $this->getUserFromCookie();
             if($user) {
-                $token = (new JWT())->generate(array('uid' => $user['id']));
+                $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
                 echo '{"status": "ok", "' . ModuleSSO::TOKEN_KEY . '": "' . $token . '", "email": "' . $user['email'] .'"}';
             } else {
-                //bad cookie, user not found
+                echo '{"status": "bad_cookie"}';
             }
         }
     }
@@ -579,7 +614,7 @@ class CORSLogin extends LoginMethod
             $user = $query->fetch();
             if($user) {
                 $this->setCookies($user['id']);
-                $token = (new JWT())->generate(array('uid' => $user['id']));
+                $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
 
                 echo '{"status": "ok", "' . ModuleSSO::TOKEN_KEY . '": "' . $token . '"}';
             } else {
@@ -595,14 +630,23 @@ class CORSLogin extends LoginMethod
     public function run()
     {
         if(isset($_SERVER['HTTP_ORIGIN'])){
-            $query = Database::$pdo->prepare("SELECT * FROM domains WHERE name = '" . $_SERVER['HTTP_ORIGIN'] . "'");
-            $domain = $query->execute();
-            if($domain) {
-                if(isset($_GET['login']) && $_GET['login'] == 1) {
-                    $this->login();
-                } else if(isset($_GET['checkCookie']) && $_GET['checkCookie'] == 1) {
-                    $this->checkCookie();
+            $parsed = parse_url($_SERVER['HTTP_ORIGIN']);
+            if(isset($parsed['host'])) {
+                $query = Database::$pdo->prepare("SELECT * FROM domains WHERE name = '" . $parsed['host'] . "'");
+                $query->execute();
+                $domain = $query->fetch();
+                if($domain) {
+                    $this->domain = $domain['name'];
+                    if(isset($_GET[ModuleSSO::LOGIN_KEY]) && $_GET[ModuleSSO::LOGIN_KEY] == 1) {
+                        $this->login();
+                    } else if(isset($_GET['checkCookie']) && $_GET['checkCookie'] == 1) {
+                        $this->checkCookie();
+                    }
+                } else {
+                    //domain not allowed
                 }
+            } else {
+                //
             }
         }
         

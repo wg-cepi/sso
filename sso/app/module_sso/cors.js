@@ -69,6 +69,7 @@ var WebgardenSSO = Class.create({
     ajaxCheckCookieResolver: function() {
         if (this.ajaxRequest.readyState === XMLHttpRequest.DONE) {
             if (this.ajaxRequest.status === 200) {
+                console.log(this.ajaxRequest.response);
                 var response = JSON.parse(this.ajaxRequest.response);
                 var loginArea =  $("id-login-area");
                 

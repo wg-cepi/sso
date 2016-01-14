@@ -1,0 +1,22 @@
+.mdl-layout__drawer-button .material-icons {
+    line-height: 1.9;
+}
+.grid-centered {
+    margin: 0 auto;
+    width: 65%;
+    text-align: center;
+}
+ul {
+    list-style-position: inside;
+}
+
+.demo-card-square.mdl-card {
+  width: 320px;
+  height: 200px;
+}
+.demo-card-square > .mdl-card__title {
+  color: #fff;
+  background:
+    url('../assets/demos/dog.png') bottom right 15% no-repeat #46B6AC;
+}
+
