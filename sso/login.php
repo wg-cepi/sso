@@ -13,7 +13,7 @@ $endPoint->pickLoginMethod();
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="css/material.min.css">
         <link rel="stylesheet" href="css/common.styles.css">
-        <link rel="stylesheet" href="<?php echo $endPoint->getStylesPath() ?>">
+        <?php echo $endPoint->appendStyles() ?>
         
         <script src="js/material.min.js"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">

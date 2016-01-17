@@ -240,9 +240,9 @@ class EndPoint extends ModuleSSO
         }
     }
     
-    public function getStylesPath()
+    public function appendStyles()
     {
-        return $this->loginMethod->getStylesPath();
+        return $this->loginMethod->appendStyles();
     }
     
     public function run()
@@ -445,9 +445,9 @@ abstract class LoginMethod implements ILoginMethod
         }
     }
     
-    public function getStylesPath()
+    public function appendStyles()
     {
-        return 'css/styles.css';
+        return '<link rel="stylesheet" href="css/styles.css">';
     }
     
 }
@@ -618,9 +618,9 @@ class IframeLogin extends ClassicLogin
 
     }
     
-    public function getStylesPath()
+    public function appendStyles()
     {
-        return 'css/iframe.styles.css';
+        return '<link rel="stylesheet" href="css/iframe.styles.css">';
     }
 }
 
