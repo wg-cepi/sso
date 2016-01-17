@@ -7,6 +7,9 @@ var WebgardenSSO = Class.create({
         this.initAjax();
         this.formOnSubmit();
         this.checkCookie();
+        
+        this.loginArea = $('id-login-area');
+        
     },
     getLogin: function(selector) {
         var item  = $$(selector).first();
@@ -34,14 +37,14 @@ var WebgardenSSO = Class.create({
         }
     },
     login: function(email, password) {
-        var url = 'http://sso.local/login.php?m=3&login=1&email=' + email + '&password=' + password;
+        var url = 'http://sso.local/loginPlain.php?m=3&login=1&email=' + email + '&password=' + password;
         this.ajaxRequest.onreadystatechange = this.ajaxLoginResolver.bind(this);
         this.ajaxRequest.open('GET', url);
         this.ajaxRequest.send();
     },
     checkCookie: function() {
         if(!$('id-user-id')) {
-            var url = 'http://sso.local/login.php?m=3&checkCookie=1';
+            var url = 'http://sso.local/loginPlain.php?m=3&checkCookie=1';
             this.ajaxRequest.onreadystatechange = this.ajaxCheckCookieResolver.bind(this);
             this.ajaxRequest.open('GET', url);
             this.ajaxRequest.send();
@@ -71,28 +74,28 @@ var WebgardenSSO = Class.create({
             if (this.ajaxRequest.status === 200) {
                 console.log(this.ajaxRequest.response);
                 var response = JSON.parse(this.ajaxRequest.response);
-                var loginArea =  $("id-login-area");
+                //var loginArea =  $("id-login-area");
                 
                 if(response.status === "ok") {
                     if($("userLogged")) {
-                       loginArea.hide();
-                    } else {
-                        var html = '<div><p>You are logged in as <strong>' + response.email + '</strong> at <a href="http://sso.local/login.php">Webgarden SSO</a></p>';
-                        html += "<ul id='id-sso-links'><li><a href='./?token=" + response.token + "' title='" + response.email + "'>Continue as " + response.email + "</a></li>";
+                       //loginArea.hide();
+                    } else if(this.loginArea){
+                        var html = '<div id="id-sso-links"><p>You are logged in as <strong>' + response.email + '</strong> at <a href="http://sso.local/login.php">Webgarden SSO</a></p>';
+                        html += "<ul><li><a href='./?token=" + response.token + "' title='" + response.email + "'>Continue as " + response.email + "</a></li>";
                         html += "<li><a id='id-relog' href='#' title='Log in as another user'>Log in as another user</a></li></ul></div>";
                        
-                        loginArea.hide();
-                        loginArea.insert({
+                        this.loginArea.hide();
+                        this.loginArea.insert({
                             before: html
                         });
                        
 
                         $("id-relog").observe('click', function(e){
                             e.preventDefault();
-                            loginArea.show();
+                            this.loginArea.show();
                             $("id-sso-links").hide();
                             return false;
-                        });
+                        }.bind(this));
                     }
                 } else if(response.status === "no_cookie") {
                     console.log("checkCookie, no SSO cookie present.");

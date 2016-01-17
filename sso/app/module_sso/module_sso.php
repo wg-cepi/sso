@@ -46,6 +46,18 @@ class Client extends ModuleSSO
         $this->publicKey = file_get_contents($pubKeyPath);
     }
     
+    public function getUser()
+    {
+        if($_SESSION['uid']) {
+            $query = Database::$pdo->prepare("SELECT * FROM users WHERE id = ?");
+            $query->execute(array($_SESSION['uid']));
+            return $query->fetch();
+        } else {
+            return null;
+        }
+        
+    }
+    
     public function getContinueUrl()
     {
         //load server path from db
@@ -119,12 +131,11 @@ class Client extends ModuleSSO
     public function login() {
         if(isset($_GET[ModuleSSO::TOKEN_KEY])) {
             $urlToken = $_GET[ModuleSSO::TOKEN_KEY];
-
-            $token = (new Parser())->parse((string) $urlToken);
-            $signer = new Sha256();
-            $keychain = new Keychain();
-            
             try {
+                $token = (new Parser())->parse((string) $urlToken);
+                $signer = new Sha256();
+                $keychain = new Keychain();
+            
                 if($token->verify($signer, $keychain->getPublicKey($this->publicKey)) && $token->getClaim('exp') > time()) {
                     $query = Database::$pdo->prepare("SELECT * FROM tokens WHERE value = '$urlToken' AND used = 0");
                     $query->execute();
@@ -161,9 +172,11 @@ class Client extends ModuleSSO
         if(isset($_GET[ModuleSSO::LOGOUT_KEY]) && $_GET[ModuleSSO::LOGOUT_KEY] == 1) {
             unset($_SESSION["uid"]);
             header("Location: " . CFG_DOMAIN_URL);
+            exit();
         } else if(isset($_GET[ModuleSSO::GLOBAL_LOGOUT_KEY]) && $_GET[ModuleSSO::GLOBAL_LOGOUT_KEY] == 1) {
-             unset($_SESSION["uid"]);
-             header("Location: " . CFG_SSO_ENDPOINT_URL . '?' . ModuleSSO::LOGOUT_KEY . '=1&' . ModuleSSO::CONTINUE_KEY . '=' . CFG_DOMAIN_URL);
+            unset($_SESSION["uid"]);
+            header("Location: " . CFG_SSO_ENDPOINT_URL . '?' . ModuleSSO::LOGOUT_KEY . '=1&' . ModuleSSO::CONTINUE_KEY . '=' . CFG_DOMAIN_URL);
+            exit();
         }
     }
     
@@ -209,7 +222,7 @@ class EndPoint extends ModuleSSO
      */
     public $loginMethod = null;
     
-    public function run()
+    public function pickLoginMethod()
     {
         if(isset($_GET[ModuleSSO::METHOD_KEY])) {
             $method = $_GET[ModuleSSO::METHOD_KEY];
@@ -225,6 +238,15 @@ class EndPoint extends ModuleSSO
         } else {
             $this->loginMethod = new DirectLogin();
         }
+    }
+    
+    public function getStylesPath()
+    {
+        return $this->loginMethod->getStylesPath();
+    }
+    
+    public function run()
+    {
         $this->loginMethod->run();
     }
 }
@@ -360,8 +382,8 @@ abstract class LoginMethod implements ILoginMethod
     
     public function run()
     {
-        $this->logout();
         $this->login();
+        $this->logout();
     }
     
         
@@ -423,6 +445,11 @@ abstract class LoginMethod implements ILoginMethod
         }
     }
     
+    public function getStylesPath()
+    {
+        return 'css/styles.css';
+    }
+    
 }
 
 abstract class ClassicLogin extends LoginMethod
@@ -470,27 +497,47 @@ abstract class ClassicLogin extends LoginMethod
         }
     }
     
-        public function showHTMLLoginForm()
+    public function showHTMLLoginForm()
     {
-        return '<form method="get">
-                <label>
-                    Email:<input type="text" name="email"/>
-                </label>
-                <br>
-                <label>
-                    Password:<input type="password" name="password"/>
-                </label>
-                <br>
-                <input type="hidden" name="' . ModuleSSO::CONTINUE_KEY . '" value="' . $this->continueUrl .  '"/>
-                <input type="hidden" name="' . ModuleSSO::METHOD_KEY . '" value="' . static::METHOD_NUMBER . '"/>
-                <input type="submit" value="Login with SSO"/>
-           </form>';
+        $str = $this->showHTMLHeader();
+        $str .= '<div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">';
+        $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_URL . '">'
+                . '<div class="inputs">'
+                        . '<div class="input-email">'
+                            . '<label for="id-email">'
+                                . 'Email'
+                            . '</label>'
+                            . '<input type="text" class="block" name="email" id="id-email"/>'
+                        . '</div>'
+                        . '<div class="input-pass">'
+                            . '<label for="id-pass">'
+                                . 'Password'
+                            . '</label>'
+                            . '<input type="password" class="block" name="password" id="id-pass"/>'
+                        . '</div>'
+                . '</div>'
+                . ' <input type="hidden" name="' . ModuleSSO::CONTINUE_KEY . '" value="' . $this->continueUrl .  '"/>'
+                . '<input type="hidden" name="' . ModuleSSO::METHOD_KEY . '" value="' . static::METHOD_NUMBER . '"/>'
+                . '<div class="button-wrap">'
+                    . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="id-login-button" value="Login with SSO"/>'
+                .'</div>'
+            . '</form>';
+        $str .= '</div>';
+        return $str;
+        
+    }
+    
+    public function showHTMLHeader()
+    {
+        $str = '<h1>Webgarden SSO</h1>';
+        return $str;
         
     }
     
     public function showHTMLUserInfo($user)
     {
-        $html = '<div><p>You are logged in as <strong>' . $user['email'] . '</strong> at <a href="' . CFG_SSO_ENDPOINT_URL . '">Webgarden SSO</a></p><ul>';
+        $html = $this->showHTMLHeader();
+        $html .= '<div id="id-sso-links"><p>You are logged in as <strong>' . $user['email'] . '</strong> at <a href="' . CFG_SSO_ENDPOINT_URL . '">Webgarden SSO</a></p><ul>';
         if ($this->continueUrl !== CFG_SSO_ENDPOINT_URL) {
             $data = array(
                 ModuleSSO::METHOD_KEY => static::METHOD_NUMBER,
@@ -528,11 +575,14 @@ class NoScriptLogin extends ClassicLogin
     const METHOD_NUMBER = 1;
     public function clientHTML($continue)
     {
-        return '<form method="get" action="'. CFG_SSO_ENDPOINT_URL .'">
+        return '
+        <div id="id-login-area">
+            <form id="id-sso-form" method="get" action="'. CFG_SSO_ENDPOINT_URL .'">
                 <input type="hidden" name="' . ModuleSSO::CONTINUE_KEY . '" value="' . $continue . '"/>
                 <input type="hidden" name="' . ModuleSSO::METHOD_KEY . '" value="' . self::METHOD_NUMBER . '"/>
-                <input type="submit" class="mdl-button mdl-js-button mdl-button--raised" value="Login with SSO"/>
-            </form>';
+                <input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="id-login-button" value="Login with SSO"/>
+            </form>
+        </div>';
         
     }
     
@@ -555,12 +605,22 @@ class IframeLogin extends ClassicLogin
                 );
         $query = http_build_query($data);
         $src = CFG_SSO_ENDPOINT_URL . '?' . $query;
-        return "<div><iframe src='$src' width='100%' frameborder='0'></iframe></div>";
+        return "<div><iframe id='id-iframe-login' src='$src' width='100%' height='100%' scrolling='no' frameborder='0'></iframe></div>";
     }
     
     public function redirect($url)
     {
         echo "<script>window.parent.location = '" . $url . "';</script>";
+    }
+    
+    public function showHTMLHeader()
+    {
+
+    }
+    
+    public function getStylesPath()
+    {
+        return 'css/iframe.styles.css';
     }
 }
 
@@ -569,17 +629,25 @@ class CORSLogin extends LoginMethod
     const METHOD_NUMBER = 3;
     public function clientHTML()
     {
-        $str = '<div id="id-login-area">';
-        $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_URL . '">'
-                . '<label>'
-                    . 'Email: <input type="text" name="email"/>'
-                . '</label>'
-                . '<br/>'
-                . '<label>'
-                    . 'Password: <input type="password" name="password"/>'
-                . '</label>'
-                . '<br/>'
-                . '<input type="submit" class="mdl-button mdl-js-button mdl-button--raised"id="id-login-button" value="Login with SSO"/>'
+        $str = '<div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">';
+        $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_PLAIN_URL . '">'
+                . '<div class="inputs">'
+                        . '<div class="input-email">'
+                            . '<label for="id-email">'
+                                . 'Email'
+                            . '</label>'
+                            . '<input type="text" class="block" name="email" id="id-email"/>'
+                        . '</div>'
+                        . '<div class="input-pass">'
+                            . '<label for="id-pass">'
+                                . 'Password'
+                            . '</label>'
+                            . '<input type="password" class="block" name="password" id="id-pass"/>'
+                        . '</div>'
+                . '</div>'
+                . '<div class="button-wrap">'
+                    . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="id-login-button" value="Login with SSO"/>'
+                .'</div>'
             . '</form>';
         $str .= '</div>';
         return $str;
@@ -672,22 +740,35 @@ class DirectLogin extends ClassicLogin
     
     public function showHTMLLoginForm()
     {
-        return '<form method="get">
-                <label>
-                    Email:<input type="text" name="email"/>
-                </label>
-                <br>
-                <label>
-                    Password:<input type="password" name="password"/>
-                </label>
-                <br>
-                <input type="submit" value="Login"/>
-           </form>';
+        $str = $this->showHTMLHeader();
+        $str .= '<div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">';
+        $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_PLAIN_URL . '">'
+                . '<div class="inputs">'
+                        . '<div class="input-email">'
+                            . '<label for="id-email">'
+                                . 'Email'
+                            . '</label>'
+                            . '<input type="text" class="block" name="email" id="id-email"/>'
+                        . '</div>'
+                        . '<div class="input-pass">'
+                            . '<label for="id-pass">'
+                                . 'Password'
+                            . '</label>'
+                            . '<input type="password" class="block" name="password" id="id-pass"/>'
+                        . '</div>'
+                . '</div>'
+                . '<div class="button-wrap">'
+                    . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="id-login-button" value="Login with SSO"/>'
+                .'</div>'
+            . '</form>';
+        $str .= '</div>';
+        return $str;
     }
    
     public function showHTMLUserInfo($user)
     {
-        $html = '<div><p>You are logged in as <strong>' . $user['email'] . '</strong> at Webgarden SSO</p><ul>';
+        $html = $this->showHTMLHeader();
+        $html .= '<div id="id-sso-link"><p>You are logged in as <strong>' . $user['email'] . '</strong> at Webgarden SSO</p><ul>';
         $html .= '<li><a href="' . CFG_SSO_ENDPOINT_URL . '?' . ModuleSSO::RELOG_KEY . '=1" title="Log in as another user">Log in as another user to Webgarden SSO</a>';
         $html .= '<li><a href="?' . ModuleSSO::LOGOUT_KEY. '=1" title="Logout">Logout from Webgarden SSO</a>';
         $html .= '</ul></div>';

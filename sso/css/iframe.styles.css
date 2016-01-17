@@ -1,0 +1,11 @@
+.button-wrap {
+    text-align: center;
+}
+#id-iframe-login {
+    height: 100%;
+}
+
+.grid-centered {
+    width: 99%;
+    margin: 0 auto;
+}

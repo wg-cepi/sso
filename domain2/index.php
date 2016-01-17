@@ -7,6 +7,7 @@ require_once 'app/config/config.inc.php';
 
 $client = new Client();
 $client->pickLoginMethod();
+$client->run();
 ?>
 
 <html>
@@ -56,23 +57,41 @@ $client->pickLoginMethod();
                         <h1><?php echo CFG_DOMAIN_DISPLAY_NAME ?> homepage</h1>
                         <section id="id-client-info">
                             <?php if (isset($_SESSION['uid'])): ?>
-
-                            <h2>User info</h2>
-                            <ul>
-                                <li id="id-user-id">ID: <?php echo $_SESSION['uid'] ?></li>
-                                <li>Email: <?php echo "TODO" ?></li>
-                            </ul>
+                            <?php $user = $client->getUser() ?>
+                            <div class="card-wrap">
+                                <div class="mdl-card--border mdl-shadow--2dp">
+                                     <div class="mdl-card__title mdl-card--expand">
+                                        <h2 class="mdl-card__title-text">User info</h2>
+                                    </div>
+                                    <div class="mdl-card__supporting-text">
+                                        <ul class="user-info">
+                                            <li id="id-user-id">ID: <?php echo $user['id'] ?></li>
+                                            <li>First name: <?php echo $user['first_name'] ?></li>
+                                            <li>Last name: <?php echo $user['last_name'] ?></li>
+                                            <li>Email: <?php echo $user['email'] ?></li>
+                                        </ul>
+                                    </div>
+                                    <!--
+                                    <div class="mdl-card__actions mdl-card--border">
+                                        <a href="/?logout=1" class="button-full mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+                                          Logout
+                                        </a>
+                                    </div>
+                                    -->
+                                </div>
+                            </div>
                             <?php else: ?>
                                 <noscript><meta http-equiv="refresh" content="0;url=noscript.php"></noscript>
                             <?php endif ?>
                         </section>
                         <section id="id-client-login">
-                            <?php 
-                            if (!isset($_SESSION['uid'])) {
-                                $client->showLoginMethodHTML();
-                            }
-                            $client->run();
-                            ?>
+                            <div class="card-wrap">
+                                <?php 
+                                if (!isset($_SESSION['uid'])) {
+                                    $client->showLoginMethodHTML();
+                                }
+                                ?>
+                            </div>
                         </section>
                     </div>
                 </div>

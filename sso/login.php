@@ -3,4 +3,25 @@ require_once 'app/module_sso/module_sso.php';
 session_start();
 
 $endPoint = new EndPoint();
-$endPoint->run();
+$endPoint->pickLoginMethod();
+
+?>
+
+<html>
+    <head>
+        <title><?php echo CFG_SSO_DISPLAY_NAME ?></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="css/material.min.css">
+        <link rel="stylesheet" href="css/common.styles.css">
+        <link rel="stylesheet" href="<?php echo $endPoint->getStylesPath() ?>">
+        
+        <script src="js/material.min.js"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+    </head>
+    <body>
+        <div class="grid-centered">
+            <?php $endPoint->run(); ?>
+        </div>
+    </body>
+</html>

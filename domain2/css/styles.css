@@ -9,13 +9,82 @@
 ul {
     list-style-position: inside;
 }
+#id-client-info, #id-client-login {
+    width: 50%;
+    margin: 0 auto;
+}
 
 .demo-card-square.mdl-card {
-  width: 320px;
+  width: 100%;
+  max-width: 300px;
   height: 200px;
 }
-.demo-card-square > .mdl-card__title {
+.mdl-card__title {
   color: #fff;
-  background:
-    url('../assets/demos/dog.png') bottom right 15% no-repeat #46B6AC;
+  background: rgb(156, 39, 176);
+}
+
+#id-sso-form {
+    
+}
+
+.card-wrap {
+    margin: 0 auto;
+    //width: 70%;
+}
+
+#id-login-area {
+    margin: 0 auto;
+    padding: 10px;
+}
+
+#id-login-area .inputs {
+    margin: 20px 0;
+}
+
+.inputs .input-email {
+    margin-bottom: 10px;
+}
+
+#id-login-area input[type="text"],input[type="password"] {
+    display: block;
+    margin: 0 auto;
+    width: 70%;
+    font-family: sans-serif;
+    font-size: 1.5em;
+    appearance: none;
+    border: 2px solid rgba(179,179,179,0.58);
+    height: 40px;
+    
+    border-radius: 2px
+}
+
+#id-login-area input[type="text"]:focus,input[type="password"]:focus {
+    border: 1px solid blue;
+}
+#id-login-area label {
+    margin: 0 auto;
+    margin-left: 50px;
+    text-align: left;
+    width: 70%;
+    display: block;
+    font-size: 1.5em;
+    
+    padding: 5px;
+}
+
+.button-full {
+    width: 70%;
+    //height: 40px;
+}
+
+.user-info {
+    font-size: 2em;
+    text-align: left;
+}
+
+.user-info li{
+    list-style: none;
+    padding-top: 9px;
+    padding-bottom: 11px;
 }
