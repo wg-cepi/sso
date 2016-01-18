@@ -1,4 +1,11 @@
 <?php
+require_once 'app/module_sso/module_sso.php';
+session_start();
+
+$endPoint = new EndPoint();
+$endPoint->loginMethod = new FacebookLogin();
+$endPoint->run();
+/*
 session_start();
 require_once 'app/config/config.inc.php';
 require_once __DIR__ . '/vendor/autoload.php';
@@ -40,3 +47,4 @@ if (isset($accessToken)) {
     redirect("http://sso.local");
  
 }
+*/

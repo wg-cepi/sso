@@ -1,6 +1,8 @@
 <?php
-require_once 'app/module_sso/module_sso.php';
+require_once 'app/config/config.php';
 session_start();
+
+use ModuleSSO\EndPoint;
 
 $endPoint = new EndPoint();
 $endPoint->pickLoginMethod();

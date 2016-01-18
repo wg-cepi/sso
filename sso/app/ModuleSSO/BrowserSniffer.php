@@ -1,5 +1,6 @@
 <?php
-//require_once '../../vendor/autoload.php';
+namespace ModuleSSO;
+
 use phpbrowscap\Browscap;
 
 class BrowserSniffer

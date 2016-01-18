@@ -1,9 +1,8 @@
 <?php
 session_start();
-require_once '../sso/app/config/config.inc.php';
-require_once '../sso/app/module_sso/module_sso.php';
+require_once 'app/config/config.php';
 
-require_once 'app/config/config.inc.php';
+use ModuleSSO\Client;
 
 $client = new Client();
 $client->pickLoginMethod();
@@ -88,7 +87,7 @@ $client->run();
                             <div class="card-wrap">
                                 <?php 
                                 if (!isset($_SESSION['uid'])) {
-                                    $client->showLoginMethodHTML();
+                                    $client->showLoginMethod();
                                 }
                                 ?>
                             </div>
