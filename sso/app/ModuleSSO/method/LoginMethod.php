@@ -57,8 +57,20 @@ abstract class LoginMethod implements ILoginMethod
     }
     
         
-    public function getContinueUrl()
+    public function getContinueUrl($continue = null)
     {
+        if($continue) {
+            $parsed = parse_url($continue);
+            if(!empty($parsed['host'])) {
+                if($this->isInWhitelist($parsed['host'])) {
+                    return $continue;
+                } else {
+                    return CFG_SSO_ENDPOINT_URL;
+                }
+            } else {
+                return CFG_SSO_ENDPOINT_URL;
+            }
+        }
         if(isset($_GET[\ModuleSSO::CONTINUE_KEY])) {
             $url = $_GET[\ModuleSSO::CONTINUE_KEY];
             $parsed = parse_url($url);

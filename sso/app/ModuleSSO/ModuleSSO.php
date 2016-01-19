@@ -2,7 +2,7 @@
 
 abstract class ModuleSSO
 {
-    const TOKEN_KEY = 'token';
+    const TOKEN_KEY = 'sso_token';
     const RELOG_KEY = 'relog';
     const LOGIN_KEY = 'login';
     const METHOD_KEY = 'm';

@@ -1,9 +1,10 @@
 <?php
 session_start();
-require_once 'app/config/config.php';
+require_once 'Autoloader.php';
 
 use ModuleSSO\Client;
 
+Database::init();
 $client = new Client();
 $client->pickLoginMethod();
 $client->run();

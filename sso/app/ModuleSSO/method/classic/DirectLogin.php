@@ -10,7 +10,6 @@ class DirectLogin extends ClassicLogin
         http_response_code($code);
         header("Location: " . $url);
         exit;
-
     }
     
     public function showHTMLLoginForm()

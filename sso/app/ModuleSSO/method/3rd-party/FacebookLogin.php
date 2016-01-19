@@ -2,6 +2,7 @@
 namespace ModuleSSO\LoginMethod\ThirdPartyLogin;
 
 use ModuleSSO\LoginMethod\ThirdPartyLogin;
+use ModuleSSO\JWT;
 
 class FacebookLogin extends ThirdPartyLogin {
     
@@ -20,30 +21,67 @@ class FacebookLogin extends ThirdPartyLogin {
     }
     public function showClientLogin()
     {
-        $permissions = ['email'];
-        $loginUrl = $this->helper->getLoginUrl(CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::METHOD_KEY . '=' . self::METHOD_NUMBER . '&continue=' . CFG_DOMAIN_URL, $permissions);
-        return '<a href="' . $loginUrl . '">Log in with Facebook</a>';
+        //$permissions = ['email'];
+        //$loginUrl = $this->helper->getLoginUrl(CFG_FB_REDIR_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_DOMAIN_URL, $permissions);
+        return '<a href="' . CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_DOMAIN_URL . '&' . \ModuleSSO::METHOD_KEY . '=' . self::METHOD_NUMBER . '">Log in with Facebook</a>';
     }
     
-    public function login()
+    public function rediretWithToken()
     {
-        $continueUrl = $this->getContinueUrl();
+        $url = isset($_SESSION['continueUrl']) ? $_SESSION['continueUrl'] : CFG_SSO_ENDPOINT_URL;
+        $continueUrl = $this->getContinueUrl($url);
         try {
             $accessToken =$this->helper->getAccessToken();
-            $this->facebook->setDefaultAccessToken($accessToken);
+            $this->facebook->setDefaultAccessToken((string)$accessToken);
 
             try {
-              $response = $this->facebook->get('/me?fields=email');
-              $userNode = $response->getGraphUser();
-              $userNode->getId();
+                $response = $this->facebook->get('/me?fields=email');
+                $userNode = $response->getGraphUser();
+                $fbId = $userNode->getId();
+                $fbEMail = $userNode->getEmail();
               
-              //try to find user in facebook login pair table
-              
-              //token
-              //$this->redirect($continueUrl);
-              echo $continueUrl;
-              
-              
+                //try to find user in facebook login pair table
+                $query = \Database::$pdo->prepare("SELECT * FROM user_login_facebook WHERE facebook_id = $fbId");
+                $query->execute();
+                $fbUser = $query->fetch();
+                if($fbUser) {
+                    //find real user
+                    $query = \Database::$pdo->prepare("SELECT * FROM users WHERE id = " . $fbUser['user_id']);
+                    $query->execute();
+                    $user = $query->fetch();
+                    if($user) {
+                        $this->setCookies($user['id']);
+                        $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
+
+                        $query = \ModuleSSO::TOKEN_KEY . '=' . $token; 
+                        $url = $continueUrl .  "?" . $query;
+                        $this->redirect($url);
+                    } else {
+                        $data = array(
+                            \ModuleSSO::METHOD_KEY => self::METHOD_NUMBER,
+                            \ModuleSSO::CONTINUE_KEY => $continueUrl
+                            );
+                        $query = http_build_query($data);
+                        $this->redirect(CFG_SSO_ENDPOINT_URL . '?' .  $query);
+                    }
+                } else {
+                    //no user found, let's create one
+                    $query = \Database::$pdo->prepare("INSERT INTO users (email) VALUES ('$fbEMail')");
+                    $query->execute();
+
+                    $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = '$fbEMail'");
+                    $query->execute();
+                    $user = $query->fetch();
+
+                    $query = \Database::$pdo->prepare("INSERT INTO user_login_facebook (user_id, facebook_id, created) VALUES (" . $user['id'] . ", $fbId, " . time() . ")");
+                    $query->execute();
+
+                    $this->setCookies($user['id']);
+
+                    $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
+                    $url = $continueUrl .  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
+                    $this->redirect($url);
+                }
             } catch(\Facebook\Exceptions\FacebookResponseException $e) {
                 // When Graph returns an error
                 echo 'Graph returned an error: ' . $e->getMessage();
@@ -64,5 +102,22 @@ class FacebookLogin extends ThirdPartyLogin {
         }
     }
     
-
+    public function showSSOLogin()
+    {
+        $continueUrl = $this->getContinueUrl();
+        $_SESSION['continueUrl'] = $continueUrl;
+        $permissions = ['email'];
+        $loginUrl = $this->helper->getLoginUrl(CFG_FB_LOGIN_ENDPOINT . '?' . \ModuleSSO::CONTINUE_KEY . '=' . $continueUrl, $permissions);
+        return '<a href="' . $loginUrl . '">Log in with Facebook</a>';
+    }
+    
+    public function run()
+    {
+        echo $this->showSSOLogin();
+    }
+    
+    public function login()
+    {
+        
+    }
 }

@@ -62,7 +62,7 @@ var WebgardenSSO = Class.create({
         if (this.ajaxRequest.readyState === XMLHttpRequest.DONE) {
             if (this.ajaxRequest.status === 200) {
                 var response = JSON.parse(this.ajaxRequest.response);
-                window.location.replace(window.location.origin + '/?token=' + response.token);
+                window.location.replace(window.location.origin + '/?sso_token=' + response.sso_token);
 
             } else {
                 console.log('login, there was a problem with the request.');
@@ -81,7 +81,7 @@ var WebgardenSSO = Class.create({
                        //loginArea.hide();
                     } else if(this.loginArea){
                         var html = '<div id="id-sso-links"><p>You are logged in as <strong>' + response.email + '</strong> at <a href="http://sso.local/login.php">Webgarden SSO</a></p>';
-                        html += "<ul><li><a href='./?token=" + response.token + "' title='" + response.email + "'>Continue as " + response.email + "</a></li>";
+                        html += "<ul><li><a href='./?sso_token=" + response.sso_token + "' title='" + response.email + "'>Continue as " + response.email + "</a></li>";
                         html += "<li><a id='id-relog' href='#' title='Log in as another user'>Log in as another user</a></li></ul></div>";
                        
                         this.loginArea.hide();

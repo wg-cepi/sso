@@ -118,7 +118,7 @@ class Client extends \ModuleSSO
                 if($token->verify($signer, $keychain->getPublicKey($this->publicKey)) && $token->getClaim('exp') > time()) {
                     $query = \Database::$pdo->prepare("SELECT * FROM tokens WHERE value = '$urlToken' AND used = 0");
                     $query->execute();
-                    $dbtoken = $query->fetch();
+                    $dbtoken = $query->fetch();                          
                     if($dbtoken) {
                         $query = \Database::$pdo->prepare("SELECT * FROM users WHERE id = ?");
                         $query->execute(array($token->getClaim('uid')));

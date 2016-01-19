@@ -1,10 +1,12 @@
 <?php
-require_once 'app/module_sso/module_sso.php';
 session_start();
+require_once 'Autoloader.php';
 
-$endPoint = new EndPoint();
-$endPoint->loginMethod = new FacebookLogin();
-$endPoint->run();
+use ModuleSSO\LoginMethod\ThirdPartyLogin\FacebookLogin;
+
+Database::init();
+$loginMethod = new FacebookLogin();
+$loginMethod->rediretWithToken();
 /*
 session_start();
 require_once 'app/config/config.inc.php';
