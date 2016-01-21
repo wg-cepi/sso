@@ -5,10 +5,12 @@ use phpbrowscap\Browscap;
 
 class BrowserSniffer
 {  
+    const TMP_DIR = 'C:\wamp\tmp';
     public static $browscap = null;
-    public static function init($path = 'C:\wamp\tmp')
+    public static function init($path = TMP_DIR)
     {
         self::$browscap = new Browscap($path);
+        self::$browscap->doAutoUpdate = false;
     }
     /**
      * 
@@ -106,8 +108,7 @@ class BrowserSniffer
         //browser info
         $name = '';
         if(self::$browscap) {
-            $browscap = new Browscap('C:\wamp\tmp');
-            $info = $browscap->getBrowser(null, true);
+            $info = self::$browscap->getBrowser(null, true);
             $name = isset($info['browser_name']) ? $info['browser_name'] : '';
         } else {
             throw new \Exception("BrowserSniffer failed, browscap is not initialized");
@@ -117,14 +118,3 @@ class BrowserSniffer
     }
 }
 BrowserSniffer::init();
-//BrowserSniffer::dump();
-/*
-BrowserSniffer::dump();
-echo "<br>";
-echo BrowserSniffer::getName();
-echo "<br>";
-echo BrowserSniffer::getVersion();
-echo "<br>";
-echo BrowserSniffer::isMobileOrTablet();
-echo "<br>";
-*/
