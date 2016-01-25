@@ -4,9 +4,11 @@ namespace ModuleSSO;
 use ModuleSSO\LoginMethod\ClassicLogin\NoScriptLogin;
 use ModuleSSO\LoginMethod\ClassicLogin\IframeLogin;
 use ModuleSSO\LoginMethod\ClassicLogin\DirectLogin;
+
 use ModuleSSO\LoginMethod\CORSLogin;
 
 use ModuleSSO\LoginMethod\ThirdPartyLogin\FacebookLogin;
+use ModuleSSO\LoginMethod\ThirdPartyLogin\GoogleLogin;
 
 class EndPoint extends \ModuleSSO
 {
@@ -27,6 +29,8 @@ class EndPoint extends \ModuleSSO
                 $this->loginMethod = new CORSLogin();
             } else if($m == FacebookLogin::METHOD_NUMBER) {
                 $this->loginMethod = new FacebookLogin();
+            } else if($m == GoogleLogin::METHOD_NUMBER) {
+                $this->loginMethod = new GoogleLogin();
             } else {
                 $this->loginMethod = new DirectLogin();
             }

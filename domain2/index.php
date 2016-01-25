@@ -14,6 +14,8 @@ $client->run();
     <head>
         <title><?php echo CFG_DOMAIN_DISPLAY_NAME ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="http://sso.local/css/common.styles.css">
+        <?php $client->appendStyles(); ?>
         <?php $client->appendScripts(); ?>
         <link rel="stylesheet" href="css/material.min.css">
         <link rel="stylesheet" href="css/styles.css">
@@ -65,7 +67,7 @@ $client->run();
                                     </div>
                                     <div class="mdl-card__supporting-text">
                                         <ul class="user-info">
-                                            <li id="id-user-id">ID: <?php echo $user['id'] ?></li>
+                                            <li>ID: <?php echo $user['id'] ?></li>
                                             <li>First name: <?php echo $user['first_name'] ?></li>
                                             <li>Last name: <?php echo $user['last_name'] ?></li>
                                             <li>Email: <?php echo $user['email'] ?></li>

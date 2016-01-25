@@ -17,22 +17,23 @@ class DirectLogin extends ClassicLogin
         $str = $this->showHTMLHeader();
         $str .= '<div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">';
         $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_URL . '">'
-                . '<div class="inputs">'
-                        . '<div class="input-email">'
-                            . '<label for="id-email">'
+                 . '<div class="inputs">'
+                        . '<div class="input-email mdl-textfield mdl-js-textfield mdl-textfield--floating-label">'
+                            . '<input type="text" class="mdl-textfield__input" name="email" id="id-email"/>'
+                            . '<label for="id-email" class="mdl-textfield__label">'
                                 . 'Email'
                             . '</label>'
-                            . '<input type="text" class="block" name="email" id="id-email"/>'
+                            
                         . '</div>'
-                        . '<div class="input-pass">'
-                            . '<label for="id-pass">'
+                        . '<div class="input-pass mdl-textfield mdl-js-textfield mdl-textfield--floating-label">'
+                            . '<label for="id-pass" class="mdl-textfield__label">'
                                 . 'Password'
                             . '</label>'
-                            . '<input type="password" class="block" name="password" id="id-pass"/>'
+                            . '<input type="password" class="mdl-textfield__input" name="password" id="id-pass"/>'
                         . '</div>'
                 . '</div>'
                 . '<div class="button-wrap">'
-                    . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="id-login-button" value="Login with SSO"/>'
+                    . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised" id="id-login-button" value="Login with SSO"/>'
                 .'</div>'
             . '</form>';
         $str .= '</div>';
@@ -48,5 +49,11 @@ class DirectLogin extends ClassicLogin
         $html .= '</ul></div>';
         return $html;
     }
+    
+    public function generateTokenAndRedirect($user)
+    {
+        $this->redirect($this->continueUrl); 
+    }
+ 
 }
 

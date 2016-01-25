@@ -19,10 +19,12 @@ abstract class ClassicLogin extends LoginMethod
             $user = $query->fetch();
             if($user) {
                 $this->setCookies($user['id']);
+                /*
                 $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
 
                 $url = $this->continueUrl .  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
-                $this->redirect($url);
+                $this->redirect($url);*/
+                $this->generateTokenAndRedirect($user);
             } else {
                 echo $this->showHTMLLoginForm();
             }
@@ -30,9 +32,12 @@ abstract class ClassicLogin extends LoginMethod
             if(isset($_COOKIE[Cookie::SSOC])) {
                 $user = $this->getUserFromCookie();
                 if($user) {
+                    /*
                     $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
                     $url = $this->continueUrl .  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
                     $this->redirect($url);
+                     */
+                    $this->generateTokenAndRedirect($user);
                 } else {
                     echo $this->showHTMLLoginForm();
                 }
@@ -54,25 +59,27 @@ abstract class ClassicLogin extends LoginMethod
     {
         $str = $this->showHTMLHeader();
         $str .= '<div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">';
+        $str .= '<span id="id-sso-login-header">Login to Webgarden SSO</span>';
         $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_URL . '">'
                 . '<div class="inputs">'
-                        . '<div class="input-email">'
-                            . '<label for="id-email">'
+                        . '<div class="input-email mdl-textfield mdl-js-textfield mdl-textfield--floating-label">'
+                            . '<input type="text" class="mdl-textfield__input" name="email" id="id-email"/>'
+                            . '<label for="id-email" class="mdl-textfield__label">'
                                 . 'Email'
                             . '</label>'
-                            . '<input type="text" class="block" name="email" id="id-email"/>'
+                            
                         . '</div>'
-                        . '<div class="input-pass">'
-                            . '<label for="id-pass">'
+                        . '<div class="input-pass mdl-textfield mdl-js-textfield mdl-textfield--floating-label">'
+                            . '<label for="id-pass" class="mdl-textfield__label">'
                                 . 'Password'
                             . '</label>'
-                            . '<input type="password" class="block" name="password" id="id-pass"/>'
+                            . '<input type="password" class="mdl-textfield__input" name="password" id="id-pass"/>'
                         . '</div>'
                 . '</div>'
                 . ' <input type="hidden" name="' . \ModuleSSO::CONTINUE_KEY . '" value="' . $this->continueUrl .  '"/>'
                 . '<input type="hidden" name="' . \ModuleSSO::METHOD_KEY . '" value="' . static::METHOD_NUMBER . '"/>'
                 . '<div class="button-wrap">'
-                    . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="id-login-button" value="Login with SSO"/>'
+                    . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised" id="id-login-button" value="Login with SSO"/>'
                 .'</div>'
             . '</form>';
         $str .= '</div>';
@@ -120,6 +127,14 @@ abstract class ClassicLogin extends LoginMethod
         } else {
             echo $this->showHTMLLoginForm();
         }
-    } 
+    }
+    
+    public function generateTokenAndRedirect($user)
+    {
+        $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
+        $url = $this->continueUrl .  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
+        $this->redirect($url);
+        
+    }
 }
 

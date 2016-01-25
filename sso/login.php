@@ -23,8 +23,10 @@ $endPoint->pickLoginMethod();
         <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
     </head>
     <body>
-        <div class="grid-centered">
-            <?php $endPoint->run(); ?>
+        <div class="sso">
+            <div class="grid-centered">
+                <?php $endPoint->run(); ?>
+            </div>
         </div>
     </body>
 </html>

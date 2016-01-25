@@ -1,38 +1,14 @@
 <?php
 namespace ModuleSSO\LoginMethod;
 
-use ModuleSSO\JWT;
 use ModuleSSO\LoginMethod;
+use ModuleSSO\JWT;
 use ModuleSSO\Cookie;
 
 class CORSLogin extends LoginMethod
 {
     const METHOD_NUMBER = 3;
-    public function showClientLogin()
-    {
-        $str = '<div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">';
-        $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_PLAIN_URL . '">'
-                . '<div class="inputs">'
-                        . '<div class="input-email">'
-                            . '<label for="id-email">'
-                                . 'Email'
-                            . '</label>'
-                            . '<input type="text" class="block" name="email" id="id-email"/>'
-                        . '</div>'
-                        . '<div class="input-pass">'
-                            . '<label for="id-pass">'
-                                . 'Password'
-                            . '</label>'
-                            . '<input type="password" class="block" name="password" id="id-pass"/>'
-                        . '</div>'
-                . '</div>'
-                . '<div class="button-wrap">'
-                    . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="id-login-button" value="Login with SSO"/>'
-                .'</div>'
-            . '</form>';
-        $str .= '</div>';
-        return $str;
-    }
+    
     public function checkCookie()
     {
         \Logger::log('test');
@@ -99,13 +75,6 @@ class CORSLogin extends LoginMethod
                 //
             }
         }
-        
-    }
-    
-    public function appendScripts()
-    {
-        return "<script src='http://sso.local/js/prototype.js'></script>
-        <script src='http://sso.local/js/cors.js'></script>";
         
     }
 }

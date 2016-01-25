@@ -7,7 +7,7 @@ class BrowserSniffer
 {  
     const TMP_DIR = 'C:\wamp\tmp';
     public static $browscap = null;
-    public static function init($path = TMP_DIR)
+    public static function init($path = self::TMP_DIR)
     {
         self::$browscap = new Browscap($path);
         self::$browscap->doAutoUpdate = false;
@@ -77,7 +77,7 @@ class BrowserSniffer
             $info = self::$browscap->getBrowser(null, true);
 
             if(!isset($info['isTablet']) && !isset($info['isMobileDevice'])) {
-                throw new Exception("BrowserSniffer failed, isTablet and isMobileDevice not set");
+                throw new \Exception("BrowserSniffer failed, isTablet and isMobileDevice not set");
             }
 
             if(isset($info['isTablet'])) {

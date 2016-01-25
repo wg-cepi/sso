@@ -1,15 +1,19 @@
  
 var WebgardenSSO = Class.create({
     /*
-     * konstruktor, inicializuje ajax a navaze event listenery
+     * constructor, initializes ajax and binds event listeners
      */
     initialize: function() {
+        this.loginArea = $('id-login-area');
         this.initAjax();
         this.formOnSubmit();
         this.checkCookie();
         
-        this.loginArea = $('id-login-area');
-        
+        this.loginSection = $$('#id-client-login .card-wrap').first();
+        this.loginSection.hide();
+        this.loginSection.insert({
+            after: '<div id="loader" class="mdl-spinner mdl-js-spinner is-active"></div>'
+        });
     },
     getLogin: function(selector) {
         var item  = $$(selector).first();
@@ -74,12 +78,8 @@ var WebgardenSSO = Class.create({
             if (this.ajaxRequest.status === 200) {
                 console.log(this.ajaxRequest.response);
                 var response = JSON.parse(this.ajaxRequest.response);
-                //var loginArea =  $("id-login-area");
-                
                 if(response.status === "ok") {
-                    if($("userLogged")) {
-                       //loginArea.hide();
-                    } else if(this.loginArea){
+                    if(this.loginArea){
                         var html = '<div id="id-sso-links"><p>You are logged in as <strong>' + response.email + '</strong> at <a href="http://sso.local/login.php">Webgarden SSO</a></p>';
                         html += "<ul><li><a href='./?sso_token=" + response.sso_token + "' title='" + response.email + "'>Continue as " + response.email + "</a></li>";
                         html += "<li><a id='id-relog' href='#' title='Log in as another user'>Log in as another user</a></li></ul></div>";
@@ -89,7 +89,6 @@ var WebgardenSSO = Class.create({
                             before: html
                         });
                        
-
                         $("id-relog").observe('click', function(e){
                             e.preventDefault();
                             this.loginArea.show();
@@ -106,6 +105,10 @@ var WebgardenSSO = Class.create({
             } else {
                 console.log('checkCookie, there was a problem with the request.');
             }
+            $('loader').remove();
+        }
+        if(this.loginSection) {
+            this.loginSection.show();
         }
     }
 });

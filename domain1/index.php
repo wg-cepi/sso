@@ -14,6 +14,8 @@ $client->run();
     <head>
         <title><?php echo CFG_DOMAIN_DISPLAY_NAME ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="http://sso.local/css/common.styles.css">
+        <?php $client->appendStyles(); ?>
         <?php $client->appendScripts(); ?>
         <link rel="stylesheet" href="css/material.min.css">
         <link rel="stylesheet" href="css/styles.css">

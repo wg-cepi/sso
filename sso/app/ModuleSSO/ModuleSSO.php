@@ -12,5 +12,6 @@ abstract class ModuleSSO
     const GLOBAL_LOGOUT_KEY = 'glogout';
     const MESSAGES_KEY = 'messages';
     
-    abstract public function run();  
+    abstract public function run();
+    abstract public function pickLoginMethod();
 }

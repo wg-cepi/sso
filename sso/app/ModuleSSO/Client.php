@@ -4,10 +4,19 @@ namespace ModuleSSO;
 use ModuleSSO\BrowserSniffer;
 
 use ModuleSSO\LoginMethod\ClassicLogin\NoScriptLogin;
+use ModuleSSO\ClientLoginMethod\ClientNoScriptLogin;
+
 use ModuleSSO\LoginMethod\ClassicLogin\IframeLogin;
+use ModuleSSO\ClientLoginMethod\ClientIframeLogin;
+
 use ModuleSSO\LoginMethod\CORSLogin;
+use ModuleSSO\ClientLoginMethod\ClientCORSLogin;
 
 use ModuleSSO\LoginMethod\ThirdPartyLogin\FacebookLogin;
+use ModuleSSO\ClientLoginMethod\ClientFacebookLogin;
+
+use ModuleSSO\LoginMethod\ThirdPartyLogin\GoogleLogin;
+use ModuleSSO\ClientLoginMethod\ClientGoogleLogin;
 
 use Lcobucci\JWT\Signer\Keychain;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
@@ -60,15 +69,17 @@ class Client extends \ModuleSSO
         if(isset($_GET[\ModuleSSO::FORCED_METHOD_KEY])) {
             $m = $_GET[\ModuleSSO::FORCED_METHOD_KEY];
             if($m == NoScriptLogin::METHOD_NUMBER) {
-                $this->loginMethod = new NoScriptLogin();
+                $this->loginMethod = new ClientNoScriptLogin();
             } else if($m == IframeLogin::METHOD_NUMBER) {
-                $this->loginMethod = new IframeLogin();
+                $this->loginMethod = new ClientIframeLogin();
             } else if($m == CORSLogin::METHOD_NUMBER) {
-                $this->loginMethod = new CORSLogin();
+                $this->loginMethod = new ClientCORSLogin();
             } else if($m == FacebookLogin::METHOD_NUMBER) {
-                $this->loginMethod = new FacebookLogin();
+                $this->loginMethod = new ClientFacebookLogin();
+            } else if($m == GoogleLogin::METHOD_NUMBER) {
+                $this->loginMethod = new ClientGoogleLogin();
             } else {
-                 $this->loginMethod = new NoScriptLogin();
+                 $this->loginMethod = new ClientNoScriptLogin();
             }
             return;
         }
@@ -91,17 +102,17 @@ class Client extends \ModuleSSO
                 $browser = new BrowserSniffer();
                 if(isset($supportedBrowsers[$browser->getName()])) {
                     if($browser->getVersion() >= $supportedBrowsers[$browser->getName()]) {
-                        $this->loginMethod = new CORSLogin();
+                        $this->loginMethod = new ClientCORSLogin();
                         break;
                     }
                 }   
             }
             else if($method === 'iframe') {
-                $this->loginMethod = new IframeLogin();
+                $this->loginMethod = new ClientIframeLogin();
                 break;
             }
             else if($method === 'noscript') {
-                $this->loginMethod = new NoScriptLogin();
+                $this->loginMethod = new ClientNoScriptLogin();
                 break;
             }
         } 
@@ -134,12 +145,12 @@ class Client extends \ModuleSSO
                     }
                     
                 } else {
-                    $this->insertMessage('warn', 'Login failed, please try again');
+                    $this->insertMessage('Login failed, please try again', 'warn');
                     header("Location: " .  $this->getContinueUrl());
                     exit();
                 }
-            } catch (Exception $e) {
-                $this->insertMessage('warn', 'Login failed, please try again');
+            } catch (\Exception $e) {
+                $this->insertMessage('Login failed, please try again', 'warn');
                 header("Location: " .  $this->getContinueUrl());
                 exit();
             }
@@ -189,7 +200,12 @@ class Client extends \ModuleSSO
         echo $this->loginMethod->appendScripts();
     }
     
+    public function appendStyles()
+    {
+        echo $this->loginMethod->appendStyles();
+    }
+    
     public function showLoginMethod() {
-        echo $this->loginMethod->showClientLogin($this->getContinueUrl());
+        echo $this->loginMethod->showLogin($this->getContinueUrl());
     }
 }
