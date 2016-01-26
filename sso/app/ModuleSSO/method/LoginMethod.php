@@ -102,6 +102,13 @@ abstract class LoginMethod implements ILoginMethod
     
     public function isInWhitelist($domainName)
     {
+        //find root domain
+        $exploded = explode(".", $domainName);
+        $tld = array_pop($exploded);
+        $main = array_pop($exploded);
+        
+        $domainName = $main . "." . $tld;
+        \Logger::log($domainName);
         $query = \Database::$pdo->prepare("SELECT * FROM domains WHERE name = '$domainName'");
         $query->execute();
         $domain = $query->fetch();

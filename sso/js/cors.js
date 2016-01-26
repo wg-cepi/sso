@@ -11,9 +11,6 @@ var WebgardenSSO = Class.create({
         
         this.loginSection = $$('#id-client-login .card-wrap').first();
         this.loginSection.hide();
-        this.loginSection.insert({
-            after: '<div id="loader" class="mdl-spinner mdl-js-spinner is-active"></div>'
-        });
     },
     getLogin: function(selector) {
         var item  = $$(selector).first();
@@ -105,7 +102,6 @@ var WebgardenSSO = Class.create({
             } else {
                 console.log('checkCookie, there was a problem with the request.');
             }
-            $('loader').remove();
         }
         if(this.loginSection) {
             this.loginSection.show();

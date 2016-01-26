@@ -12,6 +12,7 @@ ul {
 }
 #id-client-info, #id-client-login {
     width: 50%;
+    min-width: 350px;
     margin: 0 auto;
 }
 

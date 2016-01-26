@@ -4,17 +4,17 @@
     text-align: center;
     padding: 10px;
 }
-.button-wrap {
+.sso .button-wrap {
     text-align: center;
 }
-#id-iframe-login {
+.sso #id-iframe-login {
     height: 100%;
     width: 100%;
     text-align: center;
     margin: 0 auto;
 }
 
-#id-login-area {
+.sso #id-login-area {
     width: 100%;
     max-width: 600px;
     padding: 10px;

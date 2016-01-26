@@ -8,6 +8,7 @@ require_once 'app/config/config.php';
     <head>
         <title><?php echo CFG_DOMAIN_DISPLAY_NAME ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="icon" type="image/png" href="/img/favicon.png" />
         <link rel="stylesheet" href="css/material.min.css">
         <link rel="stylesheet" href="css/styles.css">
         

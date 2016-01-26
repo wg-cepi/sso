@@ -1,5 +1,5 @@
 <?php
-namespace ModuleSSO\ClientLoginMethod;
+namespace ModuleSSO\ClientLoginMethod\ClientThirdPartyLogin;
 
 use ModuleSSO\ClientLoginMethod\ClientThirdPartyLogin;
 use ModuleSSO\LoginMethod\ThirdPartyLogin\GoogleLogin;

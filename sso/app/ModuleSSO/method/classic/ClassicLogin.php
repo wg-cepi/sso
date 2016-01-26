@@ -131,8 +131,11 @@ abstract class ClassicLogin extends LoginMethod
     
     public function generateTokenAndRedirect($user)
     {
-        $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
-        $url = $this->continueUrl .  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
+        $url = $this->continueUrl;
+        if($this->continueUrl !== CFG_SSO_ENDPOINT_URL) {
+            $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
+            $url .=  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
+        }
         $this->redirect($url);
         
     }

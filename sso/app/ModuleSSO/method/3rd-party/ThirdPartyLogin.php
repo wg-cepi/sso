@@ -15,9 +15,10 @@ abstract class ThirdPartyLogin extends LoginMethod
     
     public function redirectWithToken($socialId, $socialEmail, $continueUrl) {
          //try to find user in facebook login pair table
-        $query = \Database::$pdo->prepare("SELECT * FROM " . static::TABLE . " WHERE " . static::TABLE_COLUMN . " = $socialId");
+        $query = \Database::$pdo->prepare("SELECT * FROM " . static::TABLE . " WHERE " . static::TABLE_COLUMN . " = '$socialId'");
         $query->execute();
         $socialUser = $query->fetch();
+        \Logger::log(print_pre($socialUser['user_id'], true));
                 
         if($socialUser) {
             //find real user
@@ -51,7 +52,7 @@ abstract class ThirdPartyLogin extends LoginMethod
             $query->execute();
             $user = $query->fetch();
 
-            $query = \Database::$pdo->prepare("INSERT INTO " . static::TABLE . " (user_id, " . static::TABLE_COLUMN . ", created) VALUES (" . $user['id'] . ", $socialId, " . time() . ")");
+            $query = \Database::$pdo->prepare("INSERT INTO " . static::TABLE . " (user_id, " . static::TABLE_COLUMN . ", created) VALUES (" . $user['id'] . ", '$socialId', " . time() . ")");
             $query->execute();
 
             $this->setCookies($user['id']);

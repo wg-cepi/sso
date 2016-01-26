@@ -4,19 +4,19 @@ namespace ModuleSSO;
 use ModuleSSO\BrowserSniffer;
 
 use ModuleSSO\LoginMethod\ClassicLogin\NoScriptLogin;
-use ModuleSSO\ClientLoginMethod\ClientNoScriptLogin;
+use ModuleSSO\ClientLoginMethod\ClientClassicLogin\ClientNoScriptLogin;
 
 use ModuleSSO\LoginMethod\ClassicLogin\IframeLogin;
-use ModuleSSO\ClientLoginMethod\ClientIframeLogin;
+use ModuleSSO\ClientLoginMethod\ClientClassicLogin\ClientIframeLogin;
 
 use ModuleSSO\LoginMethod\CORSLogin;
 use ModuleSSO\ClientLoginMethod\ClientCORSLogin;
 
 use ModuleSSO\LoginMethod\ThirdPartyLogin\FacebookLogin;
-use ModuleSSO\ClientLoginMethod\ClientFacebookLogin;
+use ModuleSSO\ClientLoginMethod\ClientThirdPartyLogin\ClientFacebookLogin;
 
 use ModuleSSO\LoginMethod\ThirdPartyLogin\GoogleLogin;
-use ModuleSSO\ClientLoginMethod\ClientGoogleLogin;
+use ModuleSSO\ClientLoginMethod\ClientThirdPartyLogin\ClientGoogleLogin;
 
 use Lcobucci\JWT\Signer\Keychain;
 use Lcobucci\JWT\Signer\Rsa\Sha256;

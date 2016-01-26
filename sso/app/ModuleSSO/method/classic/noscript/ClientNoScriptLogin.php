@@ -1,5 +1,5 @@
 <?php
-namespace ModuleSSO\ClientLoginMethod;
+namespace ModuleSSO\ClientLoginMethod\ClientClassicLogin;
 
 use ModuleSSO\ClientLoginMethod\ClientClassicLogin;
 use \ModuleSSO\LoginMethod\ClassicLogin\NoScriptLogin;
