@@ -48,5 +48,7 @@ Temporary Items
 nbproject
 nbproject/private/private.properties
 nbproject/project.xml
-/sso/app/config/pk.pub
 favicons.psd
+.buildpath
+.settings/
+.project
