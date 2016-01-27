@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Class ModuleSSO
+ *
+ * @abstract
+ */
 abstract class ModuleSSO
 {
     const TOKEN_KEY = 'sso_token';
@@ -11,7 +16,17 @@ abstract class ModuleSSO
     const LOGOUT_KEY = 'logout';
     const GLOBAL_LOGOUT_KEY = 'glogout';
     const MESSAGES_KEY = 'messages';
-    
+
+    /**
+     * @return mixed
+     * @abstract
+     */
     abstract public function run();
+
+    /**
+     * Picks login method depending on parameters or configuration
+     * @return mixed
+     * @abstract
+     */
     abstract public function pickLoginMethod();
 }

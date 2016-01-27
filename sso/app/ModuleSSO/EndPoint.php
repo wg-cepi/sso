@@ -10,13 +10,31 @@ use ModuleSSO\LoginMethod\CORSLogin;
 use ModuleSSO\LoginMethod\ThirdPartyLogin\FacebookLogin;
 use ModuleSSO\LoginMethod\ThirdPartyLogin\GoogleLogin;
 
+/**
+ * Class EndPoint
+ * @package ModuleSSO
+ */
 class EndPoint extends \ModuleSSO
 {
     /**
      * @var LoginMethod $loginMethod
      */
     public $loginMethod = null;
-    
+
+    /**
+     * Sets $loginMethod according to parameter passed in $_GET
+     * If there is no parameter, EndPoint::$loginMethod is set to DirectLogin
+     *
+     * @uses EndPoint::$loginMethod
+     * @uses $_GET
+     * @uses \ModuleSSO
+     * @uses NoScriptLogin
+     * @uses IframeLogin
+     * @uses CORSLogin
+     * @uses FacebookLogin
+     * @uses GoogleLogin
+     * @uses DirectLogin
+     */
     public function pickLoginMethod()
     {
         if(isset($_GET[\ModuleSSO::METHOD_KEY])) {
@@ -38,12 +56,19 @@ class EndPoint extends \ModuleSSO
             $this->loginMethod = new DirectLogin();
         }
     }
-    
+
+    /**
+     * Returns link to CSS file depending on type of @see LoginMethod
+     * @return string
+     */
     public function appendStyles()
     {
         return $this->loginMethod->appendStyles();
     }
-    
+
+    /**
+     * @see LoginMethod::run()
+     */
     public function run()
     {
         $this->loginMethod->run();

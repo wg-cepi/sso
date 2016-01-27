@@ -22,16 +22,31 @@ use Lcobucci\JWT\Signer\Keychain;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Parser;
 
+/**
+ * Class Client
+ * @package ModuleSSO
+ */
 class Client extends \ModuleSSO
 {
+    /** @var string $publicKey */
     private $publicKey = '';
+
+    /** @var LoginMethod $loginMethod */
     private $loginMethod = null;
     
     public function __construct($pubKeyPath = 'app/config/pk.pub')
     {
         $this->publicKey = file_get_contents($pubKeyPath);
     }
-    
+
+    /**
+     * Method finds and return user from database based on ID provided in $_SESSION
+     *
+     * @uses $_SESSION
+     * @uses \Database
+     *
+     * @return mixed If user is found, return array, otherwise null
+     */
     public function getUser()
     {
         if($_SESSION['uid']) {
@@ -43,7 +58,12 @@ class Client extends \ModuleSSO
         }
         
     }
-    
+
+    /**
+     * Returns requested URL if there is one, otherwise returns default CFG_DOMAIN_URL
+     *
+     * @return string
+     */
     public function getContinueUrl()
     {
         //load server path from db
@@ -63,7 +83,25 @@ class Client extends \ModuleSSO
             return $base;
         }
     }
-    
+
+    /**
+     * Sets $loginMethod according to parameter passed in $_GET
+     * If there is no parameter, Client::$loginMethod is according to config file
+     * Client::$loginMethod depends on capabilities of browser
+     *
+     * @link http://caniuse.com/#feat=cors
+     *
+     * @uses $_GET
+     * @uses Client::$loginMethod
+     * @uses ModuleSSO
+     * @uses NoScriptLogin
+     * @uses IframeLogin
+     * @uses CORSLogin
+     * @uses FacebookLogin
+     * @uses GoogleLogin
+     * @uses DirectLogin
+     *
+     */
     public function pickLoginMethod()
     {
         if(isset($_GET[\ModuleSSO::FORCED_METHOD_KEY])) {
@@ -117,7 +155,13 @@ class Client extends \ModuleSSO
             }
         } 
     }
-    
+
+    /**
+     * Parses token given in $_GET and creates local context for user (logs user in)
+     *
+     * @uses $_GET
+     * @uses ModuleSSO
+     */
     public function login() {
         if(isset($_GET[\ModuleSSO::TOKEN_KEY])) {
             $urlToken = $_GET[\ModuleSSO::TOKEN_KEY];
