@@ -2,6 +2,7 @@
 namespace ModuleSSO;
 
 
+use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\EndPoint\LoginMethod\HTTP;
 use ModuleSSO\EndPoint\LoginMethod\Other;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty;
@@ -16,6 +17,15 @@ class EndPoint extends \ModuleSSO
      * @var \ModuleSSO\EndPoint\LoginMethod $loginMethod
      */
     private $loginMethod = null;
+
+    /** @var array $MAP */
+    private static $MAP = array(
+        HTTP\NoScriptLogin::METHOD_NUMBER => '\ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin',
+        HTTP\IframeLogin::METHOD_NUMBER => '\ModuleSSO\EndPoint\LoginMethod\HTTP\IframeLogin',
+        Other\CORSLogin::METHOD_NUMBER => '\ModuleSSO\EndPoint\LoginMethod\Other\CORSLogin',
+        ThirdParty\FacebookLogin::METHOD_NUMBER => '\ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin',
+        ThirdParty\GoogleLogin::METHOD_NUMBER => '\ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin'
+    );
 
     /**
      * Sets $loginMethod according to parameter passed in $_GET
@@ -34,17 +44,10 @@ class EndPoint extends \ModuleSSO
     public function pickLoginMethod()
     {
         if(isset($_GET[\ModuleSSO::METHOD_KEY])) {
-            $m = $_GET[\ModuleSSO::METHOD_KEY];
-            if($m == HTTP\NoScriptLogin::METHOD_NUMBER) {
-                $this->loginMethod = new HTTP\NoScriptLogin();
-            } else if($m == HTTP\IframeLogin::METHOD_NUMBER) {
-                $this->loginMethod = new HTTP\IframeLogin();
-            } else if($m == Other\CORSLogin::METHOD_NUMBER) {
-                $this->loginMethod = new Other\CORSLogin();
-            } else if($m == ThirdParty\FacebookLogin::METHOD_NUMBER) {
-                $this->loginMethod = new ThirdParty\FacebookLogin();
-            } else if($m == ThirdParty\GoogleLogin::METHOD_NUMBER) {
-                $this->loginMethod = new ThirdParty\GoogleLogin();
+            $key = $_GET[\ModuleSSO::METHOD_KEY];
+            if(isset(self::$MAP[$key])) {
+                $class = self::$MAP[$key];
+                $this->loginMethod = new $class();
             } else {
                 $this->loginMethod = new HTTP\DirectLogin();
             }
@@ -70,5 +73,15 @@ class EndPoint extends \ModuleSSO
     public function run()
     {
         $this->loginMethod->perform();
+    }
+
+    public function getLoginMethod()
+    {
+        return $this->loginMethod;
+    }
+
+    public function setLoginMethod(LoginMethod $loginMethod)
+    {
+        $this->loginMethod = $loginMethod;
     }
 }

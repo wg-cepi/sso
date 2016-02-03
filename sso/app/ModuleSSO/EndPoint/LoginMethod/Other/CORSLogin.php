@@ -14,7 +14,7 @@ class CORSLogin extends LoginMethod
         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
         header('Access-Control-Allow-Credentials: true');
         header('Content-Type: application/json');
-        if(!isset($_COOKIE[Cookie::SSOC])) {
+        if(!isset($_COOKIE[Cookie::SECURE_SSO_COOKIE])) {
             echo json_encode(array("status" => "no_cookie"));
         } else {
             $user = $this->getUserFromCookie();
@@ -38,7 +38,7 @@ class CORSLogin extends LoginMethod
             $query->execute(array($_GET['email'], $_GET['password']));
             $user = $query->fetch();
             if($user) {
-                $this->setCookies($user['id']);
+                $this->setSSOCookie($user['id']);
                 $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
 
                 echo '{"status": "ok", "' . \ModuleSSO::TOKEN_KEY . '": "' . $token . '"}';

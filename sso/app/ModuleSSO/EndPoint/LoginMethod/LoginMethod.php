@@ -7,40 +7,42 @@ abstract class LoginMethod implements ILoginMethod
 {   
     public $domain = CFG_JWT_ISSUER;
     public $continueUrl = '';
-    
-    /*
-     * Sets and updates SSO cookies
+
+    /**
+     * Sets and updates SSO cookie
+     * @param $userId
      */
-    public function setCookies($userId)
+    public function setSSOCookie($userId)
     { 
         $identifier = md5(Cookie::SALT . md5(Cookie::generateHash($userId) . Cookie::SALT));
         $token = md5(uniqid(rand(), TRUE));
         $timeout = time() + 60 * 60 * 24 * 7;
         
-        setcookie(Cookie::SSOC, "$identifier:$token", $timeout, null, null, null, true);
+        setcookie(Cookie::SECURE_SSO_COOKIE, "$identifier:$token", $timeout, null, null, null, true);
         
         $query = \Database::$pdo->prepare("UPDATE users SET cookie = '$identifier:$token' WHERE id = $userId");
         $query->execute();
-        
     }
-    
-    /*
-     * Unsets SSO cookies
+
+
+    /**
+     *
+     * Unsets SSO cookie
      */
     public function unsetCookies()
     {
-        setcookie(Cookie::SSOC, null, -1, '/');
+        setcookie(Cookie::SECURE_SSO_COOKIE, null, -1, '/');
     }
     
     public function getUserFromCookie()
     {
-        if(isset($_COOKIE[Cookie::SSOC])) {
-            list($identifier, $token) = explode(":", $_COOKIE[Cookie::SSOC]);
+        if(isset($_COOKIE[Cookie::SECURE_SSO_COOKIE])) {
+            list($identifier, $token) = explode(":", $_COOKIE[Cookie::SECURE_SSO_COOKIE]);
             $query = \Database::$pdo->prepare("SELECT * FROM users WHERE cookie = '$identifier:$token'");
             $query->execute();
             $user = $query->fetch();
             if($user) {
-                $this->setCookies($user['id']);
+                $this->setSSOCookie($user['id']);
                 return $user;
             } else {
                 return null;

@@ -18,25 +18,15 @@ abstract class HTTPLogin extends LoginMethod
             $query->execute(array($email, $password));
             $user = $query->fetch();
             if($user) {
-                $this->setCookies($user['id']);
-                /*
-                $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
-
-                $url = $this->continueUrl .  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
-                $this->redirect($url);*/
+                $this->setSSOCookie($user['id']);
                 $this->generateTokenAndRedirect($user);
             } else {
                 echo $this->showHTMLLoginForm();
             }
         } else if(isset($_GET['login'])) {
-            if(isset($_COOKIE[Cookie::SSOC])) {
+            if(isset($_COOKIE[Cookie::SECURE_SSO_COOKIE])) {
                 $user = $this->getUserFromCookie();
                 if($user) {
-                    /*
-                    $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
-                    $url = $this->continueUrl .  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
-                    $this->redirect($url);
-                     */
                     $this->generateTokenAndRedirect($user);
                 } else {
                     echo $this->showHTMLLoginForm();

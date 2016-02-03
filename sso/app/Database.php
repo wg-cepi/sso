@@ -1,6 +1,12 @@
 <?php
 class Database {
+    /** @var \PDO $pdo  */
     public static $pdo = null;
+
+
+    /**
+     * Initializes database environment from config file
+     */
     public static function init() {
         $dsn = 'mysql:dbname=' . CFG_SQL_DBNAME . ';host=' . CFG_SQL_HOST . '';
         $user = CFG_SQL_USERNAME;

@@ -4,6 +4,7 @@ namespace ModuleSSO;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Keychain;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
+use phpbrowscap\Exception;
 
 class JWT
 {
@@ -31,11 +32,17 @@ class JWT
     
     /**
      * Generates and returns JWT based on input values and config variables
+     *
+     * @throws \Exception
      * @param array $values
      * @return string $token
      */
     public function generate($values)
     {
+        if(!is_array($values) || empty($values)) {
+            throw new \Exception('Bad or empty argument');
+        }
+
         $signer = new Sha256();
         $keychain = new Keychain();
         

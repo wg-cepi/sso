@@ -26,13 +26,14 @@ class Client extends \ModuleSSO
 
     /** @var \ModuleSSO\Client\LoginHelper $loginHelper */
     private $loginHelper = null;
-    
+
+    /** @var array $MAP */
     private static $MAP = array(
         ELHTTP\NoScriptLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\HTTP\NoScriptHelper',
         ELHTTP\IframeLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\HTTP\IframeHelper',
         ELOther\CORSLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\Other\CORSHelper',
         ELThirdParty\FacebookLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\ThirdParty\FacebookHelper',
-        ELThirdParty\GoogleLogin::METHOD_NUMBER => 'ModuleSSO\Client\LoginHelper\ThirdParty\GoogleHelper'
+        ELThirdParty\GoogleLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\ThirdParty\GoogleHelper'
         
     );
     
@@ -70,12 +71,10 @@ class Client extends \ModuleSSO
     {
         //load server path from db
         $base = CFG_DOMAIN_URL;
-        $rqu = "";
         if(!empty($_SERVER['REQUEST_URI'])) {
             $rqu = $_SERVER['REQUEST_URI'];
             $result = parse_url($rqu);
-            $path = "";
-            if(isset($result['path'])) {
+            if(!empty($result['path'])) {
                 $path = $result['path'];
                 return  $base . $path;
             } else {
@@ -125,6 +124,7 @@ class Client extends \ModuleSSO
         //config
         global $loginHelperPriorities;
         foreach ($loginHelperPriorities as $method) {
+            /** @var \ModuleSSO\Client\LoginHelper $loginHelper */
             $loginHelper = new $method;
             if($loginHelper->isSupported()) {
                  $this->loginHelper = $loginHelper;
@@ -143,6 +143,7 @@ class Client extends \ModuleSSO
             }
             return $str;
         }
+        return '';
     }
 
     public function appendScripts()

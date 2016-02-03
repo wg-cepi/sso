@@ -3,11 +3,11 @@ session_start();
 require_once 'Autoloader.php';
 
 use \ModuleSSO\EndPoint;
-use \ModuleSSO\LoginMethod\ClassicLogin\DirectLogin;
+use \ModuleSSO\EndPoint\LoginMethod\HTTP\DirectLogin;
 
 Database::init();
 $endPoint = new EndPoint();
-$endPoint->loginMethod = new DirectLogin();
+$endPoint->setLoginMethod(new DirectLogin());
 
 ?>
 

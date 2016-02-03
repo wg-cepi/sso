@@ -26,7 +26,7 @@ abstract class ThirdPartyLogin extends LoginMethod
             $query->execute();
             $user = $query->fetch();
             if($user) {
-                $this->setCookies($user['id']);
+                $this->setSSOCookie($user['id']);
                 
                 if($continueUrl !== CFG_SSO_ENDPOINT_URL) {
                     $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
@@ -55,7 +55,7 @@ abstract class ThirdPartyLogin extends LoginMethod
             $query = \Database::$pdo->prepare("INSERT INTO " . static::TABLE . " (user_id, " . static::TABLE_COLUMN . ", created) VALUES (" . $user['id'] . ", '$socialId', " . time() . ")");
             $query->execute();
 
-            $this->setCookies($user['id']);
+            $this->setSSOCookie($user['id']);
             
             if($continueUrl !== CFG_SSO_ENDPOINT_URL) {
                 $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
