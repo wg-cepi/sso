@@ -1,22 +1,15 @@
 <?php
 namespace ModuleSSO;
 
-use ModuleSSO\BrowserSniffer;
+use ModuleSSO\EndPoint\LoginMethod\HTTP as ELHTTP;
+use ModuleSSO\Client\LoginHelper\HTTP;
 
-use ModuleSSO\LoginMethod\ClassicLogin\NoScriptLogin;
-use ModuleSSO\ClientLoginMethod\ClientClassicLogin\ClientNoScriptLogin;
+use ModuleSSO\EndPoint\LoginMethod\Other as ELOther;
+use ModuleSSO\Client\LoginHelper\Other;
 
-use ModuleSSO\LoginMethod\ClassicLogin\IframeLogin;
-use ModuleSSO\ClientLoginMethod\ClientClassicLogin\ClientIframeLogin;
+use ModuleSSO\EndPoint\LoginMethod\ThirdParty as ELThirdParty;
+use ModuleSSO\Client\LoginHelper\ThirdParty;
 
-use ModuleSSO\LoginMethod\CORSLogin;
-use ModuleSSO\ClientLoginMethod\ClientCORSLogin;
-
-use ModuleSSO\LoginMethod\ThirdPartyLogin\FacebookLogin;
-use ModuleSSO\ClientLoginMethod\ClientThirdPartyLogin\ClientFacebookLogin;
-
-use ModuleSSO\LoginMethod\ThirdPartyLogin\GoogleLogin;
-use ModuleSSO\ClientLoginMethod\ClientThirdPartyLogin\ClientGoogleLogin;
 
 use Lcobucci\JWT\Signer\Keychain;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
@@ -31,8 +24,17 @@ class Client extends \ModuleSSO
     /** @var string $publicKey */
     private $publicKey = '';
 
-    /** @var LoginMethod $loginMethod */
-    private $loginMethod = null;
+    /** @var \ModuleSSO\Client\LoginHelper $loginHelper */
+    private $loginHelper = null;
+    
+    private static $MAP = array(
+        ELHTTP\NoScriptLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\HTTP\NoScriptHelper',
+        ELHTTP\IframeLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\HTTP\IframeHelper',
+        ELOther\CORSLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\Other\CORSHelper',
+        ELThirdParty\FacebookLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\ThirdParty\FacebookHelper',
+        ELThirdParty\GoogleLogin::METHOD_NUMBER => 'ModuleSSO\Client\LoginHelper\ThirdParty\GoogleHelper'
+        
+    );
     
     public function __construct($pubKeyPath = 'app/config/pk.pub')
     {
@@ -83,16 +85,21 @@ class Client extends \ModuleSSO
             return $base;
         }
     }
+    
+    public function setLoginHelper(Client\LoginHelper $loginHelper)
+    {
+        $this->loginHelper = $loginHelper;
+    }
 
     /**
-     * Sets $loginMethod according to parameter passed in $_GET
-     * If there is no parameter, Client::$loginMethod is according to config file
-     * Client::$loginMethod depends on capabilities of browser
+     * Sets $loginHelper according to parameter passed in $_GET
+     * If there is no parameter, Client::$loginHelper is according to config file
+     * Client::$loginHelper depends on capabilities of browser
      *
      * @link http://caniuse.com/#feat=cors
      *
      * @uses $_GET
-     * @uses Client::$loginMethod
+     * @uses Client::$loginHelper
      * @uses ModuleSSO
      * @uses NoScriptLogin
      * @uses IframeLogin
@@ -102,58 +109,54 @@ class Client extends \ModuleSSO
      * @uses DirectLogin
      *
      */
-    public function pickLoginMethod()
+    public function pickLoginHelper()
     {
         if(isset($_GET[\ModuleSSO::FORCED_METHOD_KEY])) {
-            $m = $_GET[\ModuleSSO::FORCED_METHOD_KEY];
-            if($m == NoScriptLogin::METHOD_NUMBER) {
-                $this->loginMethod = new ClientNoScriptLogin();
-            } else if($m == IframeLogin::METHOD_NUMBER) {
-                $this->loginMethod = new ClientIframeLogin();
-            } else if($m == CORSLogin::METHOD_NUMBER) {
-                $this->loginMethod = new ClientCORSLogin();
-            } else if($m == FacebookLogin::METHOD_NUMBER) {
-                $this->loginMethod = new ClientFacebookLogin();
-            } else if($m == GoogleLogin::METHOD_NUMBER) {
-                $this->loginMethod = new ClientGoogleLogin();
+            $key = $_GET[\ModuleSSO::FORCED_METHOD_KEY];
+            if(isset(self::$MAP[$key])) {
+                $class = self::$MAP[$key];
+                $this->loginHelper = new $class();
             } else {
-                 $this->loginMethod = new ClientNoScriptLogin();
+                $this->loginHelper = new HTTP\NoScriptHelper();
             }
             return;
         }
         
-        //CORS supported browsers
-        //http://caniuse.com/#feat=cors
-        $supportedBrowsers = array(
-            'chrome' => 31,
-            'ie' => 10,
-            'edge' => 12,
-            'firefox' => 37,
-            'safari' => 6.1,
-            'opera' => 12.1, 
-        );
-        
         //config
-        global $loginMethodPriorities;
-        foreach ($loginMethodPriorities as $method) {
-            if($method === 'cors') {
-                $browser = new BrowserSniffer();
-                if(isset($supportedBrowsers[$browser->getName()])) {
-                    if($browser->getVersion() >= $supportedBrowsers[$browser->getName()]) {
-                        $this->loginMethod = new ClientCORSLogin();
-                        break;
-                    }
-                }   
-            }
-            else if($method === 'iframe') {
-                $this->loginMethod = new ClientIframeLogin();
-                break;
-            }
-            else if($method === 'noscript') {
-                $this->loginMethod = new ClientNoScriptLogin();
-                break;
+        global $loginHelperPriorities;
+        foreach ($loginHelperPriorities as $method) {
+            $loginHelper = new $method;
+            if($loginHelper->isSupported()) {
+                 $this->loginHelper = $loginHelper;
+                 break;
             }
         } 
+    }
+
+    public function showMessages()
+    {
+        if(!empty($_SESSION[\ModuleSSO::MESSAGES_KEY])) {
+            $str = '';
+            foreach ($_SESSION[\ModuleSSO::MESSAGES_KEY] as $k => $message) {
+                $str .= '<div class="message ' . $message['class'] . '">' . $message['text'] . '</div>';
+                unset($_SESSION[\ModuleSSO::MESSAGES_KEY][$k]);
+            }
+            return $str;
+        }
+    }
+
+    public function appendScripts()
+    {
+        echo $this->loginHelper->appendScripts();
+    }
+
+    public function appendStyles()
+    {
+        echo $this->loginHelper->appendStyles();
+    }
+
+    public function showLogin() {
+        echo $this->loginHelper->showLogin($this->getContinueUrl());
     }
 
     /**
@@ -162,7 +165,7 @@ class Client extends \ModuleSSO
      * @uses $_GET
      * @uses ModuleSSO
      */
-    public function login() {
+    private function tokenListener() {
         if(isset($_GET[\ModuleSSO::TOKEN_KEY])) {
             $urlToken = $_GET[\ModuleSSO::TOKEN_KEY];
             try {
@@ -202,7 +205,7 @@ class Client extends \ModuleSSO
         }
     }
     
-    public function logout() {
+    private function logoutListener() {
         if(isset($_GET[\ModuleSSO::LOGOUT_KEY]) && $_GET[\ModuleSSO::LOGOUT_KEY] == 1) {
             unset($_SESSION["uid"]);
             header("Location: " . CFG_DOMAIN_URL);
@@ -216,40 +219,12 @@ class Client extends \ModuleSSO
     
     public function run()
     {
-        $this->login();
-        $this->logout();
+        $this->tokenListener();
+        $this->logoutListener();
     }
     
-    public function insertMessage($text, $class = 'success')
+    private function insertMessage($text, $class = 'success')
     {
         $_SESSION[\ModuleSSO::MESSAGES_KEY][] = array('class' => $class, 'text' => $text);
-    }
-    
-    public function showMessages()
-    {
-        if(!empty($_SESSION[\ModuleSSO::MESSAGES_KEY])) {
-            $str = '';
-            foreach ($_SESSION[\ModuleSSO::MESSAGES_KEY] as $k => $message) {
-                $str .= '<div class="message ' . $message['class'] . '">' . $message['text'] . '</div>';
-                unset($_SESSION[\ModuleSSO::MESSAGES_KEY][$k]);
-            }
-            return $str;
-        } else {
-            return;
-        }
-    }
-    
-    public function appendScripts()
-    {
-        echo $this->loginMethod->appendScripts();
-    }
-    
-    public function appendStyles()
-    {
-        echo $this->loginMethod->appendStyles();
-    }
-    
-    public function showLoginMethod() {
-        echo $this->loginMethod->showLogin($this->getContinueUrl());
     }
 }

@@ -18,9 +18,21 @@ define('CFG_G_CLIENT_ID', '851847042686-3n51ffn8p9jhnc83e50fve62tc7uaokq.apps.go
 define('CFG_G_CLIENT_SECRET', 'd5izoJR_c9o00xV9zmfOvYcx');
 define('CFG_G_REDIRECT_URI', 'http://localhost/googleLogin.php');
 
-global $loginMethodPriorities;
-$loginMethodPriorities = array(
-    'cors',
-    'iframe',
-    'noscript'
+global $loginHelperPriorities;
+$loginHelperPriorities = array(
+    '\ModuleSSO\Client\LoginHelper\Other\CORSHelper',
+    '\ModuleSSO\Client\LoginHelper\HTTP\IframeHelper',
+    '\ModuleSSO\Client\LoginHelper\HTTP\NoScriptHelper'
+);
+
+//CORS supported browsers
+//http://caniuse.com/#feat=cors
+global $CORSBrowsers;
+$CORSBrowsers = array(
+    'chrome' => 31,
+    'ie' => 10,
+    'edge' => 12,
+    'firefox' => 37,
+    'safari' => 6.1,
+    'opera' => 12.1, 
 );

@@ -1,10 +1,9 @@
 <?php
-namespace ModuleSSO\ClientLoginMethod\ClientClassicLogin;
+namespace ModuleSSO\Client\LoginHelper\HTTP;
 
-use ModuleSSO\ClientLoginMethod\ClientClassicLogin;
-use \ModuleSSO\LoginMethod\ClassicLogin\NoScriptLogin;
+use ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin;
 
-class ClientNoScriptLogin extends ClientClassicLogin
+class NoScriptHelper extends HTTPHelper
 {
     public function showLogin($continue = '')
     {

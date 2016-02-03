@@ -3,10 +3,11 @@ session_start();
 require_once 'Autoloader.php';
 
 use ModuleSSO\Client;
+use ModuleSSO\Client\LoginHelper\HTTP\NoScriptHelper;
 
 Database::init();
 $client = new Client();
-$client->pickLoginHelper();
+$client->setLoginHelper(new NoScriptHelper());
 $client->run();
 ?>
 
@@ -68,7 +69,7 @@ $client->run();
                                     </div>
                                     <div class="mdl-card__supporting-text">
                                         <ul class="user-info">
-                                            <li>ID: <?php echo $user['id'] ?></li>
+                                            <li id="id-user-id">ID: <?php echo $user['id'] ?></li>
                                             <li>First name: <?php echo $user['first_name'] ?></li>
                                             <li>Last name: <?php echo $user['last_name'] ?></li>
                                             <li>Email: <?php echo $user['email'] ?></li>
@@ -83,8 +84,6 @@ $client->run();
                                     -->
                                 </div>
                             </div>
-                            <?php else: ?>
-                                <noscript><meta http-equiv="refresh" content="0;url=noscript.php"></noscript>
                             <?php endif ?>
                         </section>
                         <section id="id-client-login">

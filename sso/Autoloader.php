@@ -4,6 +4,8 @@ define('PREFIX', __DIR__ . '/');
 
 global $dirs;
 $dirs = array(
+    PREFIX . 'app/',
+    /*
     PREFIX . 'app/ModuleSSO/',
     PREFIX . 'app/ModuleSSO/method/',
     PREFIX . 'app/ModuleSSO/method/3rd-party/',
@@ -15,18 +17,27 @@ $dirs = array(
     PREFIX . 'app/ModuleSSO/method/classic/noscript/',
     PREFIX . 'app/ModuleSSO/method/classic/iframe/',
     
-    PREFIX . 'app/ModuleSSO/method/cors/',
+    PREFIX . 'app/ModuleSSO/method/cors/',*/
+    
+    
+    PREFIX . 'app/ModuleSSO/',
+    PREFIX . 'app/ModuleSSO/Client/',
+    PREFIX . 'app/ModuleSSO/EndPoint/',
+    
+    PREFIX . 'app/ModuleSSO/EndPoint/LoginMethod/',
+    
+    PREFIX . 'app/ModuleSSO/EndPoint/LoginMethod/HTTP/',
+    PREFIX . 'app/ModuleSSO/EndPoint/LoginMethod/Other/',
+    PREFIX . 'app/ModuleSSO/EndPoint/LoginMethod/ThirdParty/',
+    
+    PREFIX . 'app/ModuleSSO/Client/LoginHelper/',
+    
+    PREFIX . 'app/ModuleSSO/Client/LoginHelper/HTTP/',
+    PREFIX . 'app/ModuleSSO/Client/LoginHelper/Other/',
+    PREFIX . 'app/ModuleSSO/Client/LoginHelper/ThirdParty/',
     
     
 );
-
-function autoLoadDatabase()
-{
-    $filename = PREFIX . "app/ModuleSSO/Database.php";
-    if (is_readable($filename) && file_exists($filename)) {
-        require_once ($filename);
-    }
-}
 function autoloadConfigAndUtils()
 {
     $filename = PREFIX . "app/config/config.php";
@@ -53,5 +64,4 @@ function autoloadModuleSSO($fullClassName) {
 }
 
 spl_autoload_register('autoloadConfigAndUtils');
-spl_autoload_register('autoLoadDatabase');
 spl_autoload_register('autoloadModuleSSO');

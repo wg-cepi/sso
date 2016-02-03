@@ -2,7 +2,7 @@
 session_start();
 require_once 'Autoloader.php';
 
-use ModuleSSO\LoginMethod\ThirdPartyLogin\FacebookLogin;
+use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
 
 Database::init();
 $loginMethod = new FacebookLogin();

@@ -1,7 +1,5 @@
 <?php
-namespace ModuleSSO\LoginMethod\ThirdPartyLogin;
-
-use ModuleSSO\LoginMethod\ThirdPartyLogin;
+namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 
 class FacebookLogin extends ThirdPartyLogin {
     
@@ -60,7 +58,7 @@ class FacebookLogin extends ThirdPartyLogin {
     }
     
     
-    public function login()
+    public function loginListener()
     {
         $continueUrl = $this->getContinueUrl();
         $_SESSION['continueUrl'] = $continueUrl;

@@ -1,10 +1,9 @@
 <?php
-namespace ModuleSSO\ClientLoginMethod\ClientClassicLogin;
+namespace ModuleSSO\Client\LoginHelper\HTTP;
 
-use ModuleSSO\ClientLoginMethod\ClientClassicLogin;
-use \ModuleSSO\LoginMethod\ClassicLogin\IframeLogin;
+use ModuleSSO\EndPoint\LoginMethod\HTTP\IframeLogin;
 
-class ClientIframeLogin extends ClientClassicLogin
+class IframeHelper extends HTTPHelper
 {
     public function showLogin($continue = '')
     {

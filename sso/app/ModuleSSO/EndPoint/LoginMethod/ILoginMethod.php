@@ -1,11 +1,11 @@
 <?php
-namespace ModuleSSO;
+namespace ModuleSSO\EndPoint;
 
 interface ILoginMethod
 {
     /*
      * Takes care of login process
      */
-    public function login();
+    public function loginListener();
 }
 

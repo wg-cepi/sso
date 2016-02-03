@@ -1,7 +1,7 @@
 <?php
-namespace ModuleSSO\LoginMethod;
+namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 
-use ModuleSSO\LoginMethod;
+use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\JWT;
 
 abstract class ThirdPartyLogin extends LoginMethod

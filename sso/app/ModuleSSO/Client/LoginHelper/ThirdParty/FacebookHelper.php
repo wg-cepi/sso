@@ -1,10 +1,9 @@
 <?php
-namespace ModuleSSO\ClientLoginMethod\ClientThirdPartyLogin;
+namespace ModuleSSO\Client\LoginHelper\ThirdParty;
 
-use ModuleSSO\ClientLoginMethod\ClientThirdPartyLogin;
-use ModuleSSO\LoginMethod\ThirdPartyLogin\FacebookLogin;
+use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
 
-class ClientFacebookLogin extends ClientThirdPartyLogin
+class FacebookHelper extends ThirdPartyHelper
 {
     public function showLogin($continue = '')
     {

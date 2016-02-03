@@ -1,9 +1,7 @@
 <?php
-namespace ModuleSSO\LoginMethod\ClassicLogin;
+namespace ModuleSSO\EndPoint\LoginMethod\HTTP;
 
-use ModuleSSO\LoginMethod\ClassicLogin;
-
-class DirectLogin extends ClassicLogin
+class DirectLogin extends HTTPLogin
 {
     public function redirect($url = CFG_SSO_ENDPOINT_URL, $code = 302)
     {

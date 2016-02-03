@@ -1,9 +1,7 @@
 <?php
-namespace ModuleSSO\LoginMethod\ClassicLogin;
+namespace ModuleSSO\EndPoint\LoginMethod\HTTP;
 
-use ModuleSSO\LoginMethod\ClassicLogin;
-
-class NoScriptLogin extends ClassicLogin
+class NoScriptLogin extends HTTPLogin
 {   
     const METHOD_NUMBER = 1;
     

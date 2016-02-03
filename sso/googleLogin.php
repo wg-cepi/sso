@@ -2,7 +2,7 @@
 session_start();
 require_once 'Autoloader.php';
 
-use ModuleSSO\LoginMethod\ThirdPartyLogin\GoogleLogin;
+use ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
 
 Database::init();
 $loginMethod = new GoogleLogin();

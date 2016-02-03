@@ -1,7 +1,7 @@
 <?php
-namespace ModuleSSO\LoginMethod;
+namespace ModuleSSO\EndPoint\LoginMethod\Other;
 
-use ModuleSSO\LoginMethod;
+use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\JWT;
 use ModuleSSO\Cookie;
 
@@ -9,7 +9,7 @@ class CORSLogin extends LoginMethod
 {
     const METHOD_NUMBER = 3;
     
-    public function checkCookie()
+    private function checkCookieListener()
     {
         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
         header('Access-Control-Allow-Credentials: true');
@@ -27,7 +27,7 @@ class CORSLogin extends LoginMethod
         }
     }
     
-    public function login()
+    public function loginListener()
     {
         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
         header('Content-Type: application/json');
@@ -52,20 +52,16 @@ class CORSLogin extends LoginMethod
         
     }
     
-    public function run()
+    public function perform()
     {
         if(isset($_SERVER['HTTP_ORIGIN'])){
             $parsed = parse_url($_SERVER['HTTP_ORIGIN']);
             if(isset($parsed['host'])) {
-                $query = \Database::$pdo->prepare("SELECT * FROM domains WHERE name = '" . $parsed['host'] . "'");
-                $query->execute();
-                $domain = $query->fetch();
-                if($domain) {
-                    $this->domain = $domain['name'];
+                if($this->isInWhiteList($parsed['host'])) {
                     if(isset($_GET[\ModuleSSO::LOGIN_KEY]) && $_GET[\ModuleSSO::LOGIN_KEY] == 1) {
-                        $this->login();
+                        $this->loginListener();
                     } else if(isset($_GET['checkCookie']) && $_GET['checkCookie'] == 1) {
-                        $this->checkCookie();
+                        $this->checkCookieListener();
                     }
                 } else {
                     //domain not allowed

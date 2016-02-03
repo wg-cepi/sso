@@ -6,7 +6,7 @@ use ModuleSSO\Client;
 
 Database::init();
 $client = new Client();
-$client->pickLoginMethod();
+$client->pickLoginHelper();
 $client->run();
 ?>
 
@@ -91,7 +91,7 @@ $client->run();
                             <div class="card-wrap">
                                 <?php 
                                 if (!isset($_SESSION['uid'])) {
-                                    $client->showLoginMethod();
+                                    $client->showLogin();
                                 }
                                 ?>
                             </div>

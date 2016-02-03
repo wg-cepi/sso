@@ -1,9 +1,9 @@
 <?php
-namespace ModuleSSO\ClientLoginMethod;
+namespace ModuleSSO\Client\LoginHelper\HTTP;
 
-use \ModuleSSO\ClientLoginMethod;
+use ModuleSSO\Client\LoginHelper;
 
-abstract class ClientClassicLogin extends ClientLoginMethod
+abstract class HTTPHelper extends LoginHelper
 {
     public function appendStyles()
     {

@@ -1,13 +1,13 @@
 <?php
-namespace ModuleSSO\LoginMethod;
+namespace ModuleSSO\EndPoint\LoginMethod\HTTP;
 
-use ModuleSSO\LoginMethod;
+use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\Cookie;
 use ModuleSSO\JWT;
 
-abstract class ClassicLogin extends LoginMethod
+abstract class HTTPLogin extends LoginMethod
 {
-    public function login()
+    public function loginListener()
     {
         $this->continueUrl = $this->getContinueUrl();
         if(isset($_GET['email']) && isset($_GET['password'])) {

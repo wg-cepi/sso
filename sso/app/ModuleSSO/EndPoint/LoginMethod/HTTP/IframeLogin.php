@@ -1,9 +1,8 @@
 <?php
-namespace ModuleSSO\LoginMethod\ClassicLogin;
+namespace ModuleSSO\EndPoint\LoginMethod\HTTP;
 
-use ModuleSSO\LoginMethod\ClassicLogin;
 
-class IframeLogin extends ClassicLogin
+class IframeLogin extends HTTPLogin
 {   
     const METHOD_NUMBER = 2;
     

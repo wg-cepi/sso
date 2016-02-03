@@ -1,9 +1,10 @@
 <?php
-namespace ModuleSSO\ClientLoginMethod;
+namespace ModuleSSO\Client\LoginHelper\Other;
 
-use ModuleSSO\ClientLoginMethod;
+use ModuleSSO\Client\LoginHelper;
+use ModuleSSO\BrowserSniffer;
 
-class ClientCORSLogin extends ClientLoginMethod
+class CORSHelper extends LoginHelper
 {
     public function showLogin($continue = '')
     {
@@ -45,6 +46,19 @@ class ClientCORSLogin extends ClientLoginMethod
     public function appendStyles()
     {
         return '<link rel="stylesheet" href="' . CFG_SSO_URL . '/css/styles.css">';
+    }
+    
+    public function isSupported()
+    {
+        global $CORSBrowsers;
+        $browser = new BrowserSniffer();
+        if(isset($CORSBrowsers[$browser->getName()])) {
+            if($browser->getVersion() >= $CORSBrowsers[$browser->getName()]) {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
     
 }

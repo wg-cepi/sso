@@ -1,10 +1,9 @@
 <?php
-namespace ModuleSSO\ClientLoginMethod\ClientThirdPartyLogin;
+namespace ModuleSSO\Client\LoginHelper\ThirdParty;
 
-use ModuleSSO\ClientLoginMethod\ClientThirdPartyLogin;
-use ModuleSSO\LoginMethod\ThirdPartyLogin\GoogleLogin;
+use ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
 
-class ClientGoogleLogin extends ClientThirdPartyLogin
+class GoogleHelper extends ThirdPartyHelper
 {
     public function showLogin($continue = '')
     {

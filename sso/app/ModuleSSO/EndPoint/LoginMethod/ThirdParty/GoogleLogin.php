@@ -1,8 +1,5 @@
 <?php
-
-namespace ModuleSSO\LoginMethod\ThirdPartyLogin;
-
-use ModuleSSO\LoginMethod\ThirdPartyLogin;
+namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 
 class GoogleLogin extends ThirdPartyLogin {
     
@@ -20,7 +17,7 @@ class GoogleLogin extends ThirdPartyLogin {
         $this->google->setRedirectUri(CFG_G_REDIRECT_URI);
     }
     
-    public function login()
+    public function loginListener()
     {
         $_SESSION['continueUrl'] = $this->getContinueUrl();
         $this->google->setScopes('email');

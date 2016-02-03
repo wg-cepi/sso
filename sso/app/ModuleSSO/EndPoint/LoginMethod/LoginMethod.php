@@ -1,5 +1,5 @@
 <?php
-namespace ModuleSSO;
+namespace ModuleSSO\EndPoint;
 
 use ModuleSSO\Cookie;
 
@@ -50,57 +50,37 @@ abstract class LoginMethod implements ILoginMethod
         }
     }
     
-    public function run()
+    public function perform()
     {
-        $this->login();
-        $this->logout();
+        $this->loginListener();
+        $this->logoutListener();
     }
     
         
     public function getContinueUrl($continue = null)
     {
+        $returnUrl = $url = CFG_SSO_ENDPOINT_URL;
         if($continue) {
-            $parsed = parse_url($continue);
-            if(!empty($parsed['host'])) {
-                if($this->isInWhitelist($parsed['host'])) {
-                    return $continue;
-                } else {
-                    return CFG_SSO_ENDPOINT_URL;
-                }
-            } else {
-                return CFG_SSO_ENDPOINT_URL;
-            }
-        }
-        if(isset($_GET[\ModuleSSO::CONTINUE_KEY])) {
+            $url = $continue;
+        } else if(isset($_GET[\ModuleSSO::CONTINUE_KEY])) {
             $url = $_GET[\ModuleSSO::CONTINUE_KEY];
-            $parsed = parse_url($url);
-            if(!empty($parsed['host'])) {
-                if($this->isInWhitelist($parsed['host'])) {
-                    return $url;
-                } else {
-                    return CFG_SSO_ENDPOINT_URL;
-                }
-            } else {
-                return CFG_SSO_ENDPOINT_URL;
-            }
         } else if(isset($_SERVER['HTTP_REFERER'])) {
             $url = $_SERVER['HTTP_REFERER'];
-            $parsed = parse_url($url);
-            if(!empty($parsed['host'])) {
-                if($this->isInWhitelist($parsed['host'])) {
-                    return $url;
-                } else {
-                    return CFG_SSO_ENDPOINT_URL;
+        }
+
+        $parsed = parse_url($url);
+        if(!empty($parsed['host']) && !empty($parsed['scheme'])) {
+            if ($this->isInWhiteList($parsed['host'])) {
+                $returnUrl = $parsed['scheme'] . '://' . $parsed['host'];
+                if(!empty($parsed['path'])) {
+                    $returnUrl .= $parsed['path'];
                 }
-            } else {
-                return CFG_SSO_ENDPOINT_URL;
             }
-        } else {
-            return CFG_SSO_ENDPOINT_URL;
-        }  
+        }
+        return $returnUrl;
     }
     
-    public function isInWhitelist($domainName)
+    public function isInWhiteList($domainName)
     {
         //find root domain
         $exploded = explode(".", $domainName);
@@ -108,7 +88,6 @@ abstract class LoginMethod implements ILoginMethod
         $main = array_pop($exploded);
         
         $domainName = $main . "." . $tld;
-        \Logger::log($domainName);
         $query = \Database::$pdo->prepare("SELECT * FROM domains WHERE name = '$domainName'");
         $query->execute();
         $domain = $query->fetch();
@@ -125,7 +104,7 @@ abstract class LoginMethod implements ILoginMethod
         
     }
     
-    public function logout()
+    public function logoutListener()
     {
         if(isset($_GET[\ModuleSSO::LOGOUT_KEY]) && $_GET[\ModuleSSO::LOGOUT_KEY] == 1) {
             session_destroy();
