@@ -9,6 +9,9 @@ class Cookie
 
     /**
      * Generates base64-encoded hash from input parameter and pseudo browser fingerprint
+     *
+     * @uses BrowserSniffer::getFingerprint()
+     *
      * @param $userId
      * @return string
      * @throws \Exception

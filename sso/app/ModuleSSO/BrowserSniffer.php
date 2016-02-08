@@ -4,16 +4,32 @@ namespace ModuleSSO;
 use phpbrowscap\Browscap;
 
 class BrowserSniffer
-{  
+{
+    /**
+     * @var string TMP_DIR Directory for Browscap cache
+     */
     const TMP_DIR = 'C:\wamp\tmp';
+
+    /**
+     * @var Browscap $browscap
+     */
     public static $browscap = null;
+
+    /**
+     * Initializes whole sniffer
+     * @param string $path Optional parameter of directory with cached browser information
+     */
     public static function init($path = self::TMP_DIR)
     {
         self::$browscap = new Browscap($path);
+
+        //very time and memory consuming process, does not have to be done every time
         self::$browscap->doAutoUpdate = false;
     }
+
     /**
-     * 
+     * Returns version of the browser
+     *
      * @return string
      * @throws \Exception
      */
@@ -33,7 +49,8 @@ class BrowserSniffer
     }
     
     /**
-     * Vraci nazev prohlizece v kratke forme, napr. 'chrome', 'firefox'
+     * Returns name of the browser in short form, eg. 'chrome', 'firefox'
+     *
      * @return string
      * @throws \Exception
      */
@@ -52,7 +69,10 @@ class BrowserSniffer
     }
     
     /**
-     * Ladici vypis informaci o prohlizeci
+     * Debug output
+     *
+     * @return string
+     * @throws \Exception
      */
     public static function dump()
     {
@@ -67,8 +87,10 @@ class BrowserSniffer
     }
     
     /**
-     * Vraci 1, pokud je zarizeni mobil nebo tablet. Jinak vraci 0.
+     * Method returns 1 if browsing device is mobile or tablet, otherwise returns 0
+     *
      * @return int
+     * @throws \Exception
      */
     public static function isMobileOrTablet()
     {
@@ -94,8 +116,10 @@ class BrowserSniffer
     }
     
     /**
-     * 
-     * @return string spojeny z IP adresy, jazyka prohlizece a nazvu prohlizece
+     * Returns pseudo-fingerprint of browser
+     *
+     * @return string concatenation of IP address, browser language and browser name
+     * @throws \Exception
      */
     public static function getFingerprint()
     {
@@ -106,7 +130,6 @@ class BrowserSniffer
         $lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '';
         
         //browser info
-        $name = '';
         if(self::$browscap) {
             $info = self::$browscap->getBrowser(null, true);
             $name = isset($info['browser_name']) ? $info['browser_name'] : '';
@@ -117,4 +140,3 @@ class BrowserSniffer
         return $ip . $lang . $name;
     }
 }
-BrowserSniffer::init();

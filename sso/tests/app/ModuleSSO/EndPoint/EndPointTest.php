@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: yadmin
- * Date: 03.02.2016
- * Time: 17:59
- */
 class EndPointTest extends PHPUnit_Framework_TestCase
 {
 

@@ -9,7 +9,6 @@ abstract class HTTPLogin extends LoginMethod
 {
     public function loginListener()
     {
-        $this->continueUrl = $this->getContinueUrl();
         if(isset($_GET['email']) && isset($_GET['password'])) {
             $email =  $_GET['email'];
             $password =  $_GET['password'];
@@ -18,7 +17,7 @@ abstract class HTTPLogin extends LoginMethod
             $query->execute(array($email, $password));
             $user = $query->fetch();
             if($user) {
-                $this->setSSOCookie($user['id']);
+                $this->setAndUpdateSSOCookie($user['id']);
                 $this->generateTokenAndRedirect($user);
             } else {
                 echo $this->showHTMLLoginForm();
@@ -123,7 +122,7 @@ abstract class HTTPLogin extends LoginMethod
     {
         $url = $this->continueUrl;
         if($this->continueUrl !== CFG_SSO_ENDPOINT_URL) {
-            $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
+            $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
             $url .=  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
         }
         $this->redirect($url);

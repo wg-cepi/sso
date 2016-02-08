@@ -2,9 +2,11 @@
 session_start();
 require_once 'Autoloader.php';
 
-use ModuleSSO\Client;
+use \ModuleSSO\Client;
+use \ModuleSSO\BrowserSniffer;
 
 Database::init();
+BrowserSniffer::init();
 $client = new Client();
 $client->pickLoginHelper();
 $client->run();

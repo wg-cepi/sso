@@ -4,7 +4,10 @@ require_once 'Autoloader.php';
 
 use \ModuleSSO\EndPoint;
 use \ModuleSSO\EndPoint\LoginMethod\HTTP\DirectLogin;
+use \ModuleSSO\BrowserSniffer;
 
+
+BrowserSniffer::init();
 Database::init();
 $endPoint = new EndPoint();
 $endPoint->setLoginMethod(new DirectLogin());

@@ -3,13 +3,6 @@ namespace ModuleSSO\EndPoint\LoginMethod\HTTP;
 
 class DirectLogin extends HTTPLogin
 {
-    public function redirect($url = CFG_SSO_ENDPOINT_URL, $code = 302)
-    {
-        http_response_code($code);
-        header("Location: " . $url);
-        exit;
-    }
-    
     public function showHTMLLoginForm()
     {
         $str = $this->showHTMLHeader();
@@ -50,7 +43,7 @@ class DirectLogin extends HTTPLogin
     
     public function generateTokenAndRedirect($user)
     {
-        $this->redirect($this->continueUrl); 
+        $this->redirect($this->getContinueUrl());
     }
  
 }

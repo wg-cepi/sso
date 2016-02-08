@@ -151,17 +151,30 @@ class Client extends \ModuleSSO
         echo $this->loginHelper->appendScripts();
     }
 
+    /**
+     * Method for appending CSS styles to HTML
+     *
+     * @return string
+     *
+     * @uses LoginHelper::appendStyles()
+     */
     public function appendStyles()
     {
         echo $this->loginHelper->appendStyles();
     }
 
+    /**
+     * Shows login form HTML of current loginHelper
+     * @return string
+     *
+     * @uses LoginHelper::showLogin()
+     */
     public function showLogin() {
         echo $this->loginHelper->showLogin($this->getContinueUrl());
     }
 
     /**
-     * Parses token given in $_GET and creates local context for user (logs user in)
+     * Waits for token given in $_GET, parses it and creates local context for user (logs user in)
      *
      * @uses $_GET
      * @uses ModuleSSO
@@ -173,7 +186,8 @@ class Client extends \ModuleSSO
                 $token = (new Parser())->parse((string) $urlToken);
                 $signer = new Sha256();
                 $keychain = new Keychain();
-            
+
+                //check if token is signed and not expired
                 if($token->verify($signer, $keychain->getPublicKey($this->publicKey)) && $token->getClaim('exp') > time()) {
                     $query = \Database::$pdo->prepare("SELECT * FROM tokens WHERE value = '$urlToken' AND used = 0");
                     $query->execute();
@@ -191,7 +205,6 @@ class Client extends \ModuleSSO
                             exit();
                         }
                     }
-                    
                 } else {
                     $this->insertMessage('Login failed, please try again', 'warn');
                     header("Location: " .  $this->getContinueUrl());
@@ -205,7 +218,11 @@ class Client extends \ModuleSSO
             
         }
     }
-    
+
+    /**
+     * Handles local logout and SSO (global) logout
+     * Redirects user to specific logout URL
+     */
     private function logoutListener() {
         if(isset($_GET[\ModuleSSO::LOGOUT_KEY]) && $_GET[\ModuleSSO::LOGOUT_KEY] == 1) {
             unset($_SESSION["uid"]);
@@ -217,13 +234,25 @@ class Client extends \ModuleSSO
             exit();
         }
     }
-    
+
+    /**
+     * Starts lifecycle of Client
+     *
+     * @uses Client::tokenListener()
+     * @uses Client::logoutListener()
+     */
     public function run()
     {
         $this->tokenListener();
         $this->logoutListener();
     }
-    
+
+    /**
+     * Inserts message into $_SESSION
+     *
+     * @param string $text Body of the message
+     * @param string $class HTML class attribute of message for CSS
+     */
     private function insertMessage($text, $class = 'success')
     {
         $_SESSION[\ModuleSSO::MESSAGES_KEY][] = array('class' => $class, 'text' => $text);

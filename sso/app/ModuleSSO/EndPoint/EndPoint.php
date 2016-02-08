@@ -59,7 +59,7 @@ class EndPoint extends \ModuleSSO
     /**
      * Returns link to CSS file depending on type of EndPoint::$loginMethod
      *
-     * @see \ModuleSSO\EndPoint\LoginMethod
+     * @uses \ModuleSSO\EndPoint\LoginMethod
      * @return string
      */
     public function appendStyles()
@@ -68,18 +68,27 @@ class EndPoint extends \ModuleSSO
     }
 
     /**
-     * @see \ModuleSSO\EndPoint\LoginMethod::perform()
+     * Starts lifecycle of EndPoint
+     * @uses \ModuleSSO\EndPoint\LoginMethod::perform()
      */
     public function run()
     {
         $this->loginMethod->perform();
     }
 
+    /**
+     * Returns login method
+     * @return LoginMethod
+     */
     public function getLoginMethod()
     {
         return $this->loginMethod;
     }
 
+    /**
+     * Sets login method
+     * @param LoginMethod $loginMethod
+     */
     public function setLoginMethod(LoginMethod $loginMethod)
     {
         $this->loginMethod = $loginMethod;

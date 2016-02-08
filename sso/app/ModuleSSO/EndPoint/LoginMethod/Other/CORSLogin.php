@@ -19,10 +19,10 @@ class CORSLogin extends LoginMethod
         } else {
             $user = $this->getUserFromCookie();
             if($user) {
-                $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
+                $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
                 echo '{"status": "ok", "' . \ModuleSSO::TOKEN_KEY . '": "' . $token . '", "email": "' . $user['email'] .'"}';
             } else {
-                echo '{"status": "bad_cookie"}';
+                echo json_encode(array("status" => "fail", 'code' => 'bad_cookie'));
             }
         }
     }
@@ -38,18 +38,16 @@ class CORSLogin extends LoginMethod
             $query->execute(array($_GET['email'], $_GET['password']));
             $user = $query->fetch();
             if($user) {
-                $this->setSSOCookie($user['id']);
-                $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
+                $this->setAndUpdateSSOCookie($user['id']);
+                $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
 
                 echo '{"status": "ok", "' . \ModuleSSO::TOKEN_KEY . '": "' . $token . '"}';
             } else {
-                echo json_encode(array("status" => "user_not_found"));
+                echo json_encode(array("status" => "fail", "code" => "user_not_found"));
             }
         } else {
-            echo json_encode(array("status" => "bad_login"));
+            echo json_encode(array("status" => "fail", "code" => "bad_login"));
         }
-
-        
     }
     
     public function perform()
@@ -65,10 +63,15 @@ class CORSLogin extends LoginMethod
                     }
                 } else {
                     //domain not allowed
+                    echo json_encode(array("status" => "fail", "code" => "domain_not_allowed"));
                 }
             } else {
-                //
+                //URL does not contain host
+                echo json_encode(array("status" => "fail", "code" => "bad_continue_url"));
             }
+        } else {
+            //probably won't reach this because of Same origin policy
+            echo json_encode(array("status" => "fail", "code" => "http_origin_not_set"));
         }
         
     }

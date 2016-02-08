@@ -12,6 +12,7 @@ class JWTTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         \Database::init();
+        \ModuleSSO\BrowserSniffer::init();
         $this->publicKey = file_get_contents('app/../../domain1/app/config/pk.pub');
     }
     public function testGenerateSimpleConstructor()

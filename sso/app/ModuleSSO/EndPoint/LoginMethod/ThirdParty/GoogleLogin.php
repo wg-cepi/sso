@@ -6,6 +6,7 @@ class GoogleLogin extends ThirdPartyLogin {
     const METHOD_NUMBER = 5;
     const TABLE = 'user_login_google';
     const TABLE_COLUMN = 'google_id';
+    const ACCESS_TOKEN_KEY = 'google_access_token';
     
     private $google;
     
@@ -19,31 +20,27 @@ class GoogleLogin extends ThirdPartyLogin {
     
     public function loginListener()
     {
-        $_SESSION['continueUrl'] = $this->getContinueUrl();
+        $_SESSION[\ModuleSSO::CONTINUE_KEY] = $this->getContinueUrl();
         $this->google->setScopes('email');
-        
-        $_SESSION['google_access_token'] = $this->google->getAccessToken();
+
+        $_SESSION[self::ACCESS_TOKEN_KEY] = $this->google->getAccessToken();
         $loginUrl = $this->google->createAuthUrl();
         $this->redirect($loginUrl);
     }
     
     public function redirectAndLogin()
     {
-        $url = isset($_SESSION['continueUrl']) ? $_SESSION['continueUrl'] : CFG_SSO_ENDPOINT_URL;
-        $continueUrl = $this->getContinueUrl($url);
+        $this->continueUrlListener();
         if(isset($_GET['code'])) {
             try {
                 $this->google->authenticate($_GET['code']);
-                //$_SESSION['google_access_token'] = $this->google->getAccessToken();
-                //$this->google->setAccessToken($_SESSION['google_access_token']);
                 if ($this->google->getAccessToken()) {
-                    //$_SESSION['google_access_token'] = $this->google->getAccessToken();
                     $tokenData = $this->google->verifyIdToken()->getAttributes();
                     $gEmail = $tokenData['payload']['email'];
                     $plus = new \Google_Service_Plus($this->google);
                     $gId = $plus->people->get('me')['id'];
-                    
-                    $this->redirectWithToken($gId, $gEmail, $continueUrl);
+
+                    $this->redirectWithToken($gId, $gEmail);
                 }
             } catch (\Exception $e) {
                 echo $e->getMessage();

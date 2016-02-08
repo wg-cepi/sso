@@ -4,15 +4,94 @@ namespace ModuleSSO\EndPoint;
 use ModuleSSO\Cookie;
 
 abstract class LoginMethod implements ILoginMethod
-{   
+{
+    /**
+     * Domain where the login request started
+     * @var string $domain
+     */
     public $domain = CFG_JWT_ISSUER;
-    public $continueUrl = '';
+
+    /**
+     * URL where user should continue after login
+     * @var string $continueUrl
+     */
+    public $continueUrl = CFG_SSO_ENDPOINT_URL;
+
+    /**
+     * Return domain
+     * @return string
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * Returns continueUrl
+     * @return string
+     */
+    public function getContinueUrl()
+    {
+        return $this->continueUrl;
+    }
+
+    /**
+     * @param string $url URL where user will be redirected
+     * @param int $code header HTTP code for temporary redirect
+     * @return mixed
+     */
+    public function redirect($url = CFG_SSO_ENDPOINT_URL, $code = 302)
+    {
+        http_response_code($code);
+        header("Location: " . $url);
+        exit;
+    }
+
+
+    /**
+     * Method for appending JavaScript scripts to HTML
+     * Overwritten in child classes
+     *
+     * @return string
+     */
+    public function appendScripts()
+    {
+        return '';
+    }
+
+    /**
+     * Method for appending CSS styles to HTML
+     * Overwritten in child classes
+     *
+     * @return string
+     */
+    public function appendStyles()
+    {
+        return '<link rel="stylesheet" href="css/styles.css">';
+    }
+
+    /**
+     * Waits for specific $_GET parameter and performs logout action by destroying session.
+     * After that redirects user back to where he came from.
+     */
+    public function logoutListener()
+    {
+        if(isset($_GET[\ModuleSSO::LOGOUT_KEY]) && $_GET[\ModuleSSO::LOGOUT_KEY] == 1) {
+            session_destroy();
+            $this->unsetSSOCookie();
+            $this->redirect($this->getContinueUrl());
+        }
+    }
 
     /**
      * Sets and updates SSO cookie
+     * SSO cookie is updated every time when user accesses login URL
+     *
+     * @uses Cookie::generateHash()
+     *
      * @param $userId
      */
-    public function setSSOCookie($userId)
+    protected function setAndUpdateSSOCookie($userId)
     { 
         $identifier = md5(Cookie::SALT . md5(Cookie::generateHash($userId) . Cookie::SALT));
         $token = md5(uniqid(rand(), TRUE));
@@ -24,16 +103,22 @@ abstract class LoginMethod implements ILoginMethod
         $query->execute();
     }
 
-
     /**
-     *
      * Unsets SSO cookie
      */
-    public function unsetCookies()
+    public function unsetSSOCookie()
     {
         setcookie(Cookie::SECURE_SSO_COOKIE, null, -1, '/');
     }
-    
+
+
+    /**
+     * Method tries to obtain a user from database by identified stored in SSO cookie
+     *
+     * @return mixed|null Returns either user or null
+     *
+     * @uses LoginMethod::setAndUpdateSSOCookie()
+     */
     public function getUserFromCookie()
     {
         if(isset($_COOKIE[Cookie::SECURE_SSO_COOKIE])) {
@@ -42,7 +127,7 @@ abstract class LoginMethod implements ILoginMethod
             $query->execute();
             $user = $query->fetch();
             if($user) {
-                $this->setSSOCookie($user['id']);
+                $this->setAndUpdateSSOCookie($user['id']);
                 return $user;
             } else {
                 return null;
@@ -51,21 +136,37 @@ abstract class LoginMethod implements ILoginMethod
             return null;
         }
     }
-    
+
+
+    /**
+     * Starts lifecycle of LoginMethod
+     *
+     * @uses LoginMethod::continueUrlListener()
+     * @uses LoginMethod::loginListener()
+     * @uses LoginMethod::logoutListener()
+     */
     public function perform()
     {
+        $this->continueUrlListener();
         $this->loginListener();
         $this->logoutListener();
     }
-    
-        
-    public function getContinueUrl($continue = null)
+
+
+    /**
+     * Obtains continue parameter from $_GET, $_SESSION or $_SERVER['HTTP_REFERER']
+     * Continue parameter is validated and $continueUrl and  $domain are set
+     *
+     * @uses LoginMethod::isInWhiteList()
+     * @uses LoginMethod::setContinueUrl()
+     */
+    public function continueUrlListener()
     {
         $returnUrl = $url = CFG_SSO_ENDPOINT_URL;
-        if($continue) {
-            $url = $continue;
-        } else if(isset($_GET[\ModuleSSO::CONTINUE_KEY])) {
+        if(isset($_GET[\ModuleSSO::CONTINUE_KEY])) {
             $url = $_GET[\ModuleSSO::CONTINUE_KEY];
+        } else if(isset($_SESSION[\ModuleSSO::CONTINUE_KEY])) {
+            $url = $_SESSION[\ModuleSSO::CONTINUE_KEY];
         } else if(isset($_SERVER['HTTP_REFERER'])) {
             $url = $_SERVER['HTTP_REFERER'];
         }
@@ -79,45 +180,69 @@ abstract class LoginMethod implements ILoginMethod
                 }
             }
         }
-        return $returnUrl;
+        $this->setContinueUrl($returnUrl);
+
+        //clear session
+        unset($_SESSION[\ModuleSSO::CONTINUE_KEY]);
     }
-    
-    public function isInWhiteList($domainName)
+
+    /**
+     * Checks if domain exists in database. If so, method sets domain property to that value otherwise domain value is untouched
+     *
+     * @uses LoginMethod::setDomain()
+     *
+     * @param string $domainName Domain extracted from $continueUrl
+     * @return bool
+     */
+    protected function isInWhiteList($domainName)
     {
+        $fullDomainName = $domainName;
+
         //find root domain
         $exploded = explode(".", $domainName);
         $tld = array_pop($exploded);
         $main = array_pop($exploded);
-        
         $domainName = $main . "." . $tld;
-        $query = \Database::$pdo->prepare("SELECT * FROM domains WHERE name = '$domainName'");
+
+        //check if full domain matches
+        $query = \Database::$pdo->prepare("SELECT * FROM domains WHERE name= '$fullDomainName'");
         $query->execute();
         $domain = $query->fetch();
         if($domain) {
-            $this->domain = $domain['name'];
+            $this->setDomain($domain['name']);
             return true;
         } else {
-            return false;
+            if($domainName !== $fullDomainName) {
+                //check if root domain matches
+                $query = \Database::$pdo->prepare("SELECT * FROM domains WHERE name= '$domainName'");
+                $query->execute();
+                $domain = $query->fetch();
+                if($domain) {
+                    $this->setDomain($domain['name']);
+                    return true;
+                }
+            }
         }
+        return false;
     }
-    
-    public function appendScripts()
+
+    /**
+     * Sets domain
+     * @param string $domain
+     */
+    private function setDomain($domain)
     {
-        
+        $this->domain = $domain;
     }
-    
-    public function logoutListener()
+
+    /**
+     * Sets continue URL
+     * @param string $url
+     */
+    private function setContinueUrl($url)
     {
-        if(isset($_GET[\ModuleSSO::LOGOUT_KEY]) && $_GET[\ModuleSSO::LOGOUT_KEY] == 1) {
-            session_destroy();
-            $this->unsetCookies();
-            $this->redirect($this->getContinueUrl());
-        }
+        $this->continueUrl = $url;
     }
-    
-    public function appendStyles()
-    {
-        return '<link rel="stylesheet" href="css/styles.css">';
-    }
-    
+
+
 }

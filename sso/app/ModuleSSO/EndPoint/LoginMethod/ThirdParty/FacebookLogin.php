@@ -1,6 +1,9 @@
 <?php
 namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 
+use Facebook\Facebook;
+use Facebook\Exceptions;
+
 class FacebookLogin extends ThirdPartyLogin {
     
     const METHOD_NUMBER = 4;
@@ -12,7 +15,7 @@ class FacebookLogin extends ThirdPartyLogin {
     
     public function __construct()
     {
-       $this->facebook = new \Facebook\Facebook([
+       $this->facebook = new Facebook([
             'app_id' => CFG_FB_APP_ID,
             'app_secret' => CFG_FB_APP_SECRET,
             'default_graph_version' => 'v2.2',
@@ -23,8 +26,7 @@ class FacebookLogin extends ThirdPartyLogin {
     
     public function redirectAndLogin()
     {
-        $url = isset($_SESSION['continueUrl']) ? $_SESSION['continueUrl'] : CFG_SSO_ENDPOINT_URL;
-        $continueUrl = $this->getContinueUrl($url);
+        $this->continueUrlListener();
         try {
             $accessToken =$this->helper->getAccessToken();
             $this->facebook->setDefaultAccessToken((string)$accessToken);
@@ -35,22 +37,22 @@ class FacebookLogin extends ThirdPartyLogin {
                 $fbId = $userNode->getId();
                 $fbEMail = $userNode->getEmail();
               
-               $this->redirectWithToken($fbId, $fbEMail, $continueUrl);
+               $this->redirectWithToken($fbId, $fbEMail);
                 
-            } catch(\Facebook\Exceptions\FacebookResponseException $e) {
+            } catch(Exceptions\FacebookResponseException $e) {
                 // When Graph returns an error
                 echo 'Graph returned an error: ' . $e->getMessage();
                 exit;
-            } catch(\Facebook\Exceptions\FacebookSDKException $e) {
+            } catch(Exceptions\FacebookSDKException $e) {
                 // When validation fails or other local issues
                 echo 'Facebook SDK returned an error: ' . $e->getMessage();
                 exit;
             }
-        } catch(\Facebook\Exceptions\FacebookResponseException $e) {
+        } catch(Exceptions\FacebookResponseException $e) {
             // When Graph returns an error
             echo 'Graph returned an error: ' . $e->getMessage();
             exit;
-        } catch(\Facebook\Exceptions\FacebookSDKException $e) {
+        } catch(Exceptions\FacebookSDKException $e) {
             // When validation fails or other local issues
             echo 'Facebook SDK returned an error: ' . $e->getMessage();
             exit;
@@ -60,10 +62,9 @@ class FacebookLogin extends ThirdPartyLogin {
     
     public function loginListener()
     {
-        $continueUrl = $this->getContinueUrl();
-        $_SESSION['continueUrl'] = $continueUrl;
+        $_SESSION[\ModuleSSO::CONTINUE_KEY] = $this->getContinueUrl();
         $permissions = ['email'];
-        $loginUrl = $this->helper->getLoginUrl(CFG_FB_LOGIN_ENDPOINT . '?' . \ModuleSSO::CONTINUE_KEY . '=' . $continueUrl, $permissions);
+        $loginUrl = $this->helper->getLoginUrl(CFG_FB_LOGIN_ENDPOINT . '?' . \ModuleSSO::CONTINUE_KEY . '=' . $this->getContinueUrl(), $permissions);
         $this->redirect($loginUrl);
     }
 }

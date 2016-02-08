@@ -13,7 +13,7 @@ abstract class ThirdPartyLogin extends LoginMethod
         exit;
     }
     
-    public function redirectWithToken($socialId, $socialEmail, $continueUrl) {
+    public function redirectWithToken($socialId, $socialEmail) {
          //try to find user in facebook login pair table
         $query = \Database::$pdo->prepare("SELECT * FROM " . static::TABLE . " WHERE " . static::TABLE_COLUMN . " = '$socialId'");
         $query->execute();
@@ -26,19 +26,20 @@ abstract class ThirdPartyLogin extends LoginMethod
             $query->execute();
             $user = $query->fetch();
             if($user) {
-                $this->setSSOCookie($user['id']);
-                
-                if($continueUrl !== CFG_SSO_ENDPOINT_URL) {
-                    $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
+                $this->setAndUpdateSSOCookie($user['id']);
 
-                    $query = \ModuleSSO::TOKEN_KEY . '=' . $token; 
-                    $continueUrl = $continueUrl .  "?" . $query;
+                $redirectUrl = $this->getContinueUrl();
+                if($redirectUrl !== CFG_SSO_ENDPOINT_URL) {
+                    $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
+
+                    $query = \ModuleSSO::TOKEN_KEY . '=' . $token;
+                    $redirectUrl = $redirectUrl .  "?" . $query;
                 }
-                $this->redirect($continueUrl);
+                $this->redirect($redirectUrl);
             } else {
                 $data = array(
-                    \ModuleSSO::METHOD_KEY => self::METHOD_NUMBER,
-                    \ModuleSSO::CONTINUE_KEY => $continueUrl
+                    \ModuleSSO::METHOD_KEY => static::METHOD_NUMBER,
+                    \ModuleSSO::CONTINUE_KEY => $this->getContinueUrl()
                     );
                 $query = http_build_query($data);
                 $this->redirect(CFG_SSO_ENDPOINT_URL . '?' .  $query);
@@ -55,13 +56,14 @@ abstract class ThirdPartyLogin extends LoginMethod
             $query = \Database::$pdo->prepare("INSERT INTO " . static::TABLE . " (user_id, " . static::TABLE_COLUMN . ", created) VALUES (" . $user['id'] . ", '$socialId', " . time() . ")");
             $query->execute();
 
-            $this->setSSOCookie($user['id']);
-            
-            if($continueUrl !== CFG_SSO_ENDPOINT_URL) {
-                $token = (new JWT($this->domain))->generate(array('uid' => $user['id']));
-                $continueUrl = $continueUrl .  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
+            $this->setAndUpdateSSOCookie($user['id']);
+
+            $redirectUrl = $this->getContinueUrl();
+            if($redirectUrl !== CFG_SSO_ENDPOINT_URL) {
+                $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
+                $redirectUrl = $redirectUrl .  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
             }
-             $this->redirect($continueUrl);
+             $this->redirect($redirectUrl);
         }
     }
 }
