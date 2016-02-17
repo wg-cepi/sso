@@ -10,6 +10,7 @@ use ModuleSSO\Client\LoginHelper\Other;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty as ELThirdParty;
 use ModuleSSO\Client\LoginHelper\ThirdParty;
 
+use ModuleSSO\Messages;
 
 use Lcobucci\JWT\Signer\Keychain;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
@@ -133,19 +134,6 @@ class Client extends \ModuleSSO
         } 
     }
 
-    public function showMessages()
-    {
-        if(!empty($_SESSION[\ModuleSSO::MESSAGES_KEY])) {
-            $str = '';
-            foreach ($_SESSION[\ModuleSSO::MESSAGES_KEY] as $k => $message) {
-                $str .= '<div class="message ' . $message['class'] . '">' . $message['text'] . '</div>';
-                unset($_SESSION[\ModuleSSO::MESSAGES_KEY][$k]);
-            }
-            return $str;
-        }
-        return '';
-    }
-
     public function appendScripts()
     {
         echo $this->loginHelper->appendScripts();
@@ -206,12 +194,12 @@ class Client extends \ModuleSSO
                         }
                     }
                 } else {
-                    $this->insertMessage('Login failed, please try again', 'warn');
+                    Messages::insert('Login failed, please try again', 'warn');
                     header("Location: " .  $this->getContinueUrl());
                     exit();
                 }
             } catch (\Exception $e) {
-                $this->insertMessage('Login failed, please try again', 'warn');
+                Messages::insert('Login failed, please try again', 'warn');
                 header("Location: " .  $this->getContinueUrl());
                 exit();
             }
@@ -245,16 +233,5 @@ class Client extends \ModuleSSO
     {
         $this->tokenListener();
         $this->logoutListener();
-    }
-
-    /**
-     * Inserts message into $_SESSION
-     *
-     * @param string $text Body of the message
-     * @param string $class HTML class attribute of message for CSS
-     */
-    private function insertMessage($text, $class = 'success')
-    {
-        $_SESSION[\ModuleSSO::MESSAGES_KEY][] = array('class' => $class, 'text' => $text);
     }
 }

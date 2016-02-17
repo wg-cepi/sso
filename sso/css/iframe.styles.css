@@ -7,13 +7,15 @@
 .sso .button-wrap {
     text-align: center;
 }
-.sso #id-iframe-login {
+#id-iframe-login {
     height: 100%;
     width: 100%;
     text-align: center;
     margin: 0 auto;
 }
-
+#id-client-login {
+    width: 100% !important;
+}
 .sso #id-login-area {
     width: 100%;
     max-width: 600px;

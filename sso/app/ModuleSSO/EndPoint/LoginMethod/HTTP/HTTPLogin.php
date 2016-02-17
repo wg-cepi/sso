@@ -4,6 +4,7 @@ namespace ModuleSSO\EndPoint\LoginMethod\HTTP;
 use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\Cookie;
 use ModuleSSO\JWT;
+use ModuleSSO\Messages;
 
 abstract class HTTPLogin extends LoginMethod
 {
@@ -20,6 +21,7 @@ abstract class HTTPLogin extends LoginMethod
                 $this->setAndUpdateSSOCookie($user['id']);
                 $this->generateTokenAndRedirect($user);
             } else {
+                Messages::insert('Login failed, please try again', 'warn');
                 echo $this->showHTMLLoginForm();
             }
         } else if(isset($_GET['login'])) {
@@ -70,6 +72,7 @@ abstract class HTTPLogin extends LoginMethod
                 . '<div class="button-wrap">'
                     . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised" id="id-login-button" value="Login with SSO"/>'
                 .'</div>'
+                . Messages::showMessages()
             . '</form>';
         $str .= '</div>';
         return $str;

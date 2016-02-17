@@ -1,6 +1,8 @@
- 
+/**
+ * Handless SSO AJAX and CORS login
+ */
 var WebgardenSSO = Class.create({
-    /*
+    /**
      * constructor, initializes ajax and binds event listeners
      */
     initialize: function() {
@@ -12,6 +14,12 @@ var WebgardenSSO = Class.create({
         this.loginSection = $$('#id-client-login .card-wrap').first();
         this.loginSection.hide();
     },
+    /**
+     * Checks login state from specific element
+     *
+     * @param selector
+     * @returns {*}
+     */
     getLogin: function(selector) {
         var item  = $$(selector).first();
         if(item){
@@ -25,6 +33,9 @@ var WebgardenSSO = Class.create({
             return null;
         }
     },
+    /**
+     * Listener binded on submitting form
+     */
     formOnSubmit: function() {
         if($('id-sso-form')){
             $('id-sso-form').observe('submit', function(e){
@@ -37,12 +48,21 @@ var WebgardenSSO = Class.create({
             }.bind(this));
         }
     },
+    /**
+     * AJAX login request
+     *
+     * @param email
+     * @param password
+     */
     login: function(email, password) {
         var url = 'http://sso.local/loginPlain.php?m=3&login=1&email=' + email + '&password=' + password;
         this.ajaxRequest.onreadystatechange = this.ajaxLoginResolver.bind(this);
         this.ajaxRequest.open('GET', url);
         this.ajaxRequest.send();
     },
+    /**
+     * AJAX request checking login cookie
+     */
     checkCookie: function() {
         if(!$('id-user-id')) {
             var url = 'http://sso.local/loginPlain.php?m=3&checkCookie=1';
@@ -51,6 +71,9 @@ var WebgardenSSO = Class.create({
             this.ajaxRequest.send();
         }
     },
+    /**
+     * Initializes AJAX and sets withCredentials parameter essential for CORS
+     */
     initAjax: function () {      
         if (window.XMLHttpRequest) { // Mozilla, Safari, IE7+ ...
             this.ajaxRequest = new XMLHttpRequest();
@@ -59,6 +82,9 @@ var WebgardenSSO = Class.create({
         }
         this.ajaxRequest.withCredentials = true;
     },
+    /**
+     * Handles AJAX response from login function
+     */
     ajaxLoginResolver: function(){
         if (this.ajaxRequest.readyState === XMLHttpRequest.DONE) {
             if (this.ajaxRequest.status === 200) {
@@ -70,6 +96,9 @@ var WebgardenSSO = Class.create({
             }
         }
     },
+    /**
+     * Handles AJAX response from checkCookie function
+     */
     ajaxCheckCookieResolver: function() {
         if (this.ajaxRequest.readyState === XMLHttpRequest.DONE) {
             if (this.ajaxRequest.status === 200) {
@@ -80,11 +109,21 @@ var WebgardenSSO = Class.create({
                         var html = '<div id="id-sso-links"><p>You are logged in as <strong>' + response.email + '</strong> at <a href="http://sso.local/login.php">Webgarden SSO</a></p>';
                         html += "<ul><li><a href='./?sso_token=" + response.sso_token + "' title='" + response.email + "'>Continue as " + response.email + "</a></li>";
                         html += "<li><a id='id-relog' href='#' title='Log in as another user'>Log in as another user</a></li></ul></div>";
+                        var messages = $('messages');
+                        if(messages){
+                            var content = messages.innerHTML;
+                            html += '<div id="messages">' + content + '</div>';
+                            messages.remove();
+                        }
                        
                         this.loginArea.hide();
                         this.loginArea.insert({
                             before: html
                         });
+
+                        if(messages) {
+                            $('messages').fadeOut(3000);
+                        }
                        
                         $("id-relog").observe('click', function(e){
                             e.preventDefault();
@@ -109,6 +148,7 @@ var WebgardenSSO = Class.create({
     }
 });
 
+//document onload event
 document.observe('dom:loaded', function(){
     var wg = new WebgardenSSO();
 });

@@ -54,7 +54,7 @@ class LoginMethoTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(CFG_JWT_ISSUER, $loginMethod->getDomain());
     }
 
-    public function testPerform()
+    public function testLoginListener()
     {
         /*
         $loginMethodMock = $this->getMockBuilder('\ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')

@@ -13,7 +13,7 @@ class IframeHelper extends HTTPHelper
                 );
         $query = http_build_query($data);
         $src = CFG_SSO_ENDPOINT_URL . '?' . $query;
-        return "<div><iframe id='id-iframe-login' src='$src' width='100%' height='100%' scrolling='no' frameborder='0'></iframe></div>";
+        return "<div><iframe id='id-iframe-login' src='$src' scrolling='no' frameborder='0'></iframe></div>";
     }
     
     public function appendStyles()

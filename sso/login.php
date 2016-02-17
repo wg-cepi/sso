@@ -3,8 +3,7 @@ session_start();
 require_once 'Autoloader.php';
 
 use ModuleSSO\EndPoint;
-use \ModuleSSO\BrowserSniffer;
-
+use ModuleSSO\BrowserSniffer;
 
 BrowserSniffer::init();
 Database::init();
@@ -19,6 +18,7 @@ $endPoint->pickLoginMethod();
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="css/material.min.css">
         <link rel="stylesheet" href="css/common.styles.css">
+        <script src="js/common.js"></script>
         <?php echo $endPoint->appendStyles() ?>
         
         <script src="js/material.min.js"></script>
