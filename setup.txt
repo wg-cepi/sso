@@ -1,0 +1,3 @@
+#generate tests files inside sso folder
+Win: vendor/bin/codecept.bat bootstrap
+Linux vendor/bin/codecept bootstrap
