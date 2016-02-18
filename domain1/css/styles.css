@@ -52,3 +52,44 @@ ul {
     padding-top: 9px;
     padding-bottom: 11px;
 }
+
+/* Messages styles */
+#messages {
+    color:white;
+    -webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12);
+    -moz-box-shadow: 0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12);
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12);
+}
+#messages .message {
+    padding: 10px 30px;
+    margin: 0 auto;
+    margin-top: 10px;
+}
+#messages .message.warn {
+    background: red;
+
+}
+#messages .message.success {
+    background: green;
+}
+
+/* SSO form */
+.sso #id-login-area .inputs {
+    margin: 20px 0;
+}
+
+.sso #id-login-area label {
+    font-size: 1.2em;
+}
+
+.sso #id-sso-login-header {
+    display: block;
+    font-size: 1.5em;
+    margin-top: 20px;
+}
+.sso .input-pass,.input-email {
+    margin: 10px;
+}
+.sso .d-none {
+    display: none;
+}

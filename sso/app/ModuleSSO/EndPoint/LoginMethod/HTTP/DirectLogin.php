@@ -1,13 +1,17 @@
 <?php
 namespace ModuleSSO\EndPoint\LoginMethod\HTTP;
 
+use ModuleSSO\Messages;
+
 class DirectLogin extends HTTPLogin
 {
+    const METHOD_NUMBER = 0;
+
     public function showHTMLLoginForm()
     {
         $str = $this->showHTMLHeader();
         $str .= '<div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">';
-        $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_URL . '">'
+        $str .= '<form id="id-sso-form">'
                  . '<div class="inputs">'
                         . '<div class="input-email mdl-textfield mdl-js-textfield mdl-textfield--floating-label">'
                             . '<input type="text" class="mdl-textfield__input" name="email" id="id-email"/>'
@@ -26,6 +30,7 @@ class DirectLogin extends HTTPLogin
                 . '<div class="button-wrap">'
                     . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised" id="id-login-button" value="Login with SSO"/>'
                 .'</div>'
+                . Messages::showMessages()
             . '</form>';
         $str .= '</div>';
         return $str;
@@ -43,7 +48,7 @@ class DirectLogin extends HTTPLogin
     
     public function generateTokenAndRedirect($user)
     {
-        $this->redirect($this->getContinueUrl());
+        $this->redirect(CFG_SSO_ENDPOINT_INDEX_URL);
     }
  
 }

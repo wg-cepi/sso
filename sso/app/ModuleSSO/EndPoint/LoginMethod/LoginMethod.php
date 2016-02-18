@@ -121,20 +121,21 @@ abstract class LoginMethod implements ILoginMethod
      */
     public function getUserFromCookie()
     {
+        $result = null;
         if(isset($_COOKIE[Cookie::SECURE_SSO_COOKIE])) {
-            list($identifier, $token) = explode(":", $_COOKIE[Cookie::SECURE_SSO_COOKIE]);
-            $query = \Database::$pdo->prepare("SELECT * FROM users WHERE cookie = '$identifier:$token'");
-            $query->execute();
-            $user = $query->fetch();
-            if($user) {
-                $this->setAndUpdateSSOCookie($user['id']);
-                return $user;
-            } else {
-                return null;
+            $toBeListed = explode(":", $_COOKIE[Cookie::SECURE_SSO_COOKIE]);
+            if(count($toBeListed) === 2) {
+                list($identifier, $token) = $toBeListed;
+                $query = \Database::$pdo->prepare("SELECT * FROM users WHERE cookie = '$identifier:$token'");
+                $query->execute();
+                $user = $query->fetch();
+                if($user) {
+                    $this->setAndUpdateSSOCookie($user['id']);
+                    return $user;
+                }
             }
-        } else {
-            return null;
         }
+        return $result;
     }
 
 
@@ -184,6 +185,43 @@ abstract class LoginMethod implements ILoginMethod
 
         //clear session
         unset($_SESSION[\ModuleSSO::CONTINUE_KEY]);
+    }
+
+    /**
+     * Hashes password by user
+     *
+     * @param string $password Plain password
+     * @return string Hashed password
+     */
+    public function generatePasswordHash($password)
+    {
+        //automatic salt
+        return crypt($password);
+    }
+
+    /**
+     * Compares password gived by user and stored hashed password
+     *
+     * @link http://us.php.net/manual/en/function.hash-equals.php#118384
+     *
+     * @param string $password Password provided by user
+     * @param string $hashedPassword Hashed password
+     *
+     * @return bool
+     */
+    public function verifyPasswordHash($password, $hashedPassword)
+    {
+        return substr_count($hashedPassword ^ crypt($password, $hashedPassword), "\0") * 2 === strlen($hashedPassword . crypt($password, $hashedPassword));
+    }
+
+    /**
+     * Returns number of login method
+     *
+     * @return int Number of login method
+     */
+    public function getMethodNumber()
+    {
+        return static::METHOD_NUMBER;
     }
 
     /**

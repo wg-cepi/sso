@@ -10,9 +10,7 @@ use ModuleSSO\Client\LoginHelper\Other;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty as ELThirdParty;
 use ModuleSSO\Client\LoginHelper\ThirdParty;
 
-use ModuleSSO\Messages;
-
-use Lcobucci\JWT\Signer\Keychain;
+use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Parser;
 
@@ -37,7 +35,12 @@ class Client extends \ModuleSSO
         ELThirdParty\GoogleLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\ThirdParty\GoogleHelper'
         
     );
-    
+
+    /**
+     * Client constructor
+     *
+     * @param string $pubKeyPath Path to public key
+     */
     public function __construct($pubKeyPath = 'app/config/pk.pub')
     {
         $this->publicKey = file_get_contents($pubKeyPath);
@@ -53,7 +56,7 @@ class Client extends \ModuleSSO
      */
     public function getUser()
     {
-        if($_SESSION['uid']) {
+        if(isset($_SESSION['uid'])) {
             $query = \Database::$pdo->prepare("SELECT * FROM users WHERE id = ?");
             $query->execute(array($_SESSION['uid']));
             return $query->fetch();
@@ -70,25 +73,36 @@ class Client extends \ModuleSSO
      */
     public function getContinueUrl()
     {
-        //load server path from db
         $base = CFG_DOMAIN_URL;
         if(!empty($_SERVER['REQUEST_URI'])) {
             $rqu = $_SERVER['REQUEST_URI'];
             $result = parse_url($rqu);
             if(!empty($result['path'])) {
                 $path = $result['path'];
-                return  $base . $path;
-            } else {
-                return $base;
+                $base =  $base . $path;
             }
-        } else {
-            return $base;
         }
+        return $base;
     }
-    
+
+    /**
+     * Sets login helper
+     *
+     * @param Client\LoginHelper $loginHelper
+     */
     public function setLoginHelper(Client\LoginHelper $loginHelper)
     {
         $this->loginHelper = $loginHelper;
+    }
+
+    /**
+     * Returns login helper
+     *
+     * @return Client\LoginHelper
+     */
+    public function getLoginHelper()
+    {
+        return $this->loginHelper;
     }
 
     /**
@@ -134,6 +148,11 @@ class Client extends \ModuleSSO
         } 
     }
 
+    /**
+     * Method for appending JavaScript scripts to HTML
+     *
+     * @uses LoginHelper::appendScripts()
+     */
     public function appendScripts()
     {
         echo $this->loginHelper->appendScripts();
@@ -141,8 +160,6 @@ class Client extends \ModuleSSO
 
     /**
      * Method for appending CSS styles to HTML
-     *
-     * @return string
      *
      * @uses LoginHelper::appendStyles()
      */
@@ -156,9 +173,22 @@ class Client extends \ModuleSSO
      * @return string
      *
      * @uses LoginHelper::showLogin()
+     * @uses Client::getContinueUrl()
      */
     public function showLogin() {
         echo $this->loginHelper->showLogin($this->getContinueUrl());
+    }
+
+    /**
+     * Starts lifecycle of Client
+     *
+     * @uses Client::tokenListener()
+     * @uses Client::logoutListener()
+     */
+    public function run()
+    {
+        $this->tokenListener();
+        $this->logoutListener();
     }
 
     /**
@@ -173,10 +203,10 @@ class Client extends \ModuleSSO
             try {
                 $token = (new Parser())->parse((string) $urlToken);
                 $signer = new Sha256();
-                $keychain = new Keychain();
+                $pk = new Key($this->publicKey);
 
                 //check if token is signed and not expired
-                if($token->verify($signer, $keychain->getPublicKey($this->publicKey)) && $token->getClaim('exp') > time()) {
+                if($token->verify($signer, $pk) && $token->getClaim('exp') > time()) {
                     $query = \Database::$pdo->prepare("SELECT * FROM tokens WHERE value = '$urlToken' AND used = 0");
                     $query->execute();
                     $dbtoken = $query->fetch();                          
@@ -221,17 +251,5 @@ class Client extends \ModuleSSO
             header("Location: " . CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::LOGOUT_KEY . '=1&' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_DOMAIN_URL);
             exit();
         }
-    }
-
-    /**
-     * Starts lifecycle of Client
-     *
-     * @uses Client::tokenListener()
-     * @uses Client::logoutListener()
-     */
-    public function run()
-    {
-        $this->tokenListener();
-        $this->logoutListener();
     }
 }

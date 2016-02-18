@@ -72,3 +72,11 @@
     background: red;
 
 }
+#messages .message.success {
+    background: green;
+}
+
+/* Material fix */
+.mdl-layout__drawer-button .material-icons {
+    line-height: 1.9;
+}

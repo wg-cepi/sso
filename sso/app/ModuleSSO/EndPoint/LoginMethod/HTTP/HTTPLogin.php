@@ -14,10 +14,10 @@ abstract class HTTPLogin extends LoginMethod
             $email =  $_GET['email'];
             $password =  $_GET['password'];
 
-            $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-            $query->execute(array($email, $password));
+            $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = ?");
+            $query->execute(array($email));
             $user = $query->fetch();
-            if($user) {
+            if($user && $this->verifyPasswordHash($password, $user['password'])) {
                 $this->setAndUpdateSSOCookie($user['id']);
                 $this->generateTokenAndRedirect($user);
             } else {
@@ -81,7 +81,7 @@ abstract class HTTPLogin extends LoginMethod
     
     public function showHTMLHeader()
     {
-        $str = '<h1>Webgarden SSO</h1>';
+        $str = '<h1>' . CFG_SSO_DISPLAY_NAME . '</h1>';
         return $str;
         
     }

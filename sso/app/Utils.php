@@ -1,11 +1,11 @@
 <?php
 
-function redirect($url, $code = 303) {
-    http_response_code($code);
-    header("Location: " . $url);
-    exit;
-}
-
+/**
+ * Converts fully classified class name to simple name
+ *
+ * @param string $fullClassName
+ * @return string
+ */
 function getClassName($fullClassName)
 {
     $pos = 0;
@@ -21,6 +21,11 @@ function getClassName($fullClassName)
     }
 }
 
+/**
+ * Dumps variable, wrapped by HTML <pre> tag
+ *
+ * @param $var
+ */
 function print_pre($var) {
     echo "<pre>";
     print_r($var);

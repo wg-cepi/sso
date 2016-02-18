@@ -34,10 +34,13 @@ class CORSLogin extends LoginMethod
         header('Access-Control-Allow-Credentials: true');
 
         if(!empty($_GET['email']) && !empty($_GET['password'])) {
-            $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-            $query->execute(array($_GET['email'], $_GET['password']));
+            $email =  $_GET['email'];
+            $password =  $_GET['password'];
+
+            $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = ?");
+            $query->execute(array($email));
             $user = $query->fetch();
-            if($user) {
+            if($user && $this->verifyPasswordHash($password, $user['password'])) {
                 $this->setAndUpdateSSOCookie($user['id']);
                 $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
 

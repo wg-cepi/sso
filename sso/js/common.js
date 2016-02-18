@@ -11,10 +11,9 @@ Element.prototype.fadeOut = function(time) {
             opacity -= step;
         } else {
             element.style.opacity = 0;
-           // return;
+            element.remove();
         }
 
-        //if(opacity <= 0) element.remove();
     };
     fadeOutRecursion();
 
@@ -22,6 +21,7 @@ Element.prototype.fadeOut = function(time) {
 
 document.addEventListener("DOMContentLoaded", function() {
     if(document.getElementById('messages')) {
+        console.log(document.getElementById('messages'));
         document.getElementById('messages').fadeOut(3000);
     }
 

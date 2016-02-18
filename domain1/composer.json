@@ -1,5 +1,0 @@
-{
-    "require": {
-        "lcobucci/jwt": "^3.1"
-    }
-}

@@ -6,7 +6,8 @@ define('CFG_SQL_PASSWORD', 'root');
 define('CFG_JWT_ISSUER', 'sso.local');
 define('CFG_SSO_ENDPOINT_URL', 'http://sso.local/login.php');
 define('CFG_SSO_ENDPOINT_PLAIN_URL', 'http://sso.local/loginPlain.php');
-define('CFG_SSO_DISPLAY_NAME', 'Webgarden SSO Endpoint');
+define('CFG_SSO_DISPLAY_NAME', 'Webgarden SSO');
+define('CFG_SSO_ENDPOINT_INDEX_URL', 'http://sso.local/index.php');
 
 /* Facebook */
 define('CFG_FB_APP_ID', '1707595419474201');

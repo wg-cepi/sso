@@ -7,4 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'phpbrowscap\\' => array($vendorDir . '/browscap/browscap-php/src'),
+    'phpDocumentor' => array($vendorDir . '/phpdocumentor/reflection-docblock/src'),
+    'Prophecy\\' => array($vendorDir . '/phpspec/prophecy/src'),
 );

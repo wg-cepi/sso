@@ -2,9 +2,8 @@
 namespace ModuleSSO;
 
 use Lcobucci\JWT\Builder;
-use Lcobucci\JWT\Signer\Keychain;
+use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
-use phpbrowscap\Exception;
 
 class JWT
 {
@@ -44,7 +43,7 @@ class JWT
         }
 
         $signer = new Sha256();
-        $keychain = new Keychain();
+        $pk =  new Key($this->privateKey);
         
         $builder = new Builder();
         if($this->issuer !== null) {
@@ -68,7 +67,7 @@ class JWT
             $builder->set($name, $value);
         }
         
-        $token = $builder->sign($signer, $keychain->getPrivateKey($this->privateKey))
+        $token = $builder->sign($signer, $pk)
                 ->getToken();
 
         $this->token = $token;

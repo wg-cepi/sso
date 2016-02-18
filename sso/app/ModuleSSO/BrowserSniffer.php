@@ -18,13 +18,14 @@ class BrowserSniffer
     /**
      * Initializes whole sniffer
      * @param string $path Optional parameter of directory with cached browser information
+     * @param bool $update Updates cache of Browscap if is set to true
      */
-    public static function init($path = self::TMP_DIR)
+    public static function init($path = self::TMP_DIR, $update = false)
     {
         self::$browscap = new Browscap($path);
 
         //very time and memory consuming process, does not have to be done every time
-        self::$browscap->doAutoUpdate = false;
+        self::$browscap->doAutoUpdate = $update;
     }
 
     /**

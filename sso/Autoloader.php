@@ -1,10 +1,10 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
-define('PREFIX', __DIR__ . '/');
+define('APPDIR', __DIR__ . '/app');
 
 global $dirs;
 $dirs = array(
-    PREFIX . 'app/',
+    APPDIR . '/',
     /*
     PREFIX . 'app/ModuleSSO/',
     PREFIX . 'app/ModuleSSO/method/',
@@ -20,39 +20,35 @@ $dirs = array(
     PREFIX . 'app/ModuleSSO/method/cors/',*/
     
     
-    PREFIX . 'app/ModuleSSO/',
-    PREFIX . 'app/ModuleSSO/Client/',
-    PREFIX . 'app/ModuleSSO/EndPoint/',
-    
-    PREFIX . 'app/ModuleSSO/EndPoint/LoginMethod/',
-    
-    PREFIX . 'app/ModuleSSO/EndPoint/LoginMethod/HTTP/',
-    PREFIX . 'app/ModuleSSO/EndPoint/LoginMethod/Other/',
-    PREFIX . 'app/ModuleSSO/EndPoint/LoginMethod/ThirdParty/',
-    
-    PREFIX . 'app/ModuleSSO/Client/LoginHelper/',
-    
-    PREFIX . 'app/ModuleSSO/Client/LoginHelper/HTTP/',
-    PREFIX . 'app/ModuleSSO/Client/LoginHelper/Other/',
-    PREFIX . 'app/ModuleSSO/Client/LoginHelper/ThirdParty/',
+    APPDIR . '/ModuleSSO/',
+    APPDIR . '/ModuleSSO/Client/',
+    APPDIR . '/ModuleSSO/EndPoint/',
+    APPDIR . '/ModuleSSO/EndPoint/LoginMethod/',
+    APPDIR . '/ModuleSSO/EndPoint/LoginMethod/HTTP/',
+    APPDIR . '/ModuleSSO/EndPoint/LoginMethod/Other/',
+    APPDIR . '/ModuleSSO/EndPoint/LoginMethod/ThirdParty/',
+    APPDIR . '/ModuleSSO/Client/LoginHelper/',
+    APPDIR . '/ModuleSSO/Client/LoginHelper/HTTP/',
+    APPDIR . '/ModuleSSO/Client/LoginHelper/Other/',
+    APPDIR . '/ModuleSSO/Client/LoginHelper/ThirdParty/',
     
     
 );
 function autoloadConfigAndUtils()
 {
-    $filename = PREFIX . "app/config/config.php";
+    $filename = APPDIR . "/config/config.php";
     if (is_readable($filename) && file_exists($filename)) {
         require_once ($filename);
     }
     
-    $filename = PREFIX . "app/Utils.php";
+    $filename = APPDIR . "/Utils.php";
     if (is_readable($filename) && file_exists($filename)) {
         require_once ($filename);
     }
 }
 function autoloadModuleSSO($fullClassName) {
     $className = getClassName($fullClassName);
-    
+
     global $dirs;
     foreach ($dirs as $dir) {
         $filename = $dir . $className . ".php";

@@ -4,6 +4,7 @@
         "facebook/php-sdk-v4" : "~5.0",
         "google/apiclient": "1.0.*@beta",
         "abraham/twitteroauth": "^0.6.2",
-        "browscap/browscap-php": "^2.1"
+        "browscap/browscap-php": "^2.1",
+        "codeception/codeception": "*"
     }
 }
