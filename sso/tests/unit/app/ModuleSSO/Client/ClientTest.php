@@ -2,11 +2,12 @@
 use ModuleSSO\Client;
 class ClientTest extends PHPUnit_Framework_TestCase
 {
-    private $publicKeyPath = 'app/../../domain1/app/config/pk.pub';
+    private $publicKeyPath;
     public function setUp()
     {
         \Database::init();
         \ModuleSSO\BrowserSniffer::init();
+        $this->publicKeyPath = PROJECT_ROOT .  '/domain1/app/config/pk.pub';
     }
 
     public function testPickLoginHelper()
@@ -50,7 +51,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testGetContinueUrl()
     {
-        require_once __DIR__ . '/../../../../../../domain1/app/config/config.php';
+        require_once PROJECT_ROOT . '/domain1/app/config/config.php';
         $client = new Client($this->publicKeyPath);
 
         //1. test empty request uri
