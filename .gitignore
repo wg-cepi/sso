@@ -54,3 +54,6 @@ favicons.psd
 .project
 .idea
 vendor
+sso/tests/_output
+sso/tests/_support
+sso/tests/_support/_generated/AcceptanceTesterActions.php

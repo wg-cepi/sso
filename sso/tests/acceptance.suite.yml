@@ -7,6 +7,9 @@
 class_name: AcceptanceTester
 modules:
     enabled:
-        - PhpBrowser:
-            url: http://localhost/myapp
+        - WebDriver:
+            browser: 'firefox'
+            url: http://domain1.local
+        #- PhpBrowser:
+         #   url: http://domain1.local
         - \Helper\Acceptance
