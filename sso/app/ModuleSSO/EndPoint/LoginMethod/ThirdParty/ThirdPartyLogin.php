@@ -4,21 +4,38 @@ namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\JWT;
 
+/**
+ * Class ThirdPartyLogin
+ * @package ModuleSSO\EndPoint\LoginMethod\ThirdParty
+ */
 abstract class ThirdPartyLogin extends LoginMethod
-{   
-    public function redirect($url = CFG_SSO_ENDPOINT_URL, $code = 302)
-    {
-        http_response_code($code);
-        header("Location: " . $url);
-        exit;
-    }
-    
+{
+    /** @@var string Name of code parameter in URL */
+    const CODE_KEY = 'code';
+
+    /**
+     * Redirects from endpoint URL (set in third-party application) to SSO endpoint
+     *
+     * @uses LoginMethod::continueUrlListener()
+     * @return mixed
+     */
+    public abstract function codeListener();
+
+    /**
+     * Tries to find user paired with id from third-party app
+     * If no user is found, method creates new user
+     *
+     * @param int $socialId User's id in third-party application
+     * @param string $socialEmail User's email in third-party application
+     *
+     * @uses LoginMethod::setOrUpdateSSOCookie()
+     * @uses LoginMethod::generateTokenAndRedirect()
+     */
     public function redirectWithToken($socialId, $socialEmail) {
          //try to find user in facebook login pair table
         $query = \Database::$pdo->prepare("SELECT * FROM " . static::TABLE . " WHERE " . static::TABLE_COLUMN . " = '$socialId'");
         $query->execute();
         $socialUser = $query->fetch();
-        \Logger::log(print_pre($socialUser['user_id'], true));
                 
         if($socialUser) {
             //find real user
@@ -29,6 +46,8 @@ abstract class ThirdPartyLogin extends LoginMethod
                 $this->setOrUpdateSSOCookie($user['id']);
                 $this->generateTokenAndRedirect($user);
             } else {
+                //social user is not bound to real user
+                \Logger::log('Social user id: ' . $socialUser['id'] . ' is not bound with ' . $socialUser['user_id']);
                 $data = array(
                     \ModuleSSO::METHOD_KEY => static::METHOD_NUMBER,
                     \ModuleSSO::CONTINUE_KEY => $this->getContinueUrl()

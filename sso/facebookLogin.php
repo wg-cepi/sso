@@ -8,4 +8,4 @@ use ModuleSSO\BrowserSniffer;
 BrowserSniffer::init();
 Database::init();
 $loginMethod = new FacebookLogin();
-$loginMethod->redirectAndLogin();
+$loginMethod->codeListener();

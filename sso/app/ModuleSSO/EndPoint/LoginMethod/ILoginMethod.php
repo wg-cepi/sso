@@ -1,6 +1,10 @@
 <?php
 namespace ModuleSSO\EndPoint;
 
+/**
+ * Interface ILoginMethod
+ * @package ModuleSSO\EndPoint
+ */
 interface ILoginMethod
 {
     /**

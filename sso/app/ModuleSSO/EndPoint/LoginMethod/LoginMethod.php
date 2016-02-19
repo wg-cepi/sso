@@ -4,6 +4,11 @@ namespace ModuleSSO\EndPoint;
 use ModuleSSO\Cookie;
 use ModuleSSO\JWT;
 
+/**
+ * Class LoginMethod
+ *
+ * @package ModuleSSO\EndPoint
+ */
 abstract class LoginMethod implements ILoginMethod
 {
     /**
@@ -18,10 +23,9 @@ abstract class LoginMethod implements ILoginMethod
      */
     public $continueUrl = CFG_SSO_ENDPOINT_URL;
 
-    //public abstract function showLoginForm();
 
     /**
-     * Return domain
+     * Returns domain
      * @return string
      */
     public function getDomain()
@@ -39,8 +43,21 @@ abstract class LoginMethod implements ILoginMethod
     }
 
     /**
+     * Returns number of login method
+     *
+     * @return int Number of login method
+     */
+    public function getMethodNumber()
+    {
+        return static::METHOD_NUMBER;
+    }
+
+    /**
+     * Redirects user to given URL
+     * If no URL is given, redirects to default SSO endpoint URL
+     *
      * @param string $url URL where user will be redirected
-     * @param int $code header HTTP code for temporary redirect
+     * @param int $code HTTP header code for temporary redirect
      * @return mixed
      */
     public function redirect($url = CFG_SSO_ENDPOINT_URL, $code = 302)
@@ -53,7 +70,6 @@ abstract class LoginMethod implements ILoginMethod
 
     /**
      * Method for appending JavaScript scripts to HTML
-     * Overwritten in child classes
      *
      * @return string
      */
@@ -64,7 +80,6 @@ abstract class LoginMethod implements ILoginMethod
 
     /**
      * Method for appending CSS styles to HTML
-     * Overwritten in child classes
      *
      * @return string
      */
@@ -74,6 +89,8 @@ abstract class LoginMethod implements ILoginMethod
     }
 
     /**
+     * {@inheritdoc}
+     *
      * Waits for specific $_GET parameter and performs logout action by destroying session.
      * After that redirects user back to where he came from.
      */
@@ -112,22 +129,6 @@ abstract class LoginMethod implements ILoginMethod
         return $result;
     }
 
-
-    /**
-     * Starts lifecycle of LoginMethod
-     *
-     * @uses LoginMethod::continueUrlListener()
-     * @uses LoginMethod::loginListener()
-     * @uses LoginMethod::logoutListener()
-     */
-    public function perform()
-    {
-        $this->continueUrlListener();
-        $this->loginListener();
-        $this->logoutListener();
-    }
-
-
     /**
      * Obtains continue parameter from $_GET, $_SESSION or $_SERVER['HTTP_REFERER']
      * Continue parameter is validated and $continueUrl and  $domain are set
@@ -162,13 +163,17 @@ abstract class LoginMethod implements ILoginMethod
     }
 
     /**
-     * Returns number of login method
+     * Starts lifecycle of LoginMethod
      *
-     * @return int Number of login method
+     * @uses LoginMethod::continueUrlListener()
+     * @uses LoginMethod::loginListener()
+     * @uses LoginMethod::logoutListener()
      */
-    public function getMethodNumber()
+    public function perform()
     {
-        return static::METHOD_NUMBER;
+        $this->continueUrlListener();
+        $this->loginListener();
+        $this->logoutListener();
     }
 
     /**
@@ -204,7 +209,7 @@ abstract class LoginMethod implements ILoginMethod
      *
      * @uses Cookie::generateHash()
      *
-     * @param $userId
+     * @param int $userId
      */
     protected function setOrUpdateSSOCookie($userId)
     {
@@ -218,6 +223,14 @@ abstract class LoginMethod implements ILoginMethod
         $query->execute();
     }
 
+    /**
+     * Generates JWT and sends it to the domain
+     *
+     * @param array $user
+     * @throws \Exception
+     *
+     * @uses JWT::generate()
+     */
     protected function generateTokenAndRedirect($user)
     {
         $url = $this->continueUrl;

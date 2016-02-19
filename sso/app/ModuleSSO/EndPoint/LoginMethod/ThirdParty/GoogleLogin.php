@@ -1,15 +1,40 @@
 <?php
 namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 
-class GoogleLogin extends ThirdPartyLogin {
-    
+/**
+ * Class GoogleLogin
+ * @package ModuleSSO\EndPoint\LoginMethod\ThirdParty
+ */
+class GoogleLogin extends ThirdPartyLogin
+{
+    /**
+     * @var int Number of login method
+     */
     const METHOD_NUMBER = 5;
+
+    /**
+     * @var string Name of social pairing table
+     */
     const TABLE = 'user_login_google';
+
+    /**
+     * @var string Name of column in social pairing table
+     */
     const TABLE_COLUMN = 'google_id';
+
+    /**
+     * @var string Key for Google access token
+     */
     const ACCESS_TOKEN_KEY = 'google_access_token';
-    
+
+    /**
+     * @var \Google_Client
+     */
     private $google;
-    
+
+    /**
+     * GoogleLogin constructor.
+     */
     public function __construct()
     {
         $this->google = new \Google_Client();
@@ -17,7 +42,10 @@ class GoogleLogin extends ThirdPartyLogin {
         $this->google->setClientSecret(CFG_G_CLIENT_SECRET);
         $this->google->setRedirectUri(CFG_G_REDIRECT_URI);
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
     public function loginListener()
     {
         $_SESSION[\ModuleSSO::CONTINUE_KEY] = $this->getContinueUrl();
@@ -27,13 +55,17 @@ class GoogleLogin extends ThirdPartyLogin {
         $loginUrl = $this->google->createAuthUrl();
         $this->redirect($loginUrl);
     }
-    
-    public function redirectAndLogin()
+
+    /**
+     * {@inheritdoc}
+     */
+    public function codeListener()
     {
         $this->continueUrlListener();
-        if(isset($_GET['code'])) {
+        if (isset($_GET[ThirdPartyLogin::CODE_KEY])) {
+            $code = $_GET[ThirdPartyLogin::CODE_KEY];
             try {
-                $this->google->authenticate($_GET['code']);
+                $this->google->authenticate($code);
                 if ($this->google->getAccessToken()) {
                     $tokenData = $this->google->verifyIdToken()->getAttributes();
                     $gEmail = $tokenData['payload']['email'];
@@ -48,7 +80,5 @@ class GoogleLogin extends ThirdPartyLogin {
         } else {
             echo "Code not set.";
         }
-
-        
     }
 }

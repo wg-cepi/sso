@@ -1,6 +1,10 @@
 <?php
 namespace ModuleSSO;
 
+/**
+ * Class Messages
+ * @package ModuleSSO
+ */
 class Messages
 {
     /**

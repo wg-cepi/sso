@@ -5,19 +5,60 @@ use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 
+/**
+ * Class JWT
+ * @package ModuleSSO
+ */
 class JWT
 {
+    /**
+     * @var null|string
+     */
     public $issuer = null;
+
+    /**
+     * @var string|null
+     */
     public $audience = null;
+
+    /**
+     * @var int|null
+     */
     public $expiration = null;
+
+    /**
+     * @var int|null
+     */
     public $notBefore = null;
+
+    /**
+     * @var int|null
+     */
     public $issuedAt = null;
-    
+
+    /**
+     * @var string|null
+     */
     public $token = null;
-    
+
+    /**
+     * @var null|string
+     */
     private $privateKey = null;
+    /**
+     * @var null|string
+     */
     private $domain = null;
-    
+
+    /**
+     * JWT constructor.
+     * @param string $domain
+     * @param string $issuer
+     * @param null $expiration
+     * @param null $issuedAt
+     * @param null $notBefore
+     * @param null $privKeyPath
+     */
     public function __construct($domain = CFG_JWT_ISSUER, $issuer = CFG_JWT_ISSUER, $expiration = null, $issuedAt = null, $notBefore = null, $privKeyPath = null)
     {
         $this->privateKey = $privKeyPath ? file_get_contents($privKeyPath) : file_get_contents(__DIR__ . '/../config/pk.pem');
@@ -34,6 +75,7 @@ class JWT
      *
      * @throws \Exception
      * @param array $values
+     *
      * @return string $token
      */
     public function generate($values)

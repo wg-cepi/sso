@@ -1,7 +1,6 @@
 <?php
 namespace ModuleSSO;
 
-
 use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\EndPoint\LoginMethod\HTTP;
 use ModuleSSO\EndPoint\LoginMethod\Other;
@@ -18,7 +17,9 @@ class EndPoint extends \ModuleSSO
      */
     private $loginMethod = null;
 
-    /** @var array $MAP */
+    /**
+     * @var array $MAP
+     */
     private static $MAP = array(
         HTTP\NoScriptLogin::METHOD_NUMBER => '\ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin',
         HTTP\IframeLogin::METHOD_NUMBER => '\ModuleSSO\EndPoint\LoginMethod\HTTP\IframeLogin',

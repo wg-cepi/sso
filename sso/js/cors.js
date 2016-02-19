@@ -65,7 +65,7 @@ var WebgardenSSO = Class.create({
      */
     checkCookie: function() {
         if(!$('id-user-id')) {
-            var url = 'http://sso.local/loginPlain.php?m=3&checkCookie=1';
+            var url = 'http://sso.local/loginPlain.php?m=3&check_cookie=1';
             this.ajaxRequest.onreadystatechange = this.ajaxCheckCookieResolver.bind(this);
             this.ajaxRequest.open('GET', url);
             this.ajaxRequest.send();
@@ -133,13 +133,13 @@ var WebgardenSSO = Class.create({
                         }.bind(this));
                     }
                 } else if(response.status === "no_cookie") {
-                    console.log("checkCookie, no SSO cookie present.");
+                    console.log("check_cookie, no SSO cookie present.");
                 } else if(response.status === "bad_login") {
-                    console.log("checkCookie, bad login.");
+                    console.log("check_cookie, bad login.");
                 }
                 
             } else {
-                console.log('checkCookie, there was a problem with the request.');
+                console.log('check_cookie, there was a problem with the request.');
             }
         }
         if(this.loginSection) {

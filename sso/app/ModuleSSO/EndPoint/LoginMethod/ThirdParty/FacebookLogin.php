@@ -4,15 +4,39 @@ namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 use Facebook\Facebook;
 use Facebook\Exceptions;
 
-class FacebookLogin extends ThirdPartyLogin {
-    
+/**
+ * Class FacebookLogin
+ * @package ModuleSSO\EndPoint\LoginMethod\ThirdParty
+ */
+class FacebookLogin extends ThirdPartyLogin
+{
+    /**
+     * @var int Number of method
+     */
     const METHOD_NUMBER = 4;
+
+    /**
+     * @var string Name of social pairing table
+     */
     const TABLE = 'user_login_facebook';
+
+    /**
+     * @var string Name of column in social pairing table
+     */
     const TABLE_COLUMN = 'facebook_id';
-    
+
+    /**
+     * @var Facebook
+     */
     private $facebook;
+    /**
+     * @var \Facebook\Helpers\FacebookRedirectLoginHelper
+     */
     private $helper;
-    
+
+    /**
+     * FacebookLogin constructor.
+     */
     public function __construct()
     {
        $this->facebook = new Facebook([
@@ -23,8 +47,21 @@ class FacebookLogin extends ThirdPartyLogin {
        
        $this->helper = $this->facebook->getRedirectLoginHelper();
     }
-    
-    public function redirectAndLogin()
+    /**
+     * {@inheritdoc}
+     */
+    public function loginListener()
+    {
+        $_SESSION[\ModuleSSO::CONTINUE_KEY] = $this->getContinueUrl();
+        $permissions = ['email'];
+        $loginUrl = $this->helper->getLoginUrl(CFG_FB_LOGIN_ENDPOINT . '?' . \ModuleSSO::CONTINUE_KEY . '=' . $this->getContinueUrl(), $permissions);
+        $this->redirect($loginUrl);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function codeListener()
     {
         $this->continueUrlListener();
         try {
@@ -57,14 +94,5 @@ class FacebookLogin extends ThirdPartyLogin {
             echo 'Facebook SDK returned an error: ' . $e->getMessage();
             exit;
         }
-    }
-    
-    
-    public function loginListener()
-    {
-        $_SESSION[\ModuleSSO::CONTINUE_KEY] = $this->getContinueUrl();
-        $permissions = ['email'];
-        $loginUrl = $this->helper->getLoginUrl(CFG_FB_LOGIN_ENDPOINT . '?' . \ModuleSSO::CONTINUE_KEY . '=' . $this->getContinueUrl(), $permissions);
-        $this->redirect($loginUrl);
     }
 }

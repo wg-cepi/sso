@@ -1,11 +1,21 @@
 <?php
 namespace ModuleSSO;
 
+/**
+ * Class Cookie
+ * @package ModuleSSO
+ */
 class Cookie
 {
+    /**
+     * @var string Name of SSO cookie
+     */
     const SECURE_SSO_COOKIE = 'SSSOC';
-    const SALT = 'PEPPER';
 
+    /**
+     * @var string Value used for fingerprint generation
+     */
+    const SALT = 'PEPPER';
 
     /**
      * Generates base64-encoded hash from input parameter and pseudo browser fingerprint

@@ -3,20 +3,25 @@ namespace ModuleSSO;
 
 use phpbrowscap\Browscap;
 
+/**
+ * Class BrowserSniffer
+ * @package ModuleSSO
+ */
 class BrowserSniffer
 {
     /**
-     * @var string TMP_DIR Directory for Browscap cache
+     * @var string Directory for Browscap cache
      */
     const TMP_DIR = 'C:\wamp\tmp';
 
     /**
-     * @var Browscap $browscap
+     * @var Browscap
      */
     public static $browscap = null;
 
     /**
      * Initializes whole sniffer
+     *
      * @param string $path Optional parameter of directory with cached browser information
      * @param bool $update Updates cache of Browscap if is set to true
      */
@@ -31,7 +36,7 @@ class BrowserSniffer
     /**
      * Returns version of the browser
      *
-     * @return string
+     * @return float Version of the browser
      * @throws \Exception
      */
     public static function getVersion()
@@ -39,7 +44,7 @@ class BrowserSniffer
         if(self::$browscap) {
             $info = self::$browscap->getBrowser(null, true);
             if(isset($info['Version'])) {
-                return $info['Version'];
+                return (float)$info['Version'];
             } else {
                 throw new \Exception("BrowserSniffer failed, Version not set");
             }
@@ -52,7 +57,7 @@ class BrowserSniffer
     /**
      * Returns name of the browser in short form, eg. 'chrome', 'firefox'
      *
-     * @return string
+     * @return string Name of the browser in lowercase
      * @throws \Exception
      */
     public static function getName()

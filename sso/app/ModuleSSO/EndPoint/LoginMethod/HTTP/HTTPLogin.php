@@ -56,10 +56,17 @@ abstract class HTTPLogin extends LoginMethod
             echo $this->showHTMLLoginForm();
         }
         else {
-            $this->showHTML();
+            echo $this->showHTML();
         }
     }
-    
+
+    /**
+     * Generates HTML login form for NoScript login and Iframe login
+     *
+     * @return string HTML of login form
+     *
+     * @uses Messages::showMessages()
+     */
     public function showHTMLLoginForm()
     {
         $str = $this->showHTMLHeader();
@@ -92,14 +99,25 @@ abstract class HTTPLogin extends LoginMethod
         return $str;
         
     }
-    
+
+    /**
+     * Generates header HTML
+     *
+     * @return string HTML of header
+     */
     public function showHTMLHeader()
     {
         $str = '<h1>' . CFG_SSO_DISPLAY_NAME . '</h1>';
         return $str;
         
     }
-    
+
+    /**
+     * Generates user information in HTML
+     *
+     * @param $user
+     * @return string HTML containing info about user
+     */
     public function showHTMLUserInfo($user)
     {
         $html = $this->showHTMLHeader();
@@ -124,17 +142,23 @@ abstract class HTTPLogin extends LoginMethod
         $html .= '<li><a href="' . $src . '" title="Log in as another user">Log in as another user</a></ul></div>';
         return $html; 
     }
-    
+
+    /**
+     * If user exists, method shows user info, otherwise shows login form
+     *
+     * @return string HTML string
+     *
+     * @uses LoginMethod::showHTMLUserInfo()
+     * @uses LoginMethod::showHTMLLoginForm()
+     */
     public function showHTML()
     {
         $user = $this->getUserFromCookie();
         if($user !== null) {
-            echo $this->showHTMLUserInfo($user);
+            return $this->showHTMLUserInfo($user);
         } else {
-            echo $this->showHTMLLoginForm();
+            return $this->showHTMLLoginForm();
         }
     }
-
-
 }
 

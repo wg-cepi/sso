@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class Database
+ */
 class Database
 {
     /** @var \PDO $pdo  */

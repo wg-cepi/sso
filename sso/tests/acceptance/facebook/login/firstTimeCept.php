@@ -1,11 +1,5 @@
 <?php
-/*
- * Run only if user logs in first time with facebook
- *
- * Auth prompt
- */
 
-/*
 $I = new AcceptanceTester($scenario);
 $I->amOnPage('/index.php?f=4');
 
@@ -19,4 +13,3 @@ $I->submitForm('#login_form',
 $I->click('__CONFIRM__');
 $I->see('User info');
 
-*/

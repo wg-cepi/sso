@@ -8,4 +8,4 @@ use ModuleSSO\BrowserSniffer;
 BrowserSniffer::init();
 Database::init();
 $loginMethod = new GoogleLogin();
-$loginMethod->redirectAndLogin();
+$loginMethod->codeListener();

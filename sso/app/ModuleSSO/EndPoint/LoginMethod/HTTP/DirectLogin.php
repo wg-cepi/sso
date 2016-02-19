@@ -3,10 +3,20 @@ namespace ModuleSSO\EndPoint\LoginMethod\HTTP;
 
 use ModuleSSO\Messages;
 
+/**
+ * Class DirectLogin
+ * @package ModuleSSO\EndPoint\LoginMethod\HTTP
+ */
 class DirectLogin extends HTTPLogin
 {
+    /**
+     * @var int Number of login method
+     */
     const METHOD_NUMBER = 0;
 
+    /**
+     * {@inheritdoc}
+     */
     public function showHTMLLoginForm()
     {
         $str = $this->showHTMLHeader();
@@ -35,7 +45,10 @@ class DirectLogin extends HTTPLogin
         $str .= '</div>';
         return $str;
     }
-   
+
+    /**
+     * {@inheritdoc}
+     */
     public function showHTMLUserInfo($user)
     {
         $html = $this->showHTMLHeader();
@@ -45,7 +58,10 @@ class DirectLogin extends HTTPLogin
         $html .= '</ul></div>';
         return $html;
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
     protected function generateTokenAndRedirect($user)
     {
         $this->redirect(CFG_SSO_ENDPOINT_INDEX_URL);

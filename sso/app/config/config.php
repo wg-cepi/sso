@@ -30,10 +30,10 @@ $loginHelperPriorities = array(
 //http://caniuse.com/#feat=cors
 global $CORSBrowsers;
 $CORSBrowsers = array(
-    'chrome' => 31,
-    'ie' => 10,
-    'edge' => 12,
-    'firefox' => 37,
+    'chrome' => 31.0,
+    'ie' => 10.0,
+    'edge' => 12.0,
+    'firefox' => 37.0,
     'safari' => 6.1,
     'opera' => 12.1, 
 );
