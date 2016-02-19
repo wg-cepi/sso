@@ -1,5 +1,5 @@
 <?php
-@session_start();
+
 use ModuleSSO\Messages;
 
 class MessagesTest extends PHPUnit_Framework_TestCase

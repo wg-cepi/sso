@@ -10,6 +10,8 @@ modules:
         - WebDriver:
             browser: 'firefox'
             url: http://domain1.local
+            restart: true
+            clear_cookie: true
         #- PhpBrowser:
          #   url: http://domain1.local
         - \Helper\Acceptance

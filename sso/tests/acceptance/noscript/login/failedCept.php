@@ -1,7 +1,6 @@
 <?php
 
 $I = new AcceptanceTester($scenario);
-$I->wantTo('Log in');
 $I->amOnPage('/index.php?f=1');
 
 $I->click('Login with SSO');

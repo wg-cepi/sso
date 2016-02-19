@@ -1,15 +1,10 @@
 <?php
-@session_start();
+
 use ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin;
 use ModuleSSO\Cookie;
+
 class LoginMethodTest extends PHPUnit_Framework_TestCase
 {
-    public function setUp()
-    {
-        \Database::init();
-        \ModuleSSO\BrowserSniffer::init();
-    }
-
     public function testContinueUrlListener()
     {
         //1. domain in whitelist
@@ -55,28 +50,16 @@ class LoginMethodTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(CFG_JWT_ISSUER, $loginMethod->getDomain());
     }
 
-    public function testVerifyPasswordHash()
-    {
-        //pick any login method
-        $loginMethod = new NoScriptLogin();
-
-        $hash = $loginMethod->generatePasswordHash('secretPassword');
-        $this->assertEquals(true, $loginMethod->verifyPasswordHash('secretPassword', $hash));
-
-        $hash = $loginMethod->generatePasswordHash('secretPassword');
-        $this->assertEquals(false, $loginMethod->verifyPasswordHash('wrongPassword', $hash));
-    }
-
     public function testGetUserFromCookie()
     {
         //pick any login method
         /** @var NoScriptLogin $loginMethod */
         $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')
-            ->setMethods(array('setAndUpdateSSOCookie')) //overwrite this method
+            ->setMethods(array('setAndUpdateSSOCookie'))
             ->getMock();
 
         //prepare test data
-        $query = Database::$pdo->prepare("SELECT * FROM users LIMIT 1");
+        $query = Database::$pdo->prepare("SELECT * FROM users ORDER BY id LIMIT 1");
         $query->execute();
         $user = $query->fetch();
 
@@ -96,6 +79,12 @@ class LoginMethodTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null, $result);
 
     }
+
+    public function testLogoutListener()
+    {
+        //TODO
+    }
+
 
 
 }

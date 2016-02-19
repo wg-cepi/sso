@@ -26,16 +26,8 @@ abstract class ThirdPartyLogin extends LoginMethod
             $query->execute();
             $user = $query->fetch();
             if($user) {
-                $this->setAndUpdateSSOCookie($user['id']);
-
-                $redirectUrl = $this->getContinueUrl();
-                if($redirectUrl !== CFG_SSO_ENDPOINT_URL) {
-                    $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
-
-                    $query = \ModuleSSO::TOKEN_KEY . '=' . $token;
-                    $redirectUrl = $redirectUrl .  "?" . $query;
-                }
-                $this->redirect($redirectUrl);
+                $this->setOrUpdateSSOCookie($user['id']);
+                $this->generateTokenAndRedirect($user);
             } else {
                 $data = array(
                     \ModuleSSO::METHOD_KEY => static::METHOD_NUMBER,
@@ -56,14 +48,8 @@ abstract class ThirdPartyLogin extends LoginMethod
             $query = \Database::$pdo->prepare("INSERT INTO " . static::TABLE . " (user_id, " . static::TABLE_COLUMN . ", created) VALUES (" . $user['id'] . ", '$socialId', " . time() . ")");
             $query->execute();
 
-            $this->setAndUpdateSSOCookie($user['id']);
-
-            $redirectUrl = $this->getContinueUrl();
-            if($redirectUrl !== CFG_SSO_ENDPOINT_URL) {
-                $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
-                $redirectUrl = $redirectUrl .  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
-            }
-             $this->redirect($redirectUrl);
+            $this->setOrUpdateSSOCookie($user['id']);
+            $this->generateTokenAndRedirect($user);
         }
     }
 }

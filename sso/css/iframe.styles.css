@@ -22,3 +22,18 @@
     padding: 10px;
     margin: 0 auto;
 }
+
+/* Iframe domain dependat styles */
+.m2-domain1-local .mdl-textfield--floating-label.is-focused .mdl-textfield__label{
+    color: #3F51B5 !important;
+}
+.m2-domain1-local .mdl-textfield__label:after {
+    background-color: #3F51B5 !important;
+}
+
+.m2-domain2-local .mdl-textfield--floating-label.is-focused .mdl-textfield__label{
+    color: #F44336 !important;
+}
+.m2-domain2-local .mdl-textfield__label:after {
+    background-color: #F44336 !important;
+}

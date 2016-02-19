@@ -15,7 +15,7 @@ class CORSHelper extends LoginHelper
                 $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_PLAIN_URL . '">'
                         . '<div class="inputs">'
                                 . '<div class="input-email mdl-textfield mdl-js-textfield mdl-textfield--floating-label">'
-                                    . '<input type="text" class="mdl-textfield__input" name="email" id="id-email"/>'
+                                    . '<input type="email" class="mdl-textfield__input" name="email" id="id-email"/>'
                                     . '<label for="id-email" class="mdl-textfield__label">'
                                         . 'Email'
                                     . '</label>'

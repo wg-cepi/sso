@@ -1,14 +1,15 @@
 <?php
 
 $I = new AcceptanceTester($scenario);
-$I->wantTo('Log in');
 $I->amOnPage('/index.php?f=2');
 
 $I->switchToIFrame("id-iframe-login");
 $I->submitForm('#id-sso-form', array(
-    'email' => 'BADLOGIN@bad.bad',
-    'password' => 'BADLOGIN'
+    'email' => 'joe@example.com',
+    'password' => 'joe'
 ));
 
-$I->see('Login failed');
-
+//parent page
+$I->switchToIFrame();
+$I->wait(1);
+$I->seeInSource('User info');

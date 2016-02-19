@@ -1,12 +1,12 @@
 <?php
+
 use ModuleSSO\Client;
+
 class ClientTest extends PHPUnit_Framework_TestCase
 {
     private $publicKeyPath;
     public function setUp()
     {
-        \Database::init();
-        \ModuleSSO\BrowserSniffer::init();
         $this->publicKeyPath = PROJECT_ROOT .  '/domain1/app/config/pk.pub';
     }
 

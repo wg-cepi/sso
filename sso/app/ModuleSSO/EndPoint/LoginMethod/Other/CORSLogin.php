@@ -41,7 +41,7 @@ class CORSLogin extends LoginMethod
             $query->execute(array($email));
             $user = $query->fetch();
             if($user && $this->verifyPasswordHash($password, $user['password'])) {
-                $this->setAndUpdateSSOCookie($user['id']);
+                $this->setOrUpdateSSOCookie($user['id']);
                 $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
 
                 echo '{"status": "ok", "' . \ModuleSSO::TOKEN_KEY . '": "' . $token . '"}';

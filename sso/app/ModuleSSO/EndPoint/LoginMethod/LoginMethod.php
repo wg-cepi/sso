@@ -2,6 +2,7 @@
 namespace ModuleSSO\EndPoint;
 
 use ModuleSSO\Cookie;
+use ModuleSSO\JWT;
 
 abstract class LoginMethod implements ILoginMethod
 {
@@ -16,6 +17,8 @@ abstract class LoginMethod implements ILoginMethod
      * @var string $continueUrl
      */
     public $continueUrl = CFG_SSO_ENDPOINT_URL;
+
+    //public abstract function showLoginForm();
 
     /**
      * Return domain
@@ -84,40 +87,11 @@ abstract class LoginMethod implements ILoginMethod
     }
 
     /**
-     * Sets and updates SSO cookie
-     * SSO cookie is updated every time when user accesses login URL
-     *
-     * @uses Cookie::generateHash()
-     *
-     * @param $userId
-     */
-    protected function setAndUpdateSSOCookie($userId)
-    { 
-        $identifier = md5(Cookie::SALT . md5(Cookie::generateHash($userId) . Cookie::SALT));
-        $token = md5(uniqid(rand(), TRUE));
-        $timeout = time() + 60 * 60 * 24 * 7;
-        
-        setcookie(Cookie::SECURE_SSO_COOKIE, "$identifier:$token", $timeout, null, null, null, true);
-        
-        $query = \Database::$pdo->prepare("UPDATE users SET cookie = '$identifier:$token' WHERE id = $userId");
-        $query->execute();
-    }
-
-    /**
-     * Unsets SSO cookie
-     */
-    public function unsetSSOCookie()
-    {
-        setcookie(Cookie::SECURE_SSO_COOKIE, null, -1, '/');
-    }
-
-
-    /**
      * Method tries to obtain a user from database by identified stored in SSO cookie
      *
      * @return mixed|null Returns either user or null
      *
-     * @uses LoginMethod::setAndUpdateSSOCookie()
+     * @uses LoginMethod::setOrUpdateSSOCookie()
      */
     public function getUserFromCookie()
     {
@@ -130,7 +104,7 @@ abstract class LoginMethod implements ILoginMethod
                 $query->execute();
                 $user = $query->fetch();
                 if($user) {
-                    $this->setAndUpdateSSOCookie($user['id']);
+                    $this->setOrUpdateSSOCookie($user['id']);
                     return $user;
                 }
             }
@@ -188,12 +162,22 @@ abstract class LoginMethod implements ILoginMethod
     }
 
     /**
+     * Returns number of login method
+     *
+     * @return int Number of login method
+     */
+    public function getMethodNumber()
+    {
+        return static::METHOD_NUMBER;
+    }
+
+    /**
      * Hashes password by user
      *
      * @param string $password Plain password
      * @return string Hashed password
      */
-    public function generatePasswordHash($password)
+    protected function generatePasswordHash($password)
     {
         //automatic salt
         return crypt($password);
@@ -209,19 +193,48 @@ abstract class LoginMethod implements ILoginMethod
      *
      * @return bool
      */
-    public function verifyPasswordHash($password, $hashedPassword)
+    protected function verifyPasswordHash($password, $hashedPassword)
     {
         return substr_count($hashedPassword ^ crypt($password, $hashedPassword), "\0") * 2 === strlen($hashedPassword . crypt($password, $hashedPassword));
     }
 
     /**
-     * Returns number of login method
+     * Sets and updates SSO cookie
+     * SSO cookie is updated every time when user accesses login URL
      *
-     * @return int Number of login method
+     * @uses Cookie::generateHash()
+     *
+     * @param $userId
      */
-    public function getMethodNumber()
+    protected function setOrUpdateSSOCookie($userId)
     {
-        return static::METHOD_NUMBER;
+        $identifier = md5(Cookie::SALT . md5(Cookie::generateHash($userId) . Cookie::SALT));
+        $token = md5(uniqid(rand(), TRUE));
+        $timeout = time() + 60 * 60 * 24 * 7;
+
+        setcookie(Cookie::SECURE_SSO_COOKIE, "$identifier:$token", $timeout, null, null, null, true);
+
+        $query = \Database::$pdo->prepare("UPDATE users SET cookie = '$identifier:$token' WHERE id = $userId");
+        $query->execute();
+    }
+
+    protected function generateTokenAndRedirect($user)
+    {
+        $url = $this->continueUrl;
+        if($this->continueUrl !== CFG_SSO_ENDPOINT_URL) {
+            $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
+            $url .=  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
+        }
+        $this->redirect($url);
+
+    }
+
+    /**
+     * Unsets SSO cookie
+     */
+    protected function unsetSSOCookie()
+    {
+        setcookie(Cookie::SECURE_SSO_COOKIE, null, -1, '/');
     }
 
     /**

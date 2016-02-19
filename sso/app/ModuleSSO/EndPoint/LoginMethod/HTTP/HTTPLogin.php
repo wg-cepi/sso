@@ -6,8 +6,24 @@ use ModuleSSO\Cookie;
 use ModuleSSO\JWT;
 use ModuleSSO\Messages;
 
+/**
+ * Class HTTPLogin
+ * @package ModuleSSO\EndPoint\LoginMethod\HTTP
+ */
 abstract class HTTPLogin extends LoginMethod
 {
+    /**
+     * Listens for $_GET parameters and performs appropriate commands
+     *
+     * If email and password are set in $_GET, method creates SSO cookie and redirects user with generated token
+     * If continue key is set in $_GET, method updates SSO cookie and redirects user with generated token
+     * If relog key is set in $_GET, method shows login form
+     * If none of conditions mentioned above is met, method checks if SSO cookie is set and tries to obtain user, otherwise method shows login form
+     *
+     * @uses \ModuleSSO::LOGIN_KEY
+     * @uses \ModuleSSO::RELOG_KEY
+     * @uses \ModuleSSO\Cookie::SECURE_SSO_COOKIE
+     */
     public function loginListener()
     {
         if(isset($_GET['email']) && isset($_GET['password'])) {
@@ -18,13 +34,13 @@ abstract class HTTPLogin extends LoginMethod
             $query->execute(array($email));
             $user = $query->fetch();
             if($user && $this->verifyPasswordHash($password, $user['password'])) {
-                $this->setAndUpdateSSOCookie($user['id']);
+                $this->setOrUpdateSSOCookie($user['id']);
                 $this->generateTokenAndRedirect($user);
             } else {
                 Messages::insert('Login failed, please try again', 'warn');
                 echo $this->showHTMLLoginForm();
             }
-        } else if(isset($_GET['login'])) {
+        } else if(isset($_GET[\ModuleSSO::LOGIN_KEY])) {
             if(isset($_COOKIE[Cookie::SECURE_SSO_COOKIE])) {
                 $user = $this->getUserFromCookie();
                 if($user) {
@@ -39,9 +55,7 @@ abstract class HTTPLogin extends LoginMethod
         else if (isset($_GET[\ModuleSSO::RELOG_KEY])){
             echo $this->showHTMLLoginForm();
         }
-        else if(isset($_GET[\ModuleSSO::LOGOUT_KEY])) {
-            echo $this->showHTMLLoginForm();
-        } else {
+        else {
             $this->showHTML();
         }
     }
@@ -51,10 +65,10 @@ abstract class HTTPLogin extends LoginMethod
         $str = $this->showHTMLHeader();
         $str .= '<div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">';
         $str .= '<span id="id-sso-login-header">Login to Webgarden SSO</span>';
-        $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_URL . '">'
+        $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_URL . '" class="' . \ModuleSSO::METHOD_KEY . static::METHOD_NUMBER . "-" . str_replace('.', '-' , $this->getDomain()) . '">'
                 . '<div class="inputs">'
                         . '<div class="input-email mdl-textfield mdl-js-textfield mdl-textfield--floating-label">'
-                            . '<input type="text" class="mdl-textfield__input" name="email" id="id-email"/>'
+                            . '<input type="email" class="mdl-textfield__input" name="email" id="id-email"/>'
                             . '<label for="id-email" class="mdl-textfield__label">'
                                 . 'Email'
                             . '</label>'
@@ -120,16 +134,7 @@ abstract class HTTPLogin extends LoginMethod
             echo $this->showHTMLLoginForm();
         }
     }
-    
-    public function generateTokenAndRedirect($user)
-    {
-        $url = $this->continueUrl;
-        if($this->continueUrl !== CFG_SSO_ENDPOINT_URL) {
-            $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
-            $url .=  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
-        }
-        $this->redirect($url);
-        
-    }
+
+
 }
 
