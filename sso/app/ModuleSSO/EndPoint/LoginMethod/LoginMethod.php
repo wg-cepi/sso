@@ -177,33 +177,6 @@ abstract class LoginMethod implements ILoginMethod
     }
 
     /**
-     * Hashes password by user
-     *
-     * @param string $password Plain password
-     * @return string Hashed password
-     */
-    protected function generatePasswordHash($password)
-    {
-        //automatic salt
-        return crypt($password);
-    }
-
-    /**
-     * Compares password gived by user and stored hashed password
-     *
-     * @link http://us.php.net/manual/en/function.hash-equals.php#118384
-     *
-     * @param string $password Password provided by user
-     * @param string $hashedPassword Hashed password
-     *
-     * @return bool
-     */
-    protected function verifyPasswordHash($password, $hashedPassword)
-    {
-        return substr_count($hashedPassword ^ crypt($password, $hashedPassword), "\0") * 2 === strlen($hashedPassword . crypt($password, $hashedPassword));
-    }
-
-    /**
      * Sets and updates SSO cookie
      * SSO cookie is updated every time when user accesses login URL
      *

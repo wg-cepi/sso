@@ -38,7 +38,7 @@ class CORSLogin extends LoginMethod
                 $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = ?");
                 $query->execute(array($email));
                 $user = $query->fetch();
-                if ($user && $this->verifyPasswordHash($password, $user['password'])) {
+                if ($user && \ModuleSSO::verifyPasswordHash($password, $user['password'])) {
                     $this->setOrUpdateSSOCookie($user['id']);
                     $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
 
@@ -71,6 +71,8 @@ class CORSLogin extends LoginMethod
                         $this->loginListener();
                     } else if(isset($_GET[\ModuleSSO::CHECK_COOKIE_KEY]) && $_GET[\ModuleSSO::CHECK_COOKIE_KEY] == 1) {
                         $this->checkCookieListener();
+                    } else {
+                        echo json_encode(array("status" => "fail", "code" => "key_not_recognized"));
                     }
                 } else {
                     //domain not allowed
@@ -84,7 +86,6 @@ class CORSLogin extends LoginMethod
             //probably won't reach this because of Same origin policy
             echo json_encode(array("status" => "fail", "code" => "http_origin_not_set"));
         }
-        
     }
 
     /**

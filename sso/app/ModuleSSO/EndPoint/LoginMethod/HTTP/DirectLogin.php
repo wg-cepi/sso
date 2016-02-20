@@ -49,7 +49,7 @@ class DirectLogin extends HTTPLogin
     /**
      * {@inheritdoc}
      */
-    public function showHTMLUserInfo($user)
+    public function showHTMLContinueOrRelog($user)
     {
         $html = $this->showHTMLHeader();
         $html .= '<div id="id-sso-link"><p>You are logged in as <strong>' . $user['email'] . '</strong> at Webgarden SSO</p><ul>';

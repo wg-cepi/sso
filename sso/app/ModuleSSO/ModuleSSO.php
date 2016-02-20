@@ -62,4 +62,31 @@ abstract class ModuleSSO
      * @abstract
      */
     abstract public function run();
+
+    /**
+     * Hashes password by user
+     *
+     * @param string $password Plain password
+     * @return string Hashed password
+     */
+    public static function generatePasswordHash($password)
+    {
+        //automatic salt
+        return crypt($password);
+    }
+
+    /**
+     * Compares password gived by user and stored hashed password
+     *
+     * @link http://us.php.net/manual/en/function.hash-equals.php#118384
+     *
+     * @param string $password Password provided by user
+     * @param string $hashedPassword Hashed password
+     *
+     * @return bool
+     */
+    public static function verifyPasswordHash($password, $hashedPassword)
+    {
+        return substr_count($hashedPassword ^ crypt($password, $hashedPassword), "\0") * 2 === strlen($hashedPassword . crypt($password, $hashedPassword));
+    }
 }

@@ -4,6 +4,7 @@ define('CFG_SQL_DBNAME', 'sso');
 define('CFG_SQL_USERNAME', 'root');
 define('CFG_SQL_PASSWORD', 'root');
 define('CFG_JWT_ISSUER', 'sso.local');
+define('CFG_SSO_URL', 'http://sso.local');
 define('CFG_SSO_ENDPOINT_URL', 'http://sso.local/login.php');
 define('CFG_SSO_ENDPOINT_PLAIN_URL', 'http://sso.local/loginPlain.php');
 define('CFG_SSO_DISPLAY_NAME', 'Webgarden SSO');

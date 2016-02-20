@@ -3,6 +3,7 @@ namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 
 use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\JWT;
+use ModuleSSO\Messages;
 
 /**
  * Class ThirdPartyLogin
@@ -39,7 +40,7 @@ abstract class ThirdPartyLogin extends LoginMethod
                 
         if($socialUser) {
             //find real user
-            $query = \Database::$pdo->prepare("SELECT * FROM users WHERE id = " . $socialUser['user_id']);
+            $query = \Database::$pdo->prepare("SELECT * FROM users WHERE id = '" . $socialUser['user_id'] . "'");
             $query->execute();
             $user = $query->fetch();
             if($user) {
@@ -47,22 +48,43 @@ abstract class ThirdPartyLogin extends LoginMethod
                 $this->generateTokenAndRedirect($user);
             } else {
                 //social user is not bound to real user
-                \Logger::log('Social user id: ' . $socialUser['id'] . ' is not bound with ' . $socialUser['user_id']);
-                $data = array(
-                    \ModuleSSO::METHOD_KEY => static::METHOD_NUMBER,
-                    \ModuleSSO::CONTINUE_KEY => $this->getContinueUrl()
-                    );
-                $query = http_build_query($data);
-                $this->redirect(CFG_SSO_ENDPOINT_URL . '?' .  $query);
+                //create new user if email is not used and bind him
+                $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = '$socialEmail'");
+                $query->execute();
+                $user = $query->fetch();
+                if(!$user) {
+                    $query = \Database::$pdo->prepare("INSERT INTO users (id, email) VALUES (" . $socialUser['user_id'] . ", '$socialEmail')");
+                    $query->execute();
+
+                    $userId = \Database::$pdo->lastInsertId('id');
+                    $userQuery = \Database::$pdo->prepare("SELECT * FROM users WHERE id=$userId");
+                    $userQuery->execute();
+                    $user = $userQuery->fetch();
+                } else {
+                    //bind to existing user
+                    $query = \Database::$pdo->prepare("UPDATE " . static::TABLE . " SET user_id=" . $user['id']);
+                    $query->execute();
+                }
+
+                $this->setOrUpdateSSOCookie($user['id']);
+                $this->generateTokenAndRedirect($user);
             }
         } else {
             //no user found, let's create one
-            $query = \Database::$pdo->prepare("INSERT INTO users (email) VALUES ('$socialEmail')");
-            $query->execute();
-
             $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = '$socialEmail'");
             $query->execute();
             $user = $query->fetch();
+
+            //if user with given sso email does not exist
+            if(!$user) {
+                $query = \Database::$pdo->prepare("INSERT INTO users (email) VALUES ('$socialEmail')");
+                $query->execute();
+
+                $userId = \Database::$pdo->lastInsertId('id');
+                $userQuery = \Database::$pdo->prepare("SELECT * FROM users WHERE id=$userId");
+                $userQuery->execute();
+                $user = $userQuery->fetch();
+            }
 
             $query = \Database::$pdo->prepare("INSERT INTO " . static::TABLE . " (user_id, " . static::TABLE_COLUMN . ", created) VALUES (" . $user['id'] . ", '$socialId', " . time() . ")");
             $query->execute();

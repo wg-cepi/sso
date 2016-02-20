@@ -5,12 +5,20 @@ require_once 'Autoloader.php';
 use \ModuleSSO\EndPoint;
 use \ModuleSSO\EndPoint\LoginMethod\HTTP\DirectLogin;
 use \ModuleSSO\BrowserSniffer;
+use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
+use ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
 
 
 BrowserSniffer::init();
 Database::init();
 $endPoint = new EndPoint();
 $endPoint->setLoginMethod(new DirectLogin());
+
+$fbLoginUrl = CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_SSO_ENDPOINT_INDEX_URL . '&' . \ModuleSSO::METHOD_KEY . '=' . GoogleLogin::METHOD_NUMBER;
+$googleLoginUrl = CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_SSO_ENDPOINT_INDEX_URL . '&' . \ModuleSSO::METHOD_KEY . '=' . FacebookLogin::METHOD_NUMBER;
+
+$googleLoginLink = '<a class="mdl-navigation__link" href="' . $googleLoginUrl . '">Login with Google</a>';
+$fbLoginLink = '<a class="mdl-navigation__link" href="' . $fbLoginUrl . '">Login with Facebook</a>';
 
 ?>
 
@@ -37,7 +45,9 @@ $endPoint->setLoginMethod(new DirectLogin());
                         <!-- Navigation. We hide it in small screens. -->
                         <nav class="mdl-navigation mdl-layout--large-screen-only">
                             <a class="mdl-navigation__link" href="/index.php">Home</a>
-                            <a class="mdl-navigation__link" href="/createUser.php">Create User</a>
+                            <?php echo $googleLoginLink; ?>
+                            <?php echo $fbLoginLink; ?>
+                            <a class="mdl-navigation__link" href="/register.php">Register</a>
                         </nav>
                     </div>
                 </header>
@@ -45,7 +55,9 @@ $endPoint->setLoginMethod(new DirectLogin());
                     <span class="mdl-layout-title"><?php echo CFG_SSO_DISPLAY_NAME ?></span>
                     <nav class="mdl-navigation">
                         <a class="mdl-navigation__link" href="/index.php">Home</a>
-                        <a class="mdl-navigation__link" href="/createUser.php">Create User</a>
+                        <?php echo $googleLoginLink; ?>
+                        <?php echo $fbLoginLink; ?>
+                        <a class="mdl-navigation__link" href="/register.php">Register</a>
                     </nav>
                 </div>
 

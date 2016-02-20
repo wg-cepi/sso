@@ -33,7 +33,7 @@ abstract class HTTPLogin extends LoginMethod
             $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = ?");
             $query->execute(array($email));
             $user = $query->fetch();
-            if($user && $this->verifyPasswordHash($password, $user['password'])) {
+            if($user && \ModuleSSO::verifyPasswordHash($password, $user['password'])) {
                 $this->setOrUpdateSSOCookie($user['id']);
                 $this->generateTokenAndRedirect($user);
             } else {
@@ -118,7 +118,7 @@ abstract class HTTPLogin extends LoginMethod
      * @param $user
      * @return string HTML containing info about user
      */
-    public function showHTMLUserInfo($user)
+    public function showHTMLContinueOrRelog($user)
     {
         $html = $this->showHTMLHeader();
         $html .= '<div id="id-sso-links"><p>You are logged in as <strong>' . $user['email'] . '</strong> at <a href="' . CFG_SSO_ENDPOINT_URL . '">Webgarden SSO</a></p><ul>';
@@ -148,14 +148,14 @@ abstract class HTTPLogin extends LoginMethod
      *
      * @return string HTML string
      *
-     * @uses LoginMethod::showHTMLUserInfo()
+     * @uses LoginMethod::showHTMLContinueOrRelog()
      * @uses LoginMethod::showHTMLLoginForm()
      */
     public function showHTML()
     {
         $user = $this->getUserFromCookie();
         if($user !== null) {
-            return $this->showHTMLUserInfo($user);
+            return $this->showHTMLContinueOrRelog($user);
         } else {
             return $this->showHTMLLoginForm();
         }

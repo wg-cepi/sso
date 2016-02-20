@@ -3,9 +3,12 @@ session_start();
 require_once 'Autoloader.php';
 
 use ModuleSSO\Messages;
+use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
+use ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
+
 Database::init();
 
-function createUserListener()
+function registerUserListener()
 {
     if(isset($_GET['create']) && $_GET['create'] == 1) {
         if(!empty($_GET['email']) && !empty($_GET['password']) && !empty($_GET['fname']) && !empty($_GET['lname'])) {
@@ -36,8 +39,7 @@ function createUserListener()
             if(!$user){
                 //password hash creation
                 $loginMethod = new \ModuleSSO\EndPoint\LoginMethod\HTTP\DirectLogin();
-                $hashedPassword = $loginMethod->generatePasswordHash($password);
-                echo $hashedPassword;
+                $hashedPassword = \ModuleSSO::generatePasswordHash($password);
                 //insert user
                 $query = \Database::$pdo->prepare("INSERT INTO users(email, password, first_name, last_name) VALUES ('$email', '$hashedPassword', '$firstName', '$lastName')");
                 $query->execute();
@@ -52,7 +54,15 @@ function createUserListener()
     }
 }
 
-createUserListener();
+registerUserListener();
+
+$fbLoginUrl = CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_SSO_ENDPOINT_INDEX_URL . '&' . \ModuleSSO::METHOD_KEY . '=' . GoogleLogin::METHOD_NUMBER;
+$googleLoginUrl = CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_SSO_ENDPOINT_INDEX_URL . '&' . \ModuleSSO::METHOD_KEY . '=' . FacebookLogin::METHOD_NUMBER;
+
+$googleLoginLink = '<a class="mdl-navigation__link" href="' . $googleLoginUrl . '">Login with Google</a>';
+$fbLoginLink = '<a class="mdl-navigation__link" href="' . $fbLoginUrl . '">Login with Facebook</a>';
+
+
 ?>
 
 <html>
@@ -78,7 +88,9 @@ createUserListener();
                     <!-- Navigation. We hide it in small screens. -->
                     <nav class="mdl-navigation mdl-layout--large-screen-only">
                         <a class="mdl-navigation__link" href="/index.php">Home</a>
-                        <a class="mdl-navigation__link" href="/createUser.php">Create User</a>
+                        <?php echo $googleLoginLink; ?>
+                        <?php echo $fbLoginLink; ?>
+                        <a class="mdl-navigation__link" href="/register.php">Register</a>
                     </nav>
                 </div>
             </header>
@@ -86,14 +98,16 @@ createUserListener();
                 <span class="mdl-layout-title"><?php echo CFG_SSO_DISPLAY_NAME ?></span>
                 <nav class="mdl-navigation">
                     <a class="mdl-navigation__link" href="/index.php">Home</a>
-                    <a class="mdl-navigation__link" href="/createUser.php">Create User</a>
+                    <?php echo $googleLoginLink; ?>
+                    <?php echo $fbLoginLink; ?>
+                    <a class="mdl-navigation__link" href="/register.php">Register</a>
                 </nav>
             </div>
             <main class="mdl-layout__content">
                 <div class="page-content">
                     <div class="sso">
                         <div class="grid-centered">
-                            <h1>Create user</h1>
+                            <h1>Register</h1>
                             <div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">
                                 <form id="id-sso-form">
                                      <div class="inputs">
@@ -124,7 +138,7 @@ createUserListener();
                                     </div>
                                     <input type="hidden" name="create" value="1"/>
                                     <div class="button-wrap">
-                                        <input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised" id="id-login-button" value="Create user"/>
+                                        <input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised" id="id-login-button" value="Register"/>
                                     </div>
                                     <?php echo Messages::showMessages() ?>
                                 </form>

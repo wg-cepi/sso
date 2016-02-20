@@ -35,19 +35,35 @@ class LoginMethodTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(CFG_SSO_ENDPOINT_URL, $loginMethod->getContinueUrl());
         $this->assertEquals(CFG_JWT_ISSUER, $loginMethod->getDomain());
 
-        //4. domain is malformed
+        //5. domain is malformed
         $loginMethod = new NoScriptLogin();
         $_GET[\ModuleSSO::CONTINUE_KEY] = 'http://blacklisted/sub.php?param=X';
         $loginMethod->continueUrlListener();
         $this->assertEquals(CFG_SSO_ENDPOINT_URL, $loginMethod->getContinueUrl());
         $this->assertEquals(CFG_JWT_ISSUER, $loginMethod->getDomain());
 
-        //4.1 domain is malformed
+        //6. domain is malformed
         $loginMethod = new NoScriptLogin();
         $_GET[\ModuleSSO::CONTINUE_KEY] = 'blacklisted/sub.php?param=X';
         $loginMethod->continueUrlListener();
         $this->assertEquals(CFG_SSO_ENDPOINT_URL, $loginMethod->getContinueUrl());
         $this->assertEquals(CFG_JWT_ISSUER, $loginMethod->getDomain());
+
+        //7. url in SESSION
+        unset($_GET[\ModuleSSO::CONTINUE_KEY]);
+        $loginMethod = new NoScriptLogin();
+        $_SESSION[\ModuleSSO::CONTINUE_KEY] = 'http://domain1.local/some/url';
+        $loginMethod->continueUrlListener();
+        $this->assertEquals('http://domain1.local/some/url', $loginMethod->getContinueUrl());
+        $this->assertEquals('domain1.local', $loginMethod->getDomain());
+
+        //8. url in HTTP_REFERER
+        unset($_SESSION[\ModuleSSO::CONTINUE_KEY]);
+        $_SERVER['HTTP_REFERER'] = 'http://domain1.local/some/url';
+        $loginMethod = new NoScriptLogin();
+        $loginMethod->continueUrlListener();
+        $this->assertEquals('http://domain1.local/some/url', $loginMethod->getContinueUrl());
+        $this->assertEquals('domain1.local', $loginMethod->getDomain());
     }
 
     public function testGetUserFromCookie()
@@ -82,9 +98,41 @@ class LoginMethodTest extends PHPUnit_Framework_TestCase
 
     public function testLogoutListener()
     {
-        //TODO
+        //prepare data
+        $_GET[\ModuleSSO::LOGOUT_KEY] = 1;
+
+        //any class that uses HTTPLogin::loginListener()
+        $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')
+            ->setMethods(array('redirect', 'unsetSSOCookie'))
+            ->getMock();
+
+        $loginMethod->expects($this->at(0))
+            ->method('unsetSSOCookie');
+
+        $loginMethod->expects($this->at(1))
+            ->method('redirect');
+
+        $loginMethod->logoutListener();
     }
 
+    public function testPerform()
+    {
+        //pick any login method that uses LoginMethod::perform()
+        $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')
+            ->setMethods(array('continueUrlListener', 'loginListener', 'logoutListener'))
+            ->getMock();
 
+        $loginMethod->expects($this->at(0))
+            ->method('continueUrlListener');
+
+        $loginMethod->expects($this->at(1))
+            ->method('loginListener');
+
+        $loginMethod->expects($this->at(2))
+            ->method('logoutListener');
+
+        $loginMethod->perform();
+
+    }
 
 }

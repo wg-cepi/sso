@@ -65,7 +65,7 @@ class FacebookLogin extends ThirdPartyLogin
     {
         $this->continueUrlListener();
         try {
-            $accessToken =$this->helper->getAccessToken();
+            $accessToken = $this->helper->getAccessToken();
             $this->facebook->setDefaultAccessToken((string)$accessToken);
 
             try {
