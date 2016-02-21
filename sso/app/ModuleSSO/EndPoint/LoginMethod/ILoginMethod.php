@@ -16,5 +16,7 @@ interface ILoginMethod
      * Takes care of logout process
      */
     public function logoutListener();
+
+    public function perform();
 }
 

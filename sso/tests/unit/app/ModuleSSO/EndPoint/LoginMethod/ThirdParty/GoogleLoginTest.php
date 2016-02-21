@@ -1,5 +1,7 @@
 <?php
 
+use \ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
+
 class GoogleLoginTest extends PHPUnit_Framework_TestCase
 {
     public function testLoginListener()
@@ -18,9 +20,7 @@ class GoogleLoginTest extends PHPUnit_Framework_TestCase
     public function testRedirectWithToken()
     {
         //data in dummy database
-        $socialId = 107712179619654;
-        $socialEmail = 'testsso@wgz.cz';
-        $query = \Database::$pdo->prepare('SELECT * FROM users WHERE id=25');
+        $query = \Database::$pdo->prepare("SELECT users.id, users.email, " . GoogleLogin::TABLE_COLUMN . " FROM users JOIN " . GoogleLogin::TABLE . " ON users.id = " . GoogleLogin::TABLE . ".user_id");
         $query->execute();
         $user = $query->fetch();
 
@@ -32,6 +32,6 @@ class GoogleLoginTest extends PHPUnit_Framework_TestCase
             ->method('setOrUpdateSSOCookie')
             ->with($user['id']);
 
-        $loginMethod->redirectWithToken($socialId, $socialEmail);
+        $loginMethod->redirectWithToken($user[GoogleLogin::TABLE_COLUMN], $user['email']);
     }
 }

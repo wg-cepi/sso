@@ -1,5 +1,7 @@
 <?php
 
+use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
+
 class FacebookLoginTest extends PHPUnit_Framework_TestCase
 {
     public function testLoginListener()
@@ -18,13 +20,11 @@ class FacebookLoginTest extends PHPUnit_Framework_TestCase
     public function testRedirectWithToken()
     {
         //data in dummy database
-        $socialId = 106440411057598425368;
-        $socialEmail = 'testsso@wgz.cz';
-        $query = \Database::$pdo->prepare('SELECT * FROM users WHERE id=25');
+        $query = \Database::$pdo->prepare("SELECT users.id, users.email, " . FacebookLogin::TABLE_COLUMN . " FROM users JOIN " . FacebookLogin::TABLE . " ON users.id = " . FacebookLogin::TABLE . ".user_id");
         $query->execute();
         $user = $query->fetch();
 
-        $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin')
+        $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin')
             ->setMethods(array('redirect', 'setOrUpdateSSOCookie'))
             ->getMock();
 
@@ -32,6 +32,6 @@ class FacebookLoginTest extends PHPUnit_Framework_TestCase
             ->method('setOrUpdateSSOCookie')
             ->with($user['id']);
 
-        $loginMethod->redirectWithToken($socialId, $socialEmail);
+        $loginMethod->redirectWithToken($user[FacebookLogin::TABLE_COLUMN], $user['email']);
     }
 }
