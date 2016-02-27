@@ -1,6 +1,7 @@
 <?php
+use Symfony\Component\HttpFoundation\RedirectResponse;
 session_start();
 session_unset();
-header("Location: http://sso.local/");
-exit;
+
+RedirectResponse::create(CFG_SSO_URL)->send();
 

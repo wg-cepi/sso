@@ -2,10 +2,11 @@
 
 use \ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin;
 use ModuleSSO\Cookie;
+use Symfony\Component\HttpFoundation\Request;
 
 class HTTPLoginTest extends PHPUnit_Framework_TestCase
 {
-    public function testLoginListenerLoginFailed()
+    public function testSetOnLoginRequestFailed()
     {
         //our test user
         //email: joe@example.com
@@ -15,13 +16,13 @@ class HTTPLoginTest extends PHPUnit_Framework_TestCase
         $_GET['password'] = 'badpassword';
 
         //any class that uses HTTPLogin::loginListener()
-        $loginMethod = new NoScriptLogin();
-        $loginMethod->loginListener();
+        $loginMethod = new NoScriptLogin(Request::createFromGlobals());
+        $loginMethod->setOnLoginRequest();
 
         $this->expectOutputRegex('/.*Login failed, please try again.*/');
     }
 
-    public function testLoginListenerContinueAsUser()
+    public function testSetOnLoginRequestContinueAsUser()
     {
         //prepare date
         $_GET[\ModuleSSO::LOGIN_KEY] = 1;
@@ -29,6 +30,7 @@ class HTTPLoginTest extends PHPUnit_Framework_TestCase
 
         //any class that uses HTTPLogin::loginListener()
         $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')
+            ->setConstructorArgs(array(Request::createFromGlobals()))
             ->setMethods(array('getUserFromCookie', 'generateTokenAndRedirect'))
             ->getMock();
 
@@ -38,23 +40,24 @@ class HTTPLoginTest extends PHPUnit_Framework_TestCase
         $loginMethod->expects($this->at(1))
             ->method('generateTokenAndRedirect');
 
-        $loginMethod->loginListener();
+        $loginMethod->setOnLoginRequest();
     }
 
-    public function testLoginListenerRelog()
+    public function testSetOnLoginRequestRelog()
     {
         //prepare data
         $_GET[\ModuleSSO::RELOG_KEY] = 1;
 
         //any class that uses HTTPLogin::loginListener()
         $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')
+            ->setConstructorArgs(array(Request::createFromGlobals()))
             ->setMethods(array('showHTMLLoginForm'))
             ->getMock();
 
         $loginMethod->expects($this->once())
             ->method('showHTMLLoginForm');
 
-        $loginMethod->loginListener();
+        $loginMethod->setOnLoginRequest();
 
     }
 
@@ -63,6 +66,7 @@ class HTTPLoginTest extends PHPUnit_Framework_TestCase
         //1. User is in cookie
         //any class that uses HTTPLogin::showHTML()
         $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')
+            ->setConstructorArgs(array(Request::createFromGlobals()))
             ->setMethods(array('getUserFromCookie'))
             ->getMock();
 
@@ -78,6 +82,7 @@ class HTTPLoginTest extends PHPUnit_Framework_TestCase
         //2. User is not in cookie
         //any class that uses HTTPLogin::showHTML()
         $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')
+            ->setConstructorArgs(array(Request::createFromGlobals()))
             ->setMethods(array('getUserFromCookie'))
             ->getMock();
 

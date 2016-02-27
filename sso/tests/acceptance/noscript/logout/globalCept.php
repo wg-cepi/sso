@@ -3,7 +3,8 @@
 //login as joe@example.com
 require PROJECT_ROOT . '/sso/tests/acceptance/noscript/login/successCept.php';
 
-$I->click('Global logout');
+$I->maximizeWindow();
+$I->click('//a[@href="/?glogout=1"]');
 $I->amOnPage('/index.php?f=1');
 $I->seeInSource('Login with SSO');
 

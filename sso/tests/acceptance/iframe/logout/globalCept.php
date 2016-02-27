@@ -3,6 +3,7 @@
 //login as joe@example.com
 require PROJECT_ROOT . '/sso/tests/acceptance/iframe/login/successCept.php';
 
+$I->maximizeWindow();
 $I->click('Global logout');
 $I->amOnPage('/index.php?f=2');
 $I->wait(1);

@@ -17,10 +17,10 @@ abstract class ThirdPartyLogin extends LoginMethod
     /**
      * Redirects from endpoint URL (set in third-party application) to SSO endpoint
      *
-     * @uses LoginMethod::continueUrlListener()
+     * @uses LoginMethod::setOnContinueUrlRequest()
      * @return mixed
      */
-    public abstract function codeListener();
+    public abstract function setOnCodeRequest();
 
     /**
      * Tries to find user paired with id from third-party app

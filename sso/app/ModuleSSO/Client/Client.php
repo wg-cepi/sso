@@ -14,17 +14,29 @@ use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Parser;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * Class Client
  * @package ModuleSSO
  */
 class Client extends \ModuleSSO
 {
-    /** @var string $publicKey */
+    /**
+     * @var string $publicKey
+     */
     private $publicKey = '';
 
-    /** @var \ModuleSSO\Client\LoginHelper $loginHelper */
+    /**
+     * @var \ModuleSSO\Client\LoginHelper $loginHelper
+     */
     private $loginHelper = null;
+
+    /**
+     * @var Request $request
+     */
+    public $request = null;
 
     /** @var array $MAP */
     private static $MAP = array(
@@ -39,10 +51,12 @@ class Client extends \ModuleSSO
     /**
      * Client constructor
      *
+     * @param Request $request
      * @param string $pubKeyPath Path to public key
      */
-    public function __construct($pubKeyPath = 'app/config/pk.pub')
+    public function __construct(Request $request, $pubKeyPath = 'app/config/pk.pub')
     {
+        $this->request = $request;
         $this->publicKey = file_get_contents($pubKeyPath);
     }
 
@@ -63,7 +77,6 @@ class Client extends \ModuleSSO
         } else {
             return null;
         }
-        
     }
 
     /**
@@ -74,8 +87,7 @@ class Client extends \ModuleSSO
     public function getContinueUrl()
     {
         $base = CFG_DOMAIN_URL;
-        if(!empty($_SERVER['REQUEST_URI'])) {
-            $rqu = $_SERVER['REQUEST_URI'];
+        if($rqu = $this->request->server->get('REQUEST_URI')) {
             $result = parse_url($rqu);
             if(!empty($result['path'])) {
                 $path = $result['path'];
@@ -125,8 +137,7 @@ class Client extends \ModuleSSO
      */
     public function pickLoginHelper()
     {
-        if(isset($_GET[\ModuleSSO::FORCED_METHOD_KEY])) {
-            $key = $_GET[\ModuleSSO::FORCED_METHOD_KEY];
+        if($key = $this->request->query->get(\ModuleSSO::FORCED_METHOD_KEY)) {
             if(isset(self::$MAP[$key])) {
                 $class = self::$MAP[$key];
                 $this->loginHelper = new $class();
@@ -138,9 +149,9 @@ class Client extends \ModuleSSO
         
         //config
         global $loginHelperPriorities;
-        foreach ($loginHelperPriorities as $method) {
+        foreach ($loginHelperPriorities as $helper) {
             /** @var \ModuleSSO\Client\LoginHelper $loginHelper */
-            $loginHelper = new $method;
+            $loginHelper = new $helper();
             if($loginHelper->isSupported()) {
                  $this->loginHelper = $loginHelper;
                  break;
@@ -182,13 +193,13 @@ class Client extends \ModuleSSO
     /**
      * Starts lifecycle of Client
      *
-     * @uses Client::tokenListener()
-     * @uses Client::logoutListener()
+     * @uses Client::setOnTokenRequest()
+     * @uses Client::setOnLogoutRequest()
      */
     public function run()
     {
-        $this->tokenListener();
-        $this->logoutListener();
+        $this->setOnTokenRequest();
+        $this->setOnLogoutRequest();
     }
 
     /**
@@ -197,9 +208,8 @@ class Client extends \ModuleSSO
      * @uses $_GET
      * @uses ModuleSSO
      */
-    private function tokenListener() {
-        if(isset($_GET[\ModuleSSO::TOKEN_KEY])) {
-            $urlToken = $_GET[\ModuleSSO::TOKEN_KEY];
+    public function setOnTokenRequest() {
+        if($urlToken = $this->request->query->get(\ModuleSSO::TOKEN_KEY)) {
             try {
                 $token = (new Parser())->parse((string) $urlToken);
                 $signer = new Sha256();
@@ -219,19 +229,16 @@ class Client extends \ModuleSSO
                             $query->execute();
                             
                             $_SESSION['uid'] = $user['id'];
-                            header("Location: " .  $this->getContinueUrl());
-                            exit();
+                            RedirectResponse::create($this->getContinueUrl())->send();
                         }
                     }
                 } else {
                     Messages::insert('Login failed, please try again', 'warn');
-                    header("Location: " .  $this->getContinueUrl());
-                    exit();
+                    RedirectResponse::create($this->getContinueUrl())->send();
                 }
             } catch (\Exception $e) {
                 Messages::insert('Login failed, please try again', 'warn');
-                header("Location: " .  $this->getContinueUrl());
-                exit();
+                RedirectResponse::create($this->getContinueUrl())->send();
             }
             
         }
@@ -241,15 +248,13 @@ class Client extends \ModuleSSO
      * Handles local logout and SSO (global) logout
      * Redirects user to specific logout URL
      */
-    private function logoutListener() {
-        if(isset($_GET[\ModuleSSO::LOGOUT_KEY]) && $_GET[\ModuleSSO::LOGOUT_KEY] == 1) {
+    public function setOnLogoutRequest() {
+        if($this->request->query->get(\ModuleSSO::LOGOUT_KEY) == 1) {
             unset($_SESSION["uid"]);
-            header("Location: " . CFG_DOMAIN_URL);
-            exit();
-        } else if(isset($_GET[\ModuleSSO::GLOBAL_LOGOUT_KEY]) && $_GET[\ModuleSSO::GLOBAL_LOGOUT_KEY] == 1) {
+            RedirectResponse::create(CFG_DOMAIN_URL)->send();
+        } else if($this->request->query->get(\ModuleSSO::GLOBAL_LOGOUT_KEY) == 1) {
             unset($_SESSION["uid"]);
-            header("Location: " . CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::LOGOUT_KEY . '=1&' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_DOMAIN_URL);
-            exit();
+            RedirectResponse::create(CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::LOGOUT_KEY . '=1&' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_DOMAIN_URL)->send();
         }
     }
 }

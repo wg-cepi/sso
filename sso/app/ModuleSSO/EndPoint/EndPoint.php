@@ -1,6 +1,7 @@
 <?php
 namespace ModuleSSO;
 
+use Symfony\Component\HttpFoundation\Request;
 use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\EndPoint\LoginMethod\HTTP;
 use ModuleSSO\EndPoint\LoginMethod\Other;
@@ -18,6 +19,11 @@ class EndPoint extends \ModuleSSO
     private $loginMethod = null;
 
     /**
+     * @var Request $request
+     */
+    public $request = null;
+
+    /**
      * @var array $MAP
      */
     private static $MAP = array(
@@ -27,6 +33,15 @@ class EndPoint extends \ModuleSSO
         ThirdParty\FacebookLogin::METHOD_NUMBER => '\ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin',
         ThirdParty\GoogleLogin::METHOD_NUMBER => '\ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin'
     );
+
+    /**
+     * EndPoint constructor.
+     * @param Request $request
+     */
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
 
     /**
      * Sets $loginMethod according to parameter passed in $_GET
@@ -44,16 +59,15 @@ class EndPoint extends \ModuleSSO
      */
     public function pickLoginMethod()
     {
-        if(isset($_GET[\ModuleSSO::METHOD_KEY])) {
-            $key = $_GET[\ModuleSSO::METHOD_KEY];
+        if($key = $this->request->query->get(\ModuleSSO::METHOD_KEY)) {
             if(isset(self::$MAP[$key])) {
                 $class = self::$MAP[$key];
-                $this->loginMethod = new $class();
+                $this->loginMethod = new $class($this->request);
             } else {
-                $this->loginMethod = new HTTP\DirectLogin();
+                $this->loginMethod = new HTTP\DirectLogin($this->request);
             }
         } else {
-            $this->loginMethod = new HTTP\DirectLogin();
+            $this->loginMethod = new HTTP\DirectLogin($this->request);
         }
     }
 

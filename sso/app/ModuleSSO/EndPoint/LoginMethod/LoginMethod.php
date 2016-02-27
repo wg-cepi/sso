@@ -3,6 +3,8 @@ namespace ModuleSSO\EndPoint;
 
 use ModuleSSO\Cookie;
 use ModuleSSO\JWT;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class LoginMethod
@@ -15,13 +17,23 @@ abstract class LoginMethod implements ILoginMethod
      * Domain where the login request started
      * @var string $domain
      */
-    public $domain = CFG_JWT_ISSUER;
+    protected $domain = CFG_JWT_ISSUER;
 
     /**
      * URL where user should continue after login
      * @var string $continueUrl
      */
-    public $continueUrl = CFG_SSO_ENDPOINT_URL;
+    protected $continueUrl = CFG_SSO_ENDPOINT_URL;
+
+    /**
+     * @var Request $request
+     */
+    public $request = null;
+
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
 
 
     /**
@@ -62,9 +74,7 @@ abstract class LoginMethod implements ILoginMethod
      */
     public function redirect($url = CFG_SSO_ENDPOINT_URL, $code = 302)
     {
-        http_response_code($code);
-        header("Location: " . $url);
-        exit;
+        RedirectResponse::create($url, $code)->send();
     }
 
 
@@ -94,9 +104,9 @@ abstract class LoginMethod implements ILoginMethod
      * Waits for specific $_GET parameter and performs logout action by destroying session.
      * After that redirects user back to where he came from.
      */
-    public function logoutListener()
+    public function setOnLogoutRequest()
     {
-        if(isset($_GET[\ModuleSSO::LOGOUT_KEY]) && $_GET[\ModuleSSO::LOGOUT_KEY] == 1) {
+        if($this->request->query->get(\ModuleSSO::LOGOUT_KEY) == 1) {
             session_destroy();
             $this->unsetSSOCookie();
             $this->redirect($this->getContinueUrl());
@@ -112,9 +122,8 @@ abstract class LoginMethod implements ILoginMethod
      */
     public function getUserFromCookie()
     {
-        $result = null;
-        if(isset($_COOKIE[Cookie::SECURE_SSO_COOKIE])) {
-            $toBeListed = explode(":", $_COOKIE[Cookie::SECURE_SSO_COOKIE]);
+        if($cookie = $this->request->cookies->get(Cookie::SECURE_SSO_COOKIE)) {
+            $toBeListed = explode(":",$cookie);
             if(count($toBeListed) === 2) {
                 list($identifier, $token) = $toBeListed;
                 $query = \Database::$pdo->prepare("SELECT * FROM users WHERE cookie = '$identifier:$token'");
@@ -126,25 +135,26 @@ abstract class LoginMethod implements ILoginMethod
                 }
             }
         }
-        return $result;
+        return null;
     }
 
     /**
+     * {@inheritdoc}
      * Obtains continue parameter from $_GET, $_SESSION or $_SERVER['HTTP_REFERER']
-     * Continue parameter is validated and $continueUrl and  $domain are set
+     * Continue parameter is validated and $continueUrl and $domain properties are set
      *
      * @uses LoginMethod::isInWhiteList()
      * @uses LoginMethod::setContinueUrl()
      */
-    public function continueUrlListener()
+    public function setOnContinueUrlRequest()
     {
         $returnUrl = $url = CFG_SSO_ENDPOINT_URL;
-        if(isset($_GET[\ModuleSSO::CONTINUE_KEY])) {
-            $url = $_GET[\ModuleSSO::CONTINUE_KEY];
+        if($this->request->query->get(\ModuleSSO::CONTINUE_KEY)) {
+            $url = $this->request->query->get(\ModuleSSO::CONTINUE_KEY);
         } else if(isset($_SESSION[\ModuleSSO::CONTINUE_KEY])) {
             $url = $_SESSION[\ModuleSSO::CONTINUE_KEY];
-        } else if(isset($_SERVER['HTTP_REFERER'])) {
-            $url = $_SERVER['HTTP_REFERER'];
+        } else if($this->request->server->get('HTTP_REFERER')) {
+            $url = $this->request->server->get('HTTP_REFERER');
         }
 
         $parsed = parse_url($url);
@@ -163,17 +173,17 @@ abstract class LoginMethod implements ILoginMethod
     }
 
     /**
-     * Starts lifecycle of LoginMethod
+     * {@inheritdoc}
      *
-     * @uses LoginMethod::continueUrlListener()
-     * @uses LoginMethod::loginListener()
-     * @uses LoginMethod::logoutListener()
+     * @uses LoginMethod::setOnContinueUrlRequest()
+     * @uses setOnLoginRequest::setOnLoginReqeust()
+     * @uses LoginMethod::setOnLogoutRequest()
      */
     public function perform()
     {
-        $this->continueUrlListener();
-        $this->loginListener();
-        $this->logoutListener();
+        $this->setOnContinueUrlRequest();
+        $this->setOnLoginRequest();
+        $this->setOnLogoutRequest();
     }
 
     /**
@@ -212,7 +222,6 @@ abstract class LoginMethod implements ILoginMethod
             $url .=  "?" . \ModuleSSO::TOKEN_KEY . "=" . $token;
         }
         $this->redirect($url);
-
     }
 
     /**
@@ -233,6 +242,8 @@ abstract class LoginMethod implements ILoginMethod
      */
     protected function isInWhiteList($domainName)
     {
+        //set default domain
+        $this->setDomain(CFG_JWT_ISSUER);
         $fullDomainName = $domainName;
 
         //find root domain
@@ -267,7 +278,7 @@ abstract class LoginMethod implements ILoginMethod
      * Sets domain
      * @param string $domain
      */
-    private function setDomain($domain)
+    protected function setDomain($domain)
     {
         $this->domain = $domain;
     }
@@ -276,7 +287,7 @@ abstract class LoginMethod implements ILoginMethod
      * Sets continue URL
      * @param string $url
      */
-    private function setContinueUrl($url)
+    protected function setContinueUrl($url)
     {
         $this->continueUrl = $url;
     }

@@ -10,13 +10,21 @@ interface ILoginMethod
     /**
      * Takes care of login process
      */
-    public function loginListener();
+    public function setOnLoginRequest();
 
     /**
      * Takes care of logout process
      */
-    public function logoutListener();
+    public function setOnLogoutRequest();
 
+    /**
+     * Obtains URL where user should continue
+     */
+    public function setOnContinueUrlRequest();
+
+    /**
+     * Starts lifecycle of LoginMethod
+     */
     public function perform();
 }
 

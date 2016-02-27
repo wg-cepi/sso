@@ -3,6 +3,7 @@ namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 
 use Facebook\Facebook;
 use Facebook\Exceptions;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class FacebookLogin
@@ -36,21 +37,24 @@ class FacebookLogin extends ThirdPartyLogin
 
     /**
      * FacebookLogin constructor.
+     *
+     * @param Request $request
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
-       $this->facebook = new Facebook([
+        parent::__construct($request);
+        $this->facebook = new Facebook([
             'app_id' => CFG_FB_APP_ID,
             'app_secret' => CFG_FB_APP_SECRET,
             'default_graph_version' => 'v2.2',
             ]);
-       
-       $this->helper = $this->facebook->getRedirectLoginHelper();
+
+        $this->helper = $this->facebook->getRedirectLoginHelper();
     }
     /**
      * {@inheritdoc}
      */
-    public function loginListener()
+    public function setOnLoginRequest()
     {
         $_SESSION[\ModuleSSO::CONTINUE_KEY] = $this->getContinueUrl();
         $permissions = ['email'];
@@ -61,9 +65,9 @@ class FacebookLogin extends ThirdPartyLogin
     /**
      * {@inheritdoc}
      */
-    public function codeListener()
+    public function setOnCodeRequest()
     {
-        $this->continueUrlListener();
+        $this->setOnContinueUrlRequest();
         try {
             $accessToken = $this->helper->getAccessToken();
             $this->facebook->setDefaultAccessToken((string)$accessToken);

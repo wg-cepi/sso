@@ -24,5 +24,4 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log(document.getElementById('messages'));
         document.getElementById('messages').fadeOut(3000);
     }
-
 });

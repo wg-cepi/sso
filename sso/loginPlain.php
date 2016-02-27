@@ -8,10 +8,12 @@ require_once 'Autoloader.php';
 use ModuleSSO\EndPoint;
 use ModuleSSO\BrowserSniffer;
 use ModuleSSO\EndPoint\LoginMethod\Other\CORSLogin;
-
+use Symfony\Component\HttpFoundation\Request;
 
 BrowserSniffer::init();
 Database::init();
-$endPoint = new EndPoint();
-$endPoint->setLoginMethod(new CORSLogin());
+
+$request = Request::createFromGlobals();
+$endPoint = new EndPoint($request);
+$endPoint->setLoginMethod(new CORSLogin($request));
 $endPoint->run();

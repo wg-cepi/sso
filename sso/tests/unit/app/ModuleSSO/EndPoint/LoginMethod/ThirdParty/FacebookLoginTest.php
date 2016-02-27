@@ -1,20 +1,22 @@
 <?php
 
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
+use Symfony\Component\HttpFoundation\Request;
 
 class FacebookLoginTest extends PHPUnit_Framework_TestCase
 {
-    public function testLoginListener()
+    public function testSetOnLoginRequest()
     {
         //prepare continue URL
         $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin')
+            ->setConstructorArgs(array(Request::createFromGlobals()))
             ->setMethods(array('redirect'))
             ->getMock();
 
         $loginMethod->expects($this->at(0))
             ->method('redirect');
 
-        $loginMethod->loginListener();
+        $loginMethod->setOnLoginRequest();
     }
 
     public function testRedirectWithToken()
@@ -25,6 +27,7 @@ class FacebookLoginTest extends PHPUnit_Framework_TestCase
         $user = $query->fetch();
 
         $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin')
+            ->setConstructorArgs(array(Request::createFromGlobals()))
             ->setMethods(array('redirect', 'setOrUpdateSSOCookie'))
             ->getMock();
 

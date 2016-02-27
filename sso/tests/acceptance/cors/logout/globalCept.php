@@ -3,6 +3,7 @@
 //login as joe@example.com
 require PROJECT_ROOT . '/sso/tests/acceptance/noscript/login/successCept.php';
 
+$I->maximizeWindow();
 $I->click('Global logout');
 $I->amOnPage('/?f=3');
 $I->wait(1);

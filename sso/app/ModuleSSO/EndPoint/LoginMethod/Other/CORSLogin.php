@@ -3,7 +3,7 @@ namespace ModuleSSO\EndPoint\LoginMethod\Other;
 
 use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\JWT;
-use ModuleSSO\Cookie;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * Class CORSLogin
@@ -24,16 +24,16 @@ class CORSLogin extends LoginMethod
      * @uses LoginMethod::setOrUpdateSSOCookie()
      * @uses JWT::generate()
      */
-    public function loginListener()
+    public function setOnLoginRequest()
     {
-        if(isset($_SERVER['HTTP_ORIGIN'])) {
-            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+        if($this->request->server->get('HTTP_ORIGIN')) {
+            header('Access-Control-Allow-Origin: ' . $this->request->server->get('HTTP_ORIGIN'));
             header('Content-Type: application/json');
             header('Access-Control-Allow-Credentials: true');
 
-            if (!empty($_GET['email']) && !empty($_GET['password'])) {
-                $email = $_GET['email'];
-                $password = $_GET['password'];
+            if ($this->request->query->get('email') && $this->request->query->get('password')) {
+                $email = $this->request->query->get('email');
+                $password = $this->request->query->get('password');
 
                 $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = ?");
                 $query->execute(array($email));
@@ -42,16 +42,16 @@ class CORSLogin extends LoginMethod
                     $this->setOrUpdateSSOCookie($user['id']);
                     $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
 
+                    //JsonResponse or json_encode does not work here
                     echo '{"status":"ok","' . \ModuleSSO::TOKEN_KEY . '":"' . $token . '"}';
                 } else {
-                    echo json_encode(array("status" => "fail", "code" => "user_not_found"));
+                    JsonResponse::create(array("status" => "fail", "code" => "user_not_found"))->send();
                 }
             } else {
-                echo json_encode(array("status" => "fail", "code" => "bad_login"));
+                JsonResponse::create(array("status" => "fail", "code" => "bad_login"))->send();
             }
         } else {
-            //probably won't reach this because of Same origin policy
-            echo json_encode(array("status" => "fail", "code" => "http_origin_not_set"));
+            JsonResponse::create(array("status" => "fail", "code" => "http_origin_not_set"))->send();
         }
     }
 
@@ -63,28 +63,28 @@ class CORSLogin extends LoginMethod
      */
     public function perform()
     {
-        if(isset($_SERVER['HTTP_ORIGIN'])){
-            $parsed = parse_url($_SERVER['HTTP_ORIGIN']);
+        if($this->request->server->get('HTTP_ORIGIN')){
+            $parsed = parse_url($this->request->server->get('HTTP_ORIGIN'));
             if(isset($parsed['host'])) {
                 if($this->isInWhiteList($parsed['host'])) {
-                    if(isset($_GET[\ModuleSSO::LOGIN_KEY]) && $_GET[\ModuleSSO::LOGIN_KEY] == 1) {
-                        $this->loginListener();
-                    } else if(isset($_GET[\ModuleSSO::CHECK_COOKIE_KEY]) && $_GET[\ModuleSSO::CHECK_COOKIE_KEY] == 1) {
-                        $this->checkCookieListener();
+                    if($this->request->query->get(\ModuleSSO::LOGIN_KEY) == 1) {
+                        $this->setOnLoginRequest();
+                    } else if($this->request->query->get(\ModuleSSO::CHECK_COOKIE_KEY) == 1) {
+                        $this->setOnCheckCookieRequest();
                     } else {
-                        echo json_encode(array("status" => "fail", "code" => "key_not_recognized"));
+                        JsonResponse::create(array("status" => "fail", "code" => "key_not_recognized"))->send();
                     }
                 } else {
                     //domain not allowed
-                    echo json_encode(array("status" => "fail", "code" => "domain_not_allowed"));
+                    JsonResponse::create(array("status" => "fail", "code" => "domain_not_allowed"))->send();
                 }
             } else {
                 //URL does not contain host
-                echo json_encode(array("status" => "fail", "code" => "bad_continue_url"));
+                JsonResponse::create(array("status" => "fail", "code" => "bad_continue_url"))->send();
             }
         } else {
             //probably won't reach this because of Same origin policy
-            echo json_encode(array("status" => "fail", "code" => "http_origin_not_set"));
+            JsonResponse::create(array("status" => "fail", "code" => "http_origin_not_set"))->send();
         }
     }
 
@@ -96,21 +96,21 @@ class CORSLogin extends LoginMethod
      * @uses LoginMethod::getUserFromCookie()
      * @uses JWT::generate()
      */
-    private function checkCookieListener()
+    public function setOnCheckCookieRequest()
     {
-        header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
-        header('Access-Control-Allow-Credentials: true');
-        header('Content-Type: application/json');
-        if(!isset($_COOKIE[Cookie::SECURE_SSO_COOKIE])) {
-            echo json_encode(array("status" => "no_cookie"));
-        } else {
-            $user = $this->getUserFromCookie();
-            if($user) {
+        if($this->request->server->get('HTTP_ORIGIN')) {
+            header('Access-Control-Allow-Origin: ' . $this->request->server->get('HTTP_ORIGIN'));
+            header('Access-Control-Allow-Credentials: true');
+            header('Content-Type: application/json');
+            if($user = $this->getUserFromCookie()) {
                 $token = (new JWT($this->getDomain()))->generate(array('uid' => $user['id']));
-                echo '{"status": "ok","' . \ModuleSSO::TOKEN_KEY . '":"' . $token . '","email": "' . $user['email'] . '"}';
+                echo '{"status":"ok","' . \ModuleSSO::TOKEN_KEY . '":"' . $token . '","email":"' . $user['email'] . '"}';
             } else {
-                echo json_encode(array("status" => "fail", 'code' => 'bad_cookie'));
+                JsonResponse::create(array("status" => "fail", "code" => "bad_cookie"))->send();
             }
+        } else {
+            //probably won't reach this because of Same origin policy
+            JsonResponse::create(array("status" => "fail", "code" => "http_origin_not_set"))->send();
         }
     }
 }

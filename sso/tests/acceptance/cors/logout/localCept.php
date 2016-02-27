@@ -2,6 +2,7 @@
 //login as joe@example.com
 require PROJECT_ROOT . '/sso/tests/acceptance/cors/login/successCept.php';
 
+$I->maximizeWindow();
 $I->click('Local logout');
 $I->wait(1); //test bug fix wait
 $I->amOnPage('/?f=3');

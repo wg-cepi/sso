@@ -4,11 +4,11 @@ require_once 'Autoloader.php';
 
 use ModuleSSO\Client;
 use ModuleSSO\BrowserSniffer;
-use ModuleSSO\Messages;
+use Symfony\Component\HttpFoundation\Request;
 
 Database::init();
 BrowserSniffer::init();
-$client = new Client();
+$client = new Client(Request::createFromGlobals());
 $client->pickLoginHelper();
 $client->run();
 ?>

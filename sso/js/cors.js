@@ -89,8 +89,15 @@ var WebgardenSSO = Class.create({
         if (this.ajaxRequest.readyState === XMLHttpRequest.DONE) {
             if (this.ajaxRequest.status === 200) {
                 var response = JSON.parse(this.ajaxRequest.response);
-                window.location.replace(window.location.origin + '/?sso_token=' + response.sso_token);
-
+                if(response.status === "ok") {
+                    window.location.replace(window.location.origin + '/?sso_token=' + response.sso_token);
+                } else {
+                    $('id-sso-form').insert({
+                        after: '<div id="messages"><div class="message warn">Login failed, please try again</div></div>'
+                    });
+                    $('messages').fadeOut(3000);
+                    $('id-pass').value = '';
+                }
             } else {
                 console.log('login, there was a problem with the request.');
             }

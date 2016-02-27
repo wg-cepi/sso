@@ -12,7 +12,7 @@ class CORSHelper extends LoginHelper
         $str = '<div class="sso">';
             $str .= '<div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">';
             $str .= '<span id="id-sso-login-header">Login to Webgarden SSO</span>';
-                $str .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_PLAIN_URL . '">'
+                $str .= '<form id="id-sso-form" action="' . CFG_SSO_URL . '">'
                         . '<div class="inputs">'
                                 . '<div class="input-email mdl-textfield mdl-js-textfield mdl-textfield--floating-label">'
                                     . '<input type="email" class="mdl-textfield__input" name="email" id="id-email"/>'

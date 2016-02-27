@@ -38,7 +38,6 @@ function registerUserListener()
             //creating new user
             if(!$user){
                 //password hash creation
-                $loginMethod = new \ModuleSSO\EndPoint\LoginMethod\HTTP\DirectLogin();
                 $hashedPassword = \ModuleSSO::generatePasswordHash($password);
                 //insert user
                 $query = \Database::$pdo->prepare("INSERT INTO users(email, password, first_name, last_name) VALUES ('$email', '$hashedPassword', '$firstName', '$lastName')");
@@ -146,7 +145,7 @@ $fbLoginLink = '<a class="mdl-navigation__link" href="' . $fbLoginUrl . '">Login
                         </div>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
     </body>
 </html>

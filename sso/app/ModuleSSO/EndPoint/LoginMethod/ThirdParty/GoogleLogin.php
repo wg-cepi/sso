@@ -1,6 +1,8 @@
 <?php
 namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * Class GoogleLogin
  * @package ModuleSSO\EndPoint\LoginMethod\ThirdParty
@@ -33,10 +35,14 @@ class GoogleLogin extends ThirdPartyLogin
     private $google;
 
     /**
-     * GoogleLogin constructor.
+     * GoogleLogin constructor
+     *
+     * @param Request $request
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
+        parent::__construct($request);
+
         $this->google = new \Google_Client();
         $this->google->setClientId(CFG_G_CLIENT_ID);
         $this->google->setClientSecret(CFG_G_CLIENT_SECRET);
@@ -46,7 +52,7 @@ class GoogleLogin extends ThirdPartyLogin
     /**
      * {@inheritdoc}
      */
-    public function loginListener()
+    public function setOnLoginRequest()
     {
         $_SESSION[\ModuleSSO::CONTINUE_KEY] = $this->getContinueUrl();
         $this->google->setScopes('email');
@@ -59,11 +65,10 @@ class GoogleLogin extends ThirdPartyLogin
     /**
      * {@inheritdoc}
      */
-    public function codeListener()
+    public function setOnCodeRequest()
     {
-        $this->continueUrlListener();
-        if (isset($_GET[ThirdPartyLogin::CODE_KEY])) {
-            $code = $_GET[ThirdPartyLogin::CODE_KEY];
+        $this->setOnContinueUrlRequest();
+        if ($code = $this->request->query->get(ThirdPartyLogin::CODE_KEY)) {
             try {
                 $this->google->authenticate($code);
                 if ($this->google->getAccessToken()) {

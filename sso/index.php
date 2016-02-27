@@ -7,12 +7,15 @@ use \ModuleSSO\EndPoint\LoginMethod\HTTP\DirectLogin;
 use \ModuleSSO\BrowserSniffer;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
+use Symfony\Component\HttpFoundation\Request;
 
 
 BrowserSniffer::init();
 Database::init();
-$endPoint = new EndPoint();
-$endPoint->setLoginMethod(new DirectLogin());
+
+$request = Request::createFromGlobals();
+$endPoint = new EndPoint($request);
+$endPoint->setLoginMethod(new DirectLogin($request));
 
 $fbLoginUrl = CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_SSO_ENDPOINT_INDEX_URL . '&' . \ModuleSSO::METHOD_KEY . '=' . FacebookLogin::METHOD_NUMBER;
 $googleLoginUrl = CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_SSO_ENDPOINT_INDEX_URL . '&' . \ModuleSSO::METHOD_KEY . '=' . GoogleLogin::METHOD_NUMBER;

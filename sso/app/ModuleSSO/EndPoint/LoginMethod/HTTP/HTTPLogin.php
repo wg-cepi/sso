@@ -24,11 +24,11 @@ abstract class HTTPLogin extends LoginMethod
      * @uses \ModuleSSO::RELOG_KEY
      * @uses \ModuleSSO\Cookie::SECURE_SSO_COOKIE
      */
-    public function loginListener()
+    public function setOnLoginRequest()
     {
-        if(isset($_GET['email']) && isset($_GET['password'])) {
-            $email =  $_GET['email'];
-            $password =  $_GET['password'];
+        if($this->request->query->get('email') && $this->request->query->get('password')) {
+            $email = $this->request->query->get('email');
+            $password = $this->request->query->get('password');
 
             $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = ?");
             $query->execute(array($email));
@@ -40,19 +40,15 @@ abstract class HTTPLogin extends LoginMethod
                 Messages::insert('Login failed, please try again', 'warn');
                 echo $this->showHTMLLoginForm();
             }
-        } else if(isset($_GET[\ModuleSSO::LOGIN_KEY])) {
-            if(isset($_COOKIE[Cookie::SECURE_SSO_COOKIE])) {
-                $user = $this->getUserFromCookie();
-                if($user) {
-                    $this->generateTokenAndRedirect($user);
-                } else {
-                    echo $this->showHTMLLoginForm();
-                }
+        } else if($this->request->query->get(\ModuleSSO::LOGIN_KEY)) {
+            if($user = $this->getUserFromCookie()) {
+                $this->generateTokenAndRedirect($user);
             } else {
+                Messages::insert('Login failed, please try again', 'warn');
                 echo $this->showHTMLLoginForm();
             }
         }
-        else if (isset($_GET[\ModuleSSO::RELOG_KEY])){
+        else if ($this->request->query->get(\ModuleSSO::RELOG_KEY)){
             echo $this->showHTMLLoginForm();
         }
         else {

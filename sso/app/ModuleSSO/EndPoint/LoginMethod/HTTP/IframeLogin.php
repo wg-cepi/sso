@@ -15,10 +15,12 @@ class IframeLogin extends HTTPLogin
     /**
      * Performs JavaScript redirect
      * {@inheritdoc}
+     *
+     * @uses JavaScriptRedirectResponse
      */
     public function redirect($url = CFG_SSO_ENDPOINT_URL, $code = 302)
     {
-        echo "<script>window.parent.location = '" . $url . "';</script>";
+        echo \JavaScriptRedirectResponse::create($url)->send();
     }
 
     /**
