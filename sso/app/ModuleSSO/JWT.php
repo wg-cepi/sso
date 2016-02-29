@@ -51,7 +51,7 @@ class JWT
     private $domain = null;
 
     /**
-     * JWT constructor.
+     * JWT constructor
      * @param string $domain
      * @param string $issuer
      * @param null $expiration

@@ -36,7 +36,7 @@ class FacebookLogin extends ThirdPartyLogin
     private $helper;
 
     /**
-     * FacebookLogin constructor.
+     * FacebookLogin constructor
      *
      * @param Request $request
      */

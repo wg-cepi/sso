@@ -26,5 +26,10 @@ interface ILoginMethod
      * Starts lifecycle of LoginMethod
      */
     public function perform();
+
+    /**
+     * Redirects user to given URL
+     */
+    public function redirect();
 }
 

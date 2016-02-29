@@ -35,7 +35,8 @@ class EndPoint extends \ModuleSSO
     );
 
     /**
-     * EndPoint constructor.
+     * EndPoint constructor
+     *
      * @param Request $request
      */
     public function __construct(Request $request)

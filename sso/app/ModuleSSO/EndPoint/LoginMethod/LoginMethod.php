@@ -65,7 +65,7 @@ abstract class LoginMethod implements ILoginMethod
     }
 
     /**
-     * Redirects user to given URL
+     * {@inheritdoc}
      * If no URL is given, redirects to default SSO endpoint URL
      *
      * @param string $url URL where user will be redirected
@@ -176,7 +176,7 @@ abstract class LoginMethod implements ILoginMethod
      * {@inheritdoc}
      *
      * @uses LoginMethod::setOnContinueUrlRequest()
-     * @uses setOnLoginRequest::setOnLoginReqeust()
+     * @uses setOnLoginRequest::setOnLoginRequest()
      * @uses LoginMethod::setOnLogoutRequest()
      */
     public function perform()

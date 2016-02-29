@@ -1,8 +1,6 @@
 <?php
 namespace ModuleSSO\Client;
 
-use Symfony\Component\HttpFoundation\Request;
-
 /**
  * Class LoginHelper
  * @package ModuleSSO\Client
