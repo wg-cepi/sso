@@ -136,6 +136,7 @@ Also works on Linux, you will need LAMP or PHP + MySQL + Apache.
         * email: testsso@wgz.cz
         * google pass: test1234//
         * facebook pass: test1234
+
 ## Playing with SSO
 ### Login scenario
 1. Access http://domain1.local and login
