@@ -34,7 +34,7 @@ abstract class ThirdPartyLogin extends LoginMethod
      */
     public function redirectWithToken($socialId, $socialEmail) {
          //try to find user in facebook login pair table
-        $query = \Database::$pdo->prepare("SELECT * FROM " . static::TABLE . " WHERE " . static::TABLE_COLUMN . " = '$socialId'");
+        $query = \Database::$pdo->prepare("SELECT * FROM " . static::TABLE . " WHERE " . static::TABLE_COLUMN . " = $socialId");
         $query->execute();
         $socialUser = $query->fetch();
                 
@@ -86,7 +86,7 @@ abstract class ThirdPartyLogin extends LoginMethod
                 $user = $userQuery->fetch();
             }
 
-            $query = \Database::$pdo->prepare("INSERT INTO " . static::TABLE . " (user_id, " . static::TABLE_COLUMN . ", created) VALUES (" . $user['id'] . ", '$socialId', " . time() . ")");
+            $query = \Database::$pdo->prepare("INSERT INTO " . static::TABLE . " (user_id, " . static::TABLE_COLUMN . ", created) VALUES (" . $user['id'] . ", $socialId, " . time() . ")");
             $query->execute();
 
             $this->setOrUpdateSSOCookie($user['id']);
