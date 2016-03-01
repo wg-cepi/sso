@@ -143,15 +143,19 @@ Also works on Linux, you will need LAMP or PHP + MySQL + Apache.
     * Email: joe@example.com
     * Password: joe
 2. Access http://domain2.local
-    1. You will see "Continue as joe@example.com"
-    2. Click "Continue as ..."
+    1. You will see **"Continue as joe@example.com"**
+    2. Click **"Continue as ..."**
     3. Now you are logged in as joe@example.com
         * You are on different domain
         * You did not have to enter your credentials again
-### Logout scenario
+
+### Local logout scenario
 1. Login http://domain1.local
-2. Press "Local logout" button
+2. Press **"Local logout"** button
 3. Go to http://domain2.local
 4. Login at http://domain2.local
 5. Now you are logged in at http://domain2.local
     * You are not logged in at http://domain1.local but you have logged in there
+    
+### Global logout scenario
+1. TODO
