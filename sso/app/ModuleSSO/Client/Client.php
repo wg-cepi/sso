@@ -1,6 +1,7 @@
 <?php
 namespace ModuleSSO;
 
+use ModuleSSO\Client\LoginHelper\Renderer\IRenderer;
 use ModuleSSO\EndPoint\LoginMethod\HTTP as ELHTTP;
 use ModuleSSO\Client\LoginHelper\HTTP;
 
@@ -16,6 +17,7 @@ use Lcobucci\JWT\Parser;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+
 
 /**
  * Class Client
@@ -38,6 +40,11 @@ class Client extends \ModuleSSO
      */
     public $request = null;
 
+    /**
+     * @var IRenderer
+     */
+    public $renderer = null;
+
     /** @var array $MAP */
     private static $MAP = array(
         ELHTTP\NoScriptLogin::METHOD_NUMBER => '\ModuleSSO\Client\LoginHelper\HTTP\NoScriptHelper',
@@ -52,11 +59,13 @@ class Client extends \ModuleSSO
      * Client constructor
      *
      * @param Request $request
+     * @param IRenderer $renderer
      * @param string $pubKeyPath Path to public key
      */
-    public function __construct(Request $request, $pubKeyPath = 'app/config/pk.pub')
+    public function __construct(Request $request, IRenderer $renderer, $pubKeyPath = 'app/config/pk.pub')
     {
         $this->request = $request;
+        $this->renderer = $renderer;
         $this->publicKey = file_get_contents($pubKeyPath);
     }
 
@@ -105,6 +114,7 @@ class Client extends \ModuleSSO
     public function setLoginHelper(Client\LoginHelper $loginHelper)
     {
         $this->loginHelper = $loginHelper;
+        $this->loginHelper->renderer = $this->renderer->selectRenderer($this->loginHelper);
     }
 
     /**
@@ -144,6 +154,7 @@ class Client extends \ModuleSSO
             } else {
                 $this->loginHelper = new HTTP\NoScriptHelper();
             }
+            $this->loginHelper->renderer = $this->renderer->selectRenderer($this->loginHelper);
             return;
         }
         
@@ -153,8 +164,9 @@ class Client extends \ModuleSSO
             /** @var \ModuleSSO\Client\LoginHelper $loginHelper */
             $loginHelper = new $helper();
             if($loginHelper->isSupported()) {
-                 $this->loginHelper = $loginHelper;
-                 break;
+                $this->loginHelper = $loginHelper;
+                $this->loginHelper->renderer = $this->renderer->selectRenderer($this->loginHelper);
+                break;
             }
         } 
     }
@@ -187,7 +199,7 @@ class Client extends \ModuleSSO
      * @uses Client::getContinueUrl()
      */
     public function showLogin() {
-        echo $this->loginHelper->showLogin($this->getContinueUrl());
+        $this->loginHelper->showLogin($this->getContinueUrl());
     }
 
     /**

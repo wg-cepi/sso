@@ -1,12 +1,18 @@
 <?php
 namespace ModuleSSO\Client;
 
+use ModuleSSO\Client\LoginHelper\Renderer\IRenderer;
 /**
  * Class LoginHelper
  * @package ModuleSSO\Client
  */
 abstract class LoginHelper
 {
+    /**
+     * @var IRenderer
+     */
+    public $renderer = null;
+
     /**
      * Shows login HTML login form
      *

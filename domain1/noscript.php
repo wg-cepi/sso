@@ -5,9 +5,13 @@ require_once 'Autoloader.php';
 use ModuleSSO\Client;
 use ModuleSSO\Client\LoginHelper\HTTP\NoScriptHelper;
 use Symfony\Component\HttpFoundation\Request;
+use ModuleSSO\Client\LoginHelper\Renderer\HTML\HTMLRenderer;
 
 Database::init();
-$client = new Client(Request::createFromGlobals());
+
+$request = Request::createFromGlobals();
+$renderer = new HTMLRenderer();
+$client = new Client($request, $renderer);
 $client->setLoginHelper(new NoScriptHelper());
 $client->run();
 ?>

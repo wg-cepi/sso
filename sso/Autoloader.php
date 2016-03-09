@@ -31,30 +31,42 @@ $dirs = array(
     APPDIR . '/ModuleSSO/Client/LoginHelper/HTTP/',
     APPDIR . '/ModuleSSO/Client/LoginHelper/Other/',
     APPDIR . '/ModuleSSO/Client/LoginHelper/ThirdParty/',
-    
+
+    //APPDIR . '/ModuleSSO/EndPoint/LoginMethod/Renderer/',
+    //APPDIR . '/ModuleSSO/EndPoint/LoginMethod/Renderer/HTML/',
+
+    //APPDIR . '/ModuleSSO/Client/LoginHelper/Renderer/',
+    //APPDIR . '/ModuleSSO/Client/LoginHelper/Renderer/HTML/',
+
     
 );
 function autoloadConfigAndUtils()
 {
     $filename = APPDIR . "/config/config.php";
     if (is_readable($filename) && file_exists($filename)) {
-        require_once ($filename);
+        require_once $filename;
     }
     
     $filename = APPDIR . "/Utils.php";
     if (is_readable($filename) && file_exists($filename)) {
-        require_once ($filename);
+        require_once $filename;
     }
 }
 function autoloadModuleSSO($fullClassName) {
     $className = getClassName($fullClassName);
+    $namespacedName = APPDIR . '/' . $fullClassName . '.php';
 
-    global $dirs;
-    foreach ($dirs as $dir) {
-        $filename = $dir . $className . ".php";
-        if (is_readable($filename) && file_exists($filename)) {
-            require_once ($filename);
-            return;
+    if(is_readable($namespacedName) && file_exists($namespacedName)) {
+        //echo $namespacedName . "<br/>";
+        require_once $namespacedName;
+    } else {
+        global $dirs;
+        foreach ($dirs as $dir) {
+            $filename = $dir . $className . ".php";
+            if (is_readable($filename) && file_exists($filename)) {
+                require_once $filename;
+                return;
+            }
         }
     }
 }

@@ -1,19 +1,11 @@
 <?php
 namespace ModuleSSO\Client\LoginHelper\HTTP;
 
-use ModuleSSO\EndPoint\LoginMethod\HTTP\IframeLogin;
-
 class IframeHelper extends HTTPHelper
 {
     public function showLogin($continue = '')
     {
-        $data = array(
-                \ModuleSSO::METHOD_KEY => IframeLogin::METHOD_NUMBER,
-                \ModuleSSO::CONTINUE_KEY => $continue
-                );
-        $query = http_build_query($data);
-        $src = CFG_SSO_ENDPOINT_URL . '?' . $query;
-        return "<div><iframe id='id-iframe-login' src='$src' scrolling='no' frameborder='0'></iframe></div>";
+        $this->renderer->renderLogin(array('continueUrl' => $continue));
     }
     
     public function appendStyles()

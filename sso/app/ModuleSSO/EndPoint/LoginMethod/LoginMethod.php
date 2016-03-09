@@ -5,6 +5,7 @@ use ModuleSSO\Cookie;
 use ModuleSSO\JWT;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use ModuleSSO\EndPoint\LoginMethod\Renderer\IRenderer;
 
 /**
  * Class LoginMethod
@@ -13,6 +14,16 @@ use Symfony\Component\HttpFoundation\Request;
  */
 abstract class LoginMethod implements ILoginMethod
 {
+    /**
+     * @var Request $request
+     */
+    public $request = null;
+
+    /**
+     * @var IRenderer
+     */
+    public $renderer = null;
+
     /**
      * Domain where the login request started
      * @var string $domain
@@ -24,11 +35,6 @@ abstract class LoginMethod implements ILoginMethod
      * @var string $continueUrl
      */
     protected $continueUrl = CFG_SSO_ENDPOINT_URL;
-
-    /**
-     * @var Request $request
-     */
-    public $request = null;
 
     public function __construct(Request $request)
     {
@@ -130,7 +136,11 @@ abstract class LoginMethod implements ILoginMethod
                 $query->execute();
                 $user = $query->fetch();
                 if($user) {
-                    $this->setOrUpdateSSOCookie($user['id']);
+                    //protection against refresh spamming maniacs
+                    if(isset($_SESSION['lastRequestTime']) && $_SESSION['lastRequestTime'] < time() - 5 ) {
+                        $this->setOrUpdateSSOCookie($user['id']);
+                    }
+                    $_SESSION['lastRequestTime'] = time();
                     return $user;
                 }
             }
@@ -196,6 +206,7 @@ abstract class LoginMethod implements ILoginMethod
      */
     protected function setOrUpdateSSOCookie($userId)
     {
+
         $identifier = md5(Cookie::SALT . md5(Cookie::generateHash($userId) . Cookie::SALT));
         $token = md5(uniqid(rand(), TRUE));
         $timeout = time() + 60 * 60 * 24 * 7;
@@ -204,6 +215,7 @@ abstract class LoginMethod implements ILoginMethod
 
         $query = \Database::$pdo->prepare("UPDATE users SET cookie = '$identifier:$token' WHERE id = $userId");
         $query->execute();
+
     }
 
     /**

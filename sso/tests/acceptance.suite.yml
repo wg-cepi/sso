@@ -11,7 +11,9 @@ modules:
             browser: 'firefox'
             url: http://domain1.local
             restart: true
-            clear_cookie: true
+            clear_cookies: true
+            #capabilities:
+              #firefox_profile: 'C:\wamp\www\sso\sso\tests\firefoxProfile\codeceptprofile.zip.b64'
         #- PhpBrowser:
          #   url: http://domain1.local
         - \Helper\Acceptance

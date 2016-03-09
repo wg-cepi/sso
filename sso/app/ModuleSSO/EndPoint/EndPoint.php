@@ -6,6 +6,7 @@ use ModuleSSO\EndPoint\LoginMethod;
 use ModuleSSO\EndPoint\LoginMethod\HTTP;
 use ModuleSSO\EndPoint\LoginMethod\Other;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty;
+use ModuleSSO\EndPoint\LoginMethod\Renderer\IRenderer;
 
 /**
  * Class EndPoint
@@ -14,17 +15,22 @@ use ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 class EndPoint extends \ModuleSSO
 {
     /**
-     * @var \ModuleSSO\EndPoint\LoginMethod $loginMethod
+     * @var \ModuleSSO\EndPoint\LoginMethod
      */
     private $loginMethod = null;
 
     /**
-     * @var Request $request
+     * @var Request
      */
     public $request = null;
 
     /**
-     * @var array $MAP
+     * @var IRenderer|null
+     */
+    public $renderer = null;
+
+    /**
+     * @var array
      */
     private static $MAP = array(
         HTTP\NoScriptLogin::METHOD_NUMBER => '\ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin',
@@ -38,10 +44,12 @@ class EndPoint extends \ModuleSSO
      * EndPoint constructor
      *
      * @param Request $request
+     * @param IRenderer $renderer
      */
-    public function __construct(Request $request)
+    public function __construct(Request $request, IRenderer $renderer)
     {
         $this->request = $request;
+        $this->renderer = $renderer;
     }
 
     /**
@@ -70,6 +78,8 @@ class EndPoint extends \ModuleSSO
         } else {
             $this->loginMethod = new HTTP\DirectLogin($this->request);
         }
+
+       $this->loginMethod->renderer = $this->renderer->selectRenderer($this->loginMethod);
     }
 
     /**
@@ -108,5 +118,6 @@ class EndPoint extends \ModuleSSO
     public function setLoginMethod(LoginMethod $loginMethod)
     {
         $this->loginMethod = $loginMethod;
+        $this->loginMethod->renderer = $this->renderer->selectRenderer($this->loginMethod);
     }
 }

@@ -5,10 +5,14 @@ require_once 'Autoloader.php';
 use ModuleSSO\Client;
 use ModuleSSO\BrowserSniffer;
 use Symfony\Component\HttpFoundation\Request;
+use ModuleSSO\Client\LoginHelper\Renderer\HTML\HTMLRenderer;
 
 Database::init();
 BrowserSniffer::init();
-$client = new Client(Request::createFromGlobals());
+
+$request = Request::createFromGlobals();
+$renderer = new HTMLRenderer();
+$client = new Client($request, $renderer);
 $client->pickLoginHelper();
 $client->run();
 ?>

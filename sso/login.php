@@ -10,10 +10,15 @@ use ModuleSSO\BrowserSniffer;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
 use Symfony\Component\HttpFoundation\Request;
+use ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRenderer;
 
 BrowserSniffer::init();
 Database::init();
-$endPoint = new EndPoint(Request::createFromGlobals());
+
+$request = Request::createFromGlobals();
+$renderer = new HTMLRenderer();
+
+$endPoint = new EndPoint($request ,$renderer);
 $endPoint->pickLoginMethod();
 
 $fbLoginUrl = CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_SSO_ENDPOINT_INDEX_URL . '&' . \ModuleSSO::METHOD_KEY . '=' . FacebookLogin::METHOD_NUMBER;
@@ -27,6 +32,7 @@ $fbLoginLink = '<a class="mdl-navigation__link" href="' . $fbLoginUrl . '">Login
     <head>
         <title><?php echo CFG_SSO_DISPLAY_NAME ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="icon" type="image/png" href="/img/favicon.png" />
         <link rel="stylesheet" href="css/material.min.css">
         <link rel="stylesheet" href="css/common.styles.css">
         <script src="js/common.js"></script>

@@ -9,39 +9,14 @@ class CORSHelper extends LoginHelper
 {
     public function showLogin($continue = '')
     {
-        $str = '<div class="sso">';
-            $str .= '<div id="id-login-area" class="mdl-card--border mdl-shadow--2dp">';
-            $str .= '<span id="id-sso-login-header">Login to Webgarden SSO</span>';
-                $str .= '<form id="id-sso-form" action="' . CFG_SSO_URL . '">'
-                        . '<div class="inputs">'
-                                . '<div class="input-email mdl-textfield mdl-js-textfield mdl-textfield--floating-label">'
-                                    . '<input type="email" class="mdl-textfield__input" name="email" id="id-email"/>'
-                                    . '<label for="id-email" class="mdl-textfield__label">'
-                                        . 'Email'
-                                    . '</label>'
-
-                                . '</div>'
-                                . '<div class="input-pass mdl-textfield mdl-js-textfield mdl-textfield--floating-label">'
-                                    . '<label for="id-pass" class="mdl-textfield__label">'
-                                        . 'Password'
-                                    . '</label>'
-                                    . '<input type="password" class="mdl-textfield__input" name="password" id="id-pass"/>'
-                                . '</div>'
-                        . '</div>'
-                        . '<div class="button-wrap">'
-                            . '<input type="submit" class="button-full mdl-button mdl-js-button mdl-button--raised" id="id-login-button" value="Login with SSO"/>'
-                        .'</div>'
-                    . '</form>';
-                $str .= Messages::showMessages();
-            $str .= '</div>';
-        $str .= '</div>';
-        return $str;
+       $this->renderer->renderLogin();
     }
     
     public function appendScripts()
     {
-        return "<script src='http://sso.local/js/prototype.js'></script>
-        <script src='http://sso.local/js/cors.js'></script>";
+        $script =  '<script src="' . CFG_SSO_URL . '/js/prototype.js"></script>';
+        $script .= '<script src="' . CFG_SSO_URL . '/js/cors.js"></script>';
+        return $script;
         
     }
     
