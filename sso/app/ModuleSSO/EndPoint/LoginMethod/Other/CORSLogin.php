@@ -26,7 +26,8 @@ class CORSLogin extends LoginMethod
      */
     public function setOnLoginRequest()
     {
-        if($this->request->server->get('HTTP_ORIGIN')) {
+        $origin = $this->getOrigin();
+        if ($this->originIsValid($origin)) {
             header('Access-Control-Allow-Origin: ' . $this->request->server->get('HTTP_ORIGIN'));
             header('Content-Type: application/json');
             header('Access-Control-Allow-Credentials: true');
@@ -63,7 +64,8 @@ class CORSLogin extends LoginMethod
      */
     public function perform()
     {
-        if($this->request->server->get('HTTP_ORIGIN')){
+        $origin = $this->getOrigin();
+        if ($this->originIsValid($origin)) {
             $parsed = parse_url($this->request->server->get('HTTP_ORIGIN'));
             if(isset($parsed['host'])) {
                 if($this->isInWhiteList($parsed['host'])) {
@@ -98,7 +100,8 @@ class CORSLogin extends LoginMethod
      */
     public function setOnCheckCookieRequest()
     {
-        if($this->request->server->get('HTTP_ORIGIN')) {
+        $origin = $this->getOrigin();
+        if ($this->originIsValid($origin)) {
             header('Access-Control-Allow-Origin: ' . $this->request->server->get('HTTP_ORIGIN'));
             header('Access-Control-Allow-Credentials: true');
             header('Content-Type: application/json');
@@ -111,6 +114,23 @@ class CORSLogin extends LoginMethod
         } else {
             //probably won't reach this because of Same origin policy
             JsonResponse::create(array("status" => "fail", "code" => "http_origin_not_set"))->send();
+        }
+    }
+
+    protected function getOrigin()
+    {
+        $origin = $this->request->server->get('HTTP_ORIGIN');
+        $host = $this->request->server->get('HTTP_HOST');
+        return $origin ? $origin : ($host ? 'http://' . str_replace('www.', '', $host) : null);
+    }
+
+    protected function originIsValid($origin)
+    {
+        $parsed = parse_url($origin);
+        if (isset($parsed['host']) && $this->isInWhiteList($parsed['host'])) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

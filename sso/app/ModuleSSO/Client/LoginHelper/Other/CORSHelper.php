@@ -14,7 +14,7 @@ class CORSHelper extends LoginHelper
     
     public function appendScripts()
     {
-        $script =  '<script src="' . CFG_SSO_URL . '/js/prototype.js"></script>';
+        $script = '<script src="' . CFG_SSO_URL . '/js/prototype.js"></script>';
         $script .= '<script src="' . CFG_SSO_URL . '/js/cors.js"></script>';
         return $script;
         
@@ -28,9 +28,8 @@ class CORSHelper extends LoginHelper
     public function isSupported()
     {
         global $CORSBrowsers;
-        $browser = new BrowserSniffer();
-        if(isset($CORSBrowsers[$browser->getName()])) {
-            if($browser->getVersion() >= $CORSBrowsers[$browser->getName()]) {
+        if(isset($CORSBrowsers[BrowserSniffer::getName()])) {
+            if(BrowserSniffer::getVersion() >= $CORSBrowsers[BrowserSniffer::getName()]) {
                 return true;
             }
         } else {

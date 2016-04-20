@@ -14,16 +14,6 @@ abstract class LoginHelper
     public $renderer = null;
 
     /**
-     * Shows login HTML login form
-     *
-     * @param string $continue URL where user should continue in login process
-     * @return mixed
-     *
-     * @uses ModuleSSO\Messages::showMessages()
-     */
-    abstract public function showLogin($continue = '');
-
-    /**
      * Method for appending JavaScript scripts to HTML
      *
      * @return string
