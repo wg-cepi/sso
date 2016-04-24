@@ -8,7 +8,10 @@ class IframeLoginTest extends PHPUnit_Framework_TestCase
     public function testHTMLLoginForm()
     {
         $loginMethod = new IframeLogin(Request::createFromGlobals());
-        $this->assertRegExp('/.*<input type="hidden" name="' . \ModuleSSO::METHOD_KEY . '" value="' . IframeLogin::METHOD_NUMBER . '"\/>.*/', $loginMethod->showHTMLLoginForm());
+        $loginMethod->setRenderer(new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\IframeLoginRenderer());
+        $loginMethod->showLoginForm();
+
+        $this->expectOutputRegex('/.*<input type="hidden" name="' . \ModuleSSO::METHOD_KEY . '" value="' . IframeLogin::METHOD_NUMBER . '"\/>.*/');
 
     }
 }

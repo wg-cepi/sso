@@ -13,7 +13,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testPickLoginHelper()
     {
-        $client = new Client(Request::createFromGlobals(), $this->publicKeyPath);
+        $renderer = new Client\LoginHelper\Renderer\HTML\HTMLRenderer();
+        $client = new Client(Request::createFromGlobals(), $renderer, $this->publicKeyPath);
 
         //1. test forced pick
         $_GET[ModuleSSO::FORCED_METHOD_KEY] = 1;
@@ -60,7 +61,9 @@ class ClientTest extends PHPUnit_Framework_TestCase
     public function testGetContinueUrl()
     {
         require_once PROJECT_ROOT . '/domain1/app/config/config.php';
-        $client = new Client(Request::createFromGlobals(), $this->publicKeyPath);
+
+        $renderer = new Client\LoginHelper\Renderer\HTML\HTMLRenderer();
+        $client = new Client(Request::createFromGlobals(), $renderer, $this->publicKeyPath);
 
         //1. test empty request uri
         $_SERVER['REQUEST_URI'] = '';
@@ -86,7 +89,8 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testGetUser()
     {
-        $client = new Client(Request::createFromGlobals(), $this->publicKeyPath);
+        $renderer = new Client\LoginHelper\Renderer\HTML\HTMLRenderer();
+        $client = new Client(Request::createFromGlobals(), $renderer, $this->publicKeyPath);
         $query = \Database::$pdo->prepare("SELECT * FROM users WHERE id = 1");
         $query->execute();
         $testUser = $query->fetch();

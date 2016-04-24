@@ -22,7 +22,7 @@ abstract class LoginMethod implements ILoginMethod
     /**
      * @var IRenderer
      */
-    public $renderer = null;
+    protected $renderer = null;
 
     /**
      * Domain where the login request started
@@ -58,6 +58,11 @@ abstract class LoginMethod implements ILoginMethod
     public function getContinueUrl()
     {
         return $this->continueUrl;
+    }
+
+    public function setRenderer(IRenderer $renderer)
+    {
+        $this->renderer = $renderer;
     }
 
     /**

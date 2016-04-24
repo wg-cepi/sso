@@ -3,6 +3,7 @@
 use \ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin;
 use ModuleSSO\Cookie;
 use Symfony\Component\HttpFoundation\Request;
+use  \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRenderer;
 
 class HTTPLoginTest extends PHPUnit_Framework_TestCase
 {
@@ -17,6 +18,7 @@ class HTTPLoginTest extends PHPUnit_Framework_TestCase
 
         //any class that uses HTTPLogin::loginListener()
         $loginMethod = new NoScriptLogin(Request::createFromGlobals());
+        $loginMethod->setRenderer(new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\NoScriptLoginRenderer());
         $loginMethod->setOnLoginRequest();
 
         $this->expectOutputRegex('/.*Login failed, please try again.*/');
@@ -51,11 +53,13 @@ class HTTPLoginTest extends PHPUnit_Framework_TestCase
         //any class that uses HTTPLogin::loginListener()
         $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')
             ->setConstructorArgs(array(Request::createFromGlobals()))
-            ->setMethods(array('showHTMLLoginForm'))
+            ->setMethods(array('showLoginForm'))
             ->getMock();
 
+        $loginMethod->setRenderer(new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\NoScriptLoginRenderer());
+
         $loginMethod->expects($this->once())
-            ->method('showHTMLLoginForm');
+            ->method('showLoginForm');
 
         $loginMethod->setOnLoginRequest();
 
@@ -70,15 +74,20 @@ class HTTPLoginTest extends PHPUnit_Framework_TestCase
             ->setMethods(array('getUserFromCookie'))
             ->getMock();
 
-        $loginMethod->method('getUserFromCookie')->willReturn(array('id' => 1, 'email' => 'joe@example.com'));
+        $loginMethod->setRenderer(new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\NoScriptLoginRenderer());
 
-        $loginMethod->expects($this->at(0))
+        $loginMethod->method('getUserFromCookie')->willReturn(array('id' => 1, 'email' => 'joe@example.com'));
+        $loginMethod->expects($this->any())
             ->method('getUserFromCookie');
 
+        $loginMethod->showHTML();
 
-        $this->assertRegexp('/.*joe@example\.com.*Log in as another user.*/', $loginMethod->showHTML());
 
+        $this->expectOutputRegex('/.*joe@example\.com.*Log in as another user.*/');
+    }
 
+    public function testShowHTML2()
+    {
         //2. User is not in cookie
         //any class that uses HTTPLogin::showHTML()
         $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')
@@ -86,13 +95,16 @@ class HTTPLoginTest extends PHPUnit_Framework_TestCase
             ->setMethods(array('getUserFromCookie'))
             ->getMock();
 
+        $loginMethod->setRenderer(new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\NoScriptLoginRenderer());
+
         $loginMethod->method('getUserFromCookie')->willReturn(null);
 
-        $loginMethod->expects($this->at(0))
+        $loginMethod->expects($this->any())
             ->method('getUserFromCookie');
 
-        $this->assertRegexp('/.*Login to Webgarden SSO.*Email.*Password.*/', $loginMethod->showHTML());
+        $loginMethod->showHTML();
 
+        $this->expectOutputRegex('/.*Login to Webgarden SSO.*Email.*Password.*/');
     }
 
 

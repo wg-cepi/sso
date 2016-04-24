@@ -158,4 +158,10 @@ Also works on Linux, you will need LAMP or PHP + MySQL + Apache.
     * You are not logged in at http://domain1.local but you have logged in there
     
 ### Global logout scenario
-1. TODO
+1. Login http://domain1.local
+2. Navigate to http://domain2.local
+3. You will see **"Continue as ..."**
+4. Navigate to http://domain1.local
+5. Press **"Global logout"** button
+6. Navigate to http://domain2.local
+7. Yo WON'T see **"Continue as ..."**, because you have logged yourself from SSO

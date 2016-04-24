@@ -6,7 +6,8 @@ class EndPointTest extends PHPUnit_Framework_TestCase
 
     public function testPickLoginMethod()
     {
-        $endPoint = new ModuleSSO\EndPoint(Request::createFromGlobals());
+        $renderer = new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRenderer();
+        $endPoint = new ModuleSSO\EndPoint(Request::createFromGlobals(), $renderer);
 
         $_GET['m'] = 1;
         $endPoint->request = Request::createFromGlobals();
@@ -47,8 +48,10 @@ class EndPointTest extends PHPUnit_Framework_TestCase
 
     public function testRun()
     {
+        $renderer = new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRenderer();
         $request = Request::createFromGlobals();
-        $endPoint = new ModuleSSO\EndPoint($request);
+
+        $endPoint = new ModuleSSO\EndPoint($request, $renderer);
 
         $loginMethod = $this->getMockBuilder('ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin')
             ->setConstructorArgs(array($request))

@@ -7,7 +7,10 @@ class NoScriptLoginTest extends PHPUnit_Framework_TestCase
     public function testHTMLLoginForm()
     {
         $loginMethod = new NoScriptLogin(Request::createFromGlobals());
-        $this->assertRegExp('/.*<input type="hidden" name="' . \ModuleSSO::METHOD_KEY . '" value="' . NoScriptLogin::METHOD_NUMBER . '"\/>.*/', $loginMethod->showHTMLLoginForm());
+        $loginMethod->setRenderer(new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\NoScriptLoginRenderer());
+        $loginMethod->showLoginForm();
+
+        $this->expectOutputRegex('/.*<input type="hidden" name="' . \ModuleSSO::METHOD_KEY . '" value="' . NoScriptLogin::METHOD_NUMBER . '"\/>.*/');
     }
 
 }

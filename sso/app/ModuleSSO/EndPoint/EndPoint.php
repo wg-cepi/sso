@@ -79,7 +79,7 @@ class EndPoint extends \ModuleSSO
             $this->loginMethod = new HTTP\DirectLogin($this->request);
         }
 
-       $this->loginMethod->renderer = $this->renderer->selectRenderer($this->loginMethod);
+       $this->loginMethod->setRenderer($this->renderer->selectRenderer($this->loginMethod));
     }
 
     /**
@@ -118,6 +118,6 @@ class EndPoint extends \ModuleSSO
     public function setLoginMethod(LoginMethod $loginMethod)
     {
         $this->loginMethod = $loginMethod;
-        $this->loginMethod->renderer = $this->renderer->selectRenderer($this->loginMethod);
+        $this->loginMethod->setRenderer($this->renderer->selectRenderer($this->loginMethod));
     }
 }

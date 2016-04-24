@@ -52,7 +52,7 @@ class CORSLogin extends LoginMethod
                 JsonResponse::create(array("status" => "fail", "code" => "bad_login"))->send();
             }
         } else {
-            JsonResponse::create(array("status" => "fail", "code" => "http_origin_not_set"))->send();
+            JsonResponse::create(array("status" => "fail", "code" => "http_origin_not_set_or_invalid"))->send();
         }
     }
 
@@ -68,17 +68,12 @@ class CORSLogin extends LoginMethod
         if ($this->originIsValid($origin)) {
             $parsed = parse_url($this->request->server->get('HTTP_ORIGIN'));
             if(isset($parsed['host'])) {
-                if($this->isInWhiteList($parsed['host'])) {
-                    if($this->request->query->get(\ModuleSSO::LOGIN_KEY) == 1) {
-                        $this->setOnLoginRequest();
-                    } else if($this->request->query->get(\ModuleSSO::CHECK_COOKIE_KEY) == 1) {
-                        $this->setOnCheckCookieRequest();
-                    } else {
-                        JsonResponse::create(array("status" => "fail", "code" => "key_not_recognized"))->send();
-                    }
+                if($this->request->query->get(\ModuleSSO::LOGIN_KEY) == 1) {
+                    $this->setOnLoginRequest();
+                } else if($this->request->query->get(\ModuleSSO::CHECK_COOKIE_KEY) == 1) {
+                    $this->setOnCheckCookieRequest();
                 } else {
-                    //domain not allowed
-                    JsonResponse::create(array("status" => "fail", "code" => "domain_not_allowed"))->send();
+                    JsonResponse::create(array("status" => "fail", "code" => "key_not_recognized"))->send();
                 }
             } else {
                 //URL does not contain host
@@ -86,7 +81,7 @@ class CORSLogin extends LoginMethod
             }
         } else {
             //probably won't reach this because of Same origin policy
-            JsonResponse::create(array("status" => "fail", "code" => "http_origin_not_set"))->send();
+            JsonResponse::create(array("status" => "fail", "code" => "http_origin_not_set_or_invalid"))->send();
         }
     }
 

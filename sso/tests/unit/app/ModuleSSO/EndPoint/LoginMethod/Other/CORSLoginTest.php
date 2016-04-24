@@ -15,7 +15,7 @@ class CORSLoginTest extends PHPUnit_Framework_TestCase
         $_GET['email'] = 'joe@example.com';
         $_GET['password'] = 'joe';
 
-        $_SERVER['HTTP_ORIGIN'] = 'domain1.local';
+        $_SERVER['HTTP_ORIGIN'] = 'http://domain1.local';
 
         $loginMethod = new CORSLogin(Request::createFromGlobals());
 
@@ -74,7 +74,7 @@ class CORSLoginTest extends PHPUnit_Framework_TestCase
         $loginMethod = new CORSLogin(Request::createFromGlobals());
 
         $loginMethod->setOnLoginRequest();
-        $this->expectOutputString(json_encode(array("status" => "fail", "code" => "http_origin_not_set")));
+        $this->expectOutputString(json_encode(array("status" => "fail", "code" => "http_origin_not_set_or_invalid")));
     }
 
     public function testPerformLoginRequest()
@@ -122,7 +122,7 @@ class CORSLoginTest extends PHPUnit_Framework_TestCase
         $loginMethod = new CORSLogin(Request::createFromGlobals());
         $loginMethod->perform();
 
-        $this->expectOutputString('{"status":"fail","code":"domain_not_allowed"}');
+        $this->expectOutputString('{"status":"fail","code":"http_origin_not_set_or_invalid"}');
 
     }
 
