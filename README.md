@@ -12,7 +12,8 @@ Also works on Linux, you will need LAMP or PHP + MySQL + Apache.
     * assume, that you have installed WAMP to `C:/wamp`
     * you can create virtual domains (each in separated file) in `C:/wamp/vhosts` folder and include them in `httpd.conf` with `IncludeOptional "C:/wamp/vhosts/*"`
 
-3. Add virtual domains to `httpd.conf` from [vhosts dump](dumps/vhosts.txt)
+3. Add virtual domains to Apache `httpd.conf` from [vhosts dump](dumps/vhosts.txt)
+    * `httpd.conf` is located in `C:\wamp\bin\apache\apacheX.Y.Z` folder
 
 4. Create a file `googleLogin.php` in `C:/wamp/www` with following contents. This will redirect response from Google API to Webgarden SSO Endpoint
 
@@ -70,4 +71,4 @@ Also works on Linux, you will need LAMP or PHP + MySQL + Apache.
 4. Navigate to http://domain1.local
 5. Press **"Global logout"** button
 6. Navigate to http://domain2.local
-7. You WON'T see **"Continue as ..."**, because you have logged yourself from SSO
+7. You WON'T see **"Continue as ..."**, because you have logged yourself out from SSO
