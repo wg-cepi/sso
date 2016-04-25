@@ -1,0 +1,16 @@
+<VirtualHost *:80>
+  DocumentRoot "C:/wamp/www/sso/domain2"
+  ServerName domain2.local
+  ServerAlias *.domain2.local domain2.local
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot "C:/wamp/www/sso/domain1"
+  ServerName domain1.local
+  ServerAlias *.domain1.local domain1.local
+</VirtualHost>
+
+<VirtualHost *:80>
+  DocumentRoot "C:/wamp/www/sso/sso"
+  ServerName sso.local
+</VirtualHost>

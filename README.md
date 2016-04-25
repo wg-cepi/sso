@@ -12,26 +12,7 @@ Also works on Linux, you will need LAMP or PHP + MySQL + Apache.
     * assume, that you have installed WAMP to `C:/wamp`
     * you can create virtual domains (each in separated file) in `C:/wamp/vhosts` folder and include them in `httpd.conf` with `IncludeOptional "C:/wamp/vhosts/*"`
 
-3. Modify virtual domains in `httpd.conf` or create them in `vhosts` folder
-
-    ```text
-    <VirtualHost *:80>
-      DocumentRoot "C:/wamp/www/sso/domain2"
-      ServerName domain2.local
-      ServerAlias *.domain2.local domain2.local
-    </VirtualHost>
-    
-    <VirtualHost *:80>
-      DocumentRoot "C:/wamp/www/sso/domain1"
-      ServerName domain1.local
-      ServerAlias *.domain1.local domain1.local
-    </VirtualHost>
-    
-    <VirtualHost *:80>
-      DocumentRoot "C:/wamp/www/sso/sso"
-      ServerName sso.local
-    </VirtualHost>
-    ```
+3. Add virtual domains to `httpd.conf` from [vhosts dump](dumps/vhosts.txt)
 
 4. Create a file `googleLogin.php` in `C:/wamp/www` with following contents. This will redirect response from Google API to Webgarden SSO Endpoint
 
@@ -51,7 +32,7 @@ Also works on Linux, you will need LAMP or PHP + MySQL + Apache.
     * `CFG_SQL_USERNAME`
     * `CFG_SQL_PASSWORD`
 
-6. Create database (use name in `CFG_SQL_DBNAME`) and import SQL dump [Read more words!](dumps/sso.sql)
+6. Create database (use name in `CFG_SQL_DBNAME`) and import [SQL dump](dumps/sso.sql)
 
 6. Access http://sso.local. You should see Webgarden SSO endpoint.
 7. You have 3 pre-created users
