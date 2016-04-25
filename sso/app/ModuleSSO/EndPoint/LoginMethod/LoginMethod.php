@@ -36,6 +36,11 @@ abstract class LoginMethod implements ILoginMethod
      */
     protected $continueUrl = CFG_SSO_ENDPOINT_URL;
 
+
+    /**
+     * LoginMethod constructor.
+     * @param Request $request
+     */
     public function __construct(Request $request)
     {
         $this->request = $request;
@@ -60,6 +65,10 @@ abstract class LoginMethod implements ILoginMethod
         return $this->continueUrl;
     }
 
+    /**
+     * Sets renderer
+     * @param IRenderer $renderer
+     */
     public function setRenderer(IRenderer $renderer)
     {
         $this->renderer = $renderer;

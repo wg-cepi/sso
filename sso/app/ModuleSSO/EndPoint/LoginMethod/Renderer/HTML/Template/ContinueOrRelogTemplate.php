@@ -5,7 +5,8 @@ use ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\IframeLoginRenderer;
 use ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\DirectLoginRenderer;
 
 if($this instanceof DirectLoginRenderer || $this instanceof NoScriptLoginRenderer) $html .= $this->appendHeader();
-$html .= '<div id="id-sso-links">';
+$class = isset($params['cssClass']) ? 'class="' . $params['cssClass'] . '"' : '';
+$html .= '<div id="id-sso-links" ' . $class . '>';
     $html .= '<p>You are logged in as <strong>' . $params['user']['email'] . '</strong> at <a href="' . CFG_SSO_ENDPOINT_URL . '">Webgarden SSO</a></p>';
         $html .= '<ul>';
 

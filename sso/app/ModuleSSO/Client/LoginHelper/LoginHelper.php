@@ -34,10 +34,9 @@ abstract class LoginHelper
     }
 
     /**
-     * Checks if browser supports given login helper
+     * Checks if browser supports given login helper, true by default
      * @return bool
      *
-     * @uses ModuleSSO\BrowserSniffer
      */
     public function isSupported()
     {

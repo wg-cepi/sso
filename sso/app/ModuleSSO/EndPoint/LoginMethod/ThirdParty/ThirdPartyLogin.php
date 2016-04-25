@@ -2,8 +2,6 @@
 namespace ModuleSSO\EndPoint\LoginMethod\ThirdParty;
 
 use ModuleSSO\EndPoint\LoginMethod;
-use ModuleSSO\JWT;
-use ModuleSSO\Messages;
 
 /**
  * Class ThirdPartyLogin

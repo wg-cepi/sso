@@ -1,6 +1,10 @@
 <?php
 namespace ModuleSSO\Client;
 
+/**
+ * Interface ILoginHelper
+ * @package ModuleSSO\Client
+ */
 interface ILoginHelper
 {
     /**

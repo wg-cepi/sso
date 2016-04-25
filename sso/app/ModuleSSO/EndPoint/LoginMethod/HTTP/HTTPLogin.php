@@ -2,8 +2,6 @@
 namespace ModuleSSO\EndPoint\LoginMethod\HTTP;
 
 use ModuleSSO\EndPoint\LoginMethod;
-use ModuleSSO\Cookie;
-use ModuleSSO\JWT;
 use ModuleSSO\Messages;
 
 /**
@@ -80,7 +78,8 @@ abstract class HTTPLogin extends LoginMethod
         $params = array(
             'user' => $user,
             'methodNumber' => static::METHOD_NUMBER,
-            'continueUrl' => $this->continueUrl
+            'continueUrl' => $this->continueUrl,
+            'cssClass' => \ModuleSSO::METHOD_KEY .  static::METHOD_NUMBER . "-" . str_replace('.', '-' , $this->getDomain())
         );
         $this->renderer->renderContinueOrRelog($params);
     }

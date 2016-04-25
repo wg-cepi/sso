@@ -112,7 +112,7 @@ class EndPoint extends \ModuleSSO
     }
 
     /**
-     * Sets login method
+     * Sets login method and appropriate renderer
      * @param LoginMethod $loginMethod
      */
     public function setLoginMethod(LoginMethod $loginMethod)

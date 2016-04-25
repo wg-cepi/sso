@@ -12,9 +12,17 @@ use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
 
 
-
+/**
+ * Class HTMLRenderer
+ * @package ModuleSSO\EndPoint\LoginMethod\Renderer\HTML
+ */
 class HTMLRenderer implements IRenderer
 {
+    /**
+     * {@inheritdoc}
+     * @param LoginMethod $loginMethod
+     * @return CORSLoginRenderer|DirectLoginRenderer|FacebookLoginRenderer|GoogleLoginRenderer|IframeLoginRenderer|NoScriptLoginRenderer
+     */
     public function selectRenderer(LoginMethod $loginMethod)
     {
         if($loginMethod instanceof DirectLogin) {
@@ -31,6 +39,12 @@ class HTMLRenderer implements IRenderer
             return new GoogleLoginRenderer();
         }
     }
+
+    /**
+     * {@inheritdoc}
+     * @param array $params
+     * @return void
+     */
     public function renderLoginForm($params = array())
     {
         $html = '';
@@ -38,6 +52,11 @@ class HTMLRenderer implements IRenderer
         echo $html;
     }
 
+    /**
+     * {@inheritdoc}
+     * @param array $params
+     * @return void
+     */
     public function renderContinueOrRelog($params = array())
     {
         $html = '';
@@ -45,6 +64,10 @@ class HTMLRenderer implements IRenderer
         echo $html;
     }
 
+    /**
+     * Echoes name of endpoint
+     * @return string
+     */
     public function appendHeader()
     {
         return '<h1>' . CFG_SSO_DISPLAY_NAME . '</h1>';

@@ -112,6 +112,11 @@ class CORSLogin extends LoginMethod
         }
     }
 
+    /**
+     * Gets origin from HTTP_ORIGIN or HTTP_HOST
+     *
+     * @return mixed|null|string
+     */
     protected function getOrigin()
     {
         $origin = $this->request->server->get('HTTP_ORIGIN');
@@ -119,6 +124,14 @@ class CORSLogin extends LoginMethod
         return $origin ? $origin : ($host ? 'http://' . str_replace('www.', '', $host) : null);
     }
 
+    /**
+     * Checks in whitelist if origin is valid
+     *
+     * @param $origin
+     * @return bool
+     *
+     * @uses LoginMethod::isInWhiteList()
+     */
     protected function originIsValid($origin)
     {
         $parsed = parse_url($origin);

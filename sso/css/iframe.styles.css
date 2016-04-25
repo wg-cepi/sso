@@ -24,6 +24,10 @@
 }
 
 /* Iframe domain dependat styles */
+.m2-domain1-local a, .m2-domain2-local a{
+    color: rgb(255,64,129) !important;
+}
+
 .m2-domain1-local .mdl-textfield--floating-label.is-focused .mdl-textfield__label{
     color: #3F51B5 !important;
 }

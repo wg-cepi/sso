@@ -12,7 +12,7 @@ class BrowserSniffer
     /**
      * @var string Directory for Browscap cache
      */
-    const TMP_DIR = 'C:\wamp\tmp';
+    const TMP_DIR = 'C:\wamp3\tmp';
 
     /**
      * @var Browscap

@@ -5,13 +5,25 @@ use ModuleSSO\Client\LoginHelper;
 use ModuleSSO\BrowserSniffer;
 use ModuleSSO\Messages;
 
+/**
+ * Class CORSHelper
+ * @package ModuleSSO\Client\LoginHelper\Other
+ */
 class CORSHelper extends LoginHelper
 {
+    /**
+     * {@inheritdoc}
+     * @param string $continue
+     */
     public function showLogin($continue = '')
     {
        $this->renderer->renderLogin();
     }
-    
+
+    /**
+     * {@inheritdoc}
+     * @return string
+     */
     public function appendScripts()
     {
         $script = '<script src="' . CFG_SSO_URL . '/js/prototype.js"></script>';
@@ -19,12 +31,25 @@ class CORSHelper extends LoginHelper
         return $script;
         
     }
-    
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
     public function appendStyles()
     {
         return '<link rel="stylesheet" href="' . CFG_SSO_URL . '/css/styles.css">';
     }
-    
+
+
+    /**
+     * {@inheritdoc}
+     * @return bool
+     * @throws \Exception
+     *
+     * @uses ModuleSSO\BrowserSniffer
+     */
     public function isSupported()
     {
         global $CORSBrowsers;
