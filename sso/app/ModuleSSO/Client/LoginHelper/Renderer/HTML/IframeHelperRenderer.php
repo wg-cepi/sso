@@ -1,9 +1,10 @@
 <?php
 namespace ModuleSSO\Client\LoginHelper\Renderer\HTML;
 
-use ModuleSSO\Client\LoginHelper\Renderer\HelperRenderException;
-use ModuleSSO\EndPoint\LoginMethod\HTTP\IframeLogin;
-
+/**
+ * Class IframeHelperRenderer
+ * @package ModuleSSO\Client\LoginHelper\Renderer\HTML
+ */
 class IframeHelperRenderer extends HTMLRenderer
 {
 

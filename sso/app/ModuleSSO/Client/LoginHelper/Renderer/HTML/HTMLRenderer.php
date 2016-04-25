@@ -9,8 +9,16 @@ use ModuleSSO\Client\LoginHelper\Other\CORSHelper;
 use ModuleSSO\Client\LoginHelper\ThirdParty\FacebookHelper;
 use ModuleSSO\Client\LoginHelper\ThirdParty\GoogleHelper;
 
+/**
+ * Class HTMLRenderer
+ * @package ModuleSSO\Client\LoginHelper\Renderer\HTML
+ */
 class HTMLRenderer implements IRenderer
 {
+    /**
+     * {@inheritdoc}
+     * @param array $params
+     */
     public function renderLogin($params = array())
     {
         $html = '';
@@ -18,6 +26,11 @@ class HTMLRenderer implements IRenderer
         echo $html;
     }
 
+    /**
+     * {@inheritdoc}
+     * @param LoginHelper $loginHelper
+     * @return CORSHelperRenderer|FacebookHelperRenderer|GoogleHelperRenderer|IframeHelperRenderer|NoScriptHelperRenderer
+     */
     public function selectRenderer(LoginHelper $loginHelper)
     {
         if($loginHelper instanceof NoScriptHelper) {

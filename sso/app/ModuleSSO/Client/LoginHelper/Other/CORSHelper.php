@@ -3,7 +3,6 @@ namespace ModuleSSO\Client\LoginHelper\Other;
 
 use ModuleSSO\Client\LoginHelper;
 use ModuleSSO\BrowserSniffer;
-use ModuleSSO\Messages;
 
 /**
  * Class CORSHelper
@@ -13,6 +12,7 @@ class CORSHelper extends LoginHelper
 {
     /**
      * {@inheritdoc}
+     *
      * @param string $continue
      */
     public function showLogin($continue = '')
@@ -22,6 +22,7 @@ class CORSHelper extends LoginHelper
 
     /**
      * {@inheritdoc}
+     *
      * @return string
      */
     public function appendScripts()
@@ -45,6 +46,7 @@ class CORSHelper extends LoginHelper
 
     /**
      * {@inheritdoc}
+     *
      * @return bool
      * @throws \Exception
      *
