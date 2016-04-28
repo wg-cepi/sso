@@ -32,9 +32,9 @@ class CORSLogin extends LoginMethod
             header('Content-Type: application/json');
             header('Access-Control-Allow-Credentials: true');
 
-            if ($this->request->query->get('email') && $this->request->query->get('password')) {
-                $email = $this->request->query->get('email');
-                $password = $this->request->query->get('password');
+            if ($this->request->get('email') && $this->request->get('password')) {
+                $email = $this->request->get('email');
+                $password = $this->request->get('password');
 
                 $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = ?");
                 $query->execute(array($email));
@@ -68,9 +68,9 @@ class CORSLogin extends LoginMethod
         if ($this->originIsValid($origin)) {
             $parsed = parse_url($this->request->server->get('HTTP_ORIGIN'));
             if(isset($parsed['host'])) {
-                if($this->request->query->get(\ModuleSSO::LOGIN_KEY) == 1) {
+                if($this->request->get(\ModuleSSO::LOGIN_KEY) == 1) {
                     $this->setOnLoginRequest();
-                } else if($this->request->query->get(\ModuleSSO::CHECK_COOKIE_KEY) == 1) {
+                } else if($this->request->get(\ModuleSSO::CHECK_COOKIE_KEY) == 1) {
                     $this->setOnCheckCookieRequest();
                 } else {
                     JsonResponse::create(array("status" => "fail", "code" => "key_not_recognized"))->send();

@@ -24,9 +24,9 @@ abstract class HTTPLogin extends LoginMethod
      */
     public function setOnLoginRequest()
     {
-        if($this->request->query->get('email') && $this->request->query->get('password')) {
-            $email = $this->request->query->get('email');
-            $password = $this->request->query->get('password');
+        if($this->request->get('email') && $this->request->get('password')) {
+            $email = $this->request->get('email');
+            $password = $this->request->get('password');
 
             $query = \Database::$pdo->prepare("SELECT * FROM users WHERE email = ?");
             $query->execute(array($email));
@@ -38,7 +38,7 @@ abstract class HTTPLogin extends LoginMethod
                 Messages::insert('Login failed, please try again', 'warn');
                 $this->showLoginForm();
             }
-        } else if($this->request->query->get(\ModuleSSO::LOGIN_KEY)) {
+        } else if($this->request->get(\ModuleSSO::LOGIN_KEY)) {
             if($user = $this->getUserFromCookie()) {
                 $this->generateTokenAndRedirect($user);
             } else {
@@ -46,7 +46,7 @@ abstract class HTTPLogin extends LoginMethod
                 $this->showLoginForm();
             }
         }
-        else if ($this->request->query->get(\ModuleSSO::RELOG_KEY)){
+        else if ($this->request->get(\ModuleSSO::RELOG_KEY)){
             $this->showLoginForm();
         }
         else {

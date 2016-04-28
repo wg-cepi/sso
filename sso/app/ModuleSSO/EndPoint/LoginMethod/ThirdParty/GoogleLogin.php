@@ -68,7 +68,7 @@ class GoogleLogin extends ThirdPartyLogin
     public function setOnCodeRequest()
     {
         $this->setOnContinueUrlRequest();
-        if ($code = $this->request->query->get(ThirdPartyLogin::CODE_KEY)) {
+        if ($code = $this->request->get(ThirdPartyLogin::CODE_KEY)) {
             try {
                 $this->google->authenticate($code);
                 if ($this->google->getAccessToken()) {

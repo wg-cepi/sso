@@ -21,6 +21,11 @@ $renderer = new HTMLRenderer();
 $endPoint = new EndPoint($request ,$renderer);
 $endPoint->pickLoginMethod();
 
+ob_start();
+$endPoint->run();
+$html = ob_get_clean();
+ob_end_clean();
+
 $fbLoginUrl = CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_SSO_ENDPOINT_INDEX_URL . '&' . \ModuleSSO::METHOD_KEY . '=' . FacebookLogin::METHOD_NUMBER;
 $googleLoginUrl = CFG_SSO_ENDPOINT_URL . '?' . \ModuleSSO::CONTINUE_KEY . '=' . CFG_SSO_ENDPOINT_INDEX_URL . '&' . \ModuleSSO::METHOD_KEY . '=' . GoogleLogin::METHOD_NUMBER;
 
@@ -33,7 +38,9 @@ $fbLoginLink = '<a class="mdl-navigation__link" href="' . $fbLoginUrl . '">Login
         <title><?php echo CFG_SSO_DISPLAY_NAME ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="icon" type="image/png" href="/img/favicon.png" />
-        <link rel="stylesheet" href="css/material.min.css">
+        <?php if($endPoint->getLoginMethod()->getMethodNumber() !== 2): ?>
+            <link rel="stylesheet" href="css/material.min.css">
+        <?php endif;?>
         <link rel="stylesheet" href="css/common.styles.css">
         <script src="js/common.js"></script>
         <?php echo $endPoint->appendStyles() ?>
@@ -76,7 +83,7 @@ $fbLoginLink = '<a class="mdl-navigation__link" href="' . $fbLoginUrl . '">Login
             <?php endif; ?>
                     <div class="sso">
                         <div class="grid-centered">
-                            <?php $endPoint->run(); ?>
+                            <?php echo $html; ?>
                         </div>
                     </div>
             <?php if($endPoint->getLoginMethod()->getMethodNumber() !== 2): ?>

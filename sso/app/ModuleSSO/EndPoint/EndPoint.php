@@ -68,7 +68,7 @@ class EndPoint extends \ModuleSSO
      */
     public function pickLoginMethod()
     {
-        if($key = $this->request->query->get(\ModuleSSO::METHOD_KEY)) {
+        if($key = $this->request->get(\ModuleSSO::METHOD_KEY)) {
             if(isset(self::$MAP[$key])) {
                 $class = self::$MAP[$key];
                 $this->loginMethod = new $class($this->request);

@@ -26,7 +26,7 @@ $html .= '<span id="id-sso-login-header">Login to Webgarden SSO</span>';
     } else if ($this instanceof CORSHelperRenderer) {
         $html .= '<form id="id-sso-form" action="' . CFG_SSO_ENDPOINT_URL . '">';
     } else {
-        $html .= '<form id="id-sso-form">';
+        $html .= '<form id="id-sso-form" method="post">';
     }
         $html .= '<div class="inputs">';
             $html .= '<div class="input-email mdl-textfield mdl-js-textfield mdl-textfield--floating-label">';

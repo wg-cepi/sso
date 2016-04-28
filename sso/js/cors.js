@@ -55,20 +55,26 @@ var WebgardenSSO = Class.create({
      * @param password
      */
     login: function(email, password) {
-        var url = 'http://sso.local/loginPlain.php?m=3&login=1&email=' + email + '&password=' + password;
+        var url = 'http://sso.local/loginPlain.php';
+        var parameters = '?m=3&login=1&email=' + email + '&password=' + password;
         this.ajaxRequest.onreadystatechange = this.ajaxLoginResolver.bind(this);
-        this.ajaxRequest.open('GET', url);
-        this.ajaxRequest.send();
+
+        this.ajaxRequest.open('POST', url);
+        this.ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        this.ajaxRequest.send(parameters);
     },
     /**
      * AJAX request checking login cookie
      */
     checkCookie: function() {
         if(!$('id-user-id')) {
-            var url = 'http://sso.local/loginPlain.php?m=3&check_cookie=1';
+            var url = 'http://sso.local/loginPlain.php';
+            var parameters = 'm=3&check_cookie=1';
             this.ajaxRequest.onreadystatechange = this.ajaxCheckCookieResolver.bind(this);
-            this.ajaxRequest.open('GET', url);
-            this.ajaxRequest.send();
+
+            this.ajaxRequest.open('POST', url);
+            this.ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            this.ajaxRequest.send(parameters);
         }
     },
     /**

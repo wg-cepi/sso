@@ -26,16 +26,11 @@ class IframeLogin extends HTTPLogin
     /**
      * {@inheritdoc}
      */
-    public function showHTMLHeader()
-    {
-        return '';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function appendStyles()
     {
-        return '<link rel="stylesheet" href="css/iframe.styles.css">';
+        $links = '<link rel="stylesheet" href="http://' . $this->getDomain() . '/css/material.min.css">';
+        $links .= '<link rel="stylesheet" href="css/iframe.styles.css">';
+        return $links;
+
     }
 }

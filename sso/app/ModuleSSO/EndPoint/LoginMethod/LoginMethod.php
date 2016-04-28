@@ -126,7 +126,7 @@ abstract class LoginMethod implements ILoginMethod
      */
     public function setOnLogoutRequest()
     {
-        if($this->request->query->get(\ModuleSSO::LOGOUT_KEY) == 1) {
+        if($this->request->get(\ModuleSSO::LOGOUT_KEY) == 1) {
             session_destroy();
             $this->unsetSSOCookie();
             $this->redirect($this->getContinueUrl());
@@ -173,8 +173,8 @@ abstract class LoginMethod implements ILoginMethod
     public function setOnContinueUrlRequest()
     {
         $returnUrl = $url = CFG_SSO_ENDPOINT_URL;
-        if($this->request->query->get(\ModuleSSO::CONTINUE_KEY)) {
-            $url = $this->request->query->get(\ModuleSSO::CONTINUE_KEY);
+        if($this->request->get(\ModuleSSO::CONTINUE_KEY)) {
+            $url = $this->request->get(\ModuleSSO::CONTINUE_KEY);
         } else if(isset($_SESSION[\ModuleSSO::CONTINUE_KEY])) {
             $url = $_SESSION[\ModuleSSO::CONTINUE_KEY];
         } else if($this->request->server->get('HTTP_REFERER')) {
