@@ -9,8 +9,8 @@ modules:
         - \Helper\Unit
         - Db:
            dsn: 'mysql:host=localhost;dbname=sso_dummy'
-           user: 'root'
-           password: 'root'
+           user: 'sso'
+           password: 'sso'
            dump: 'tests/_data/dump.sql'
            populate: true
            cleanup: true

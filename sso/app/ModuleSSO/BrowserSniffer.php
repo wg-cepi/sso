@@ -27,7 +27,15 @@ class BrowserSniffer
      */
     public static function init($path = self::TMP_DIR, $update = false)
     {
-        self::$browscap = new Browscap($path);
+        if(!self::$browscap) {
+            self::$browscap = new Browscap($path);
+            if(self::$browscap->shouldCacheBeUpdated()) {
+                $oldLimit = ini_get('memory_limit');
+                ini_set('memory_limit', '512M');
+                self::$browscap->updateCache();
+                ini_set('memory_limit', $oldLimit);
+            }
+        }
 
         //very time and memory consuming process, does not have to be done every time
         self::$browscap->doAutoUpdate = $update;
