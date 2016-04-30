@@ -13,7 +13,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testPickLoginHelper()
     {
-        $renderer = new Client\LoginHelper\Renderer\HTML\HTMLRenderer();
+        $renderer = new Client\LoginHelper\Renderer\HTML\HTMLRendererFactory();
         $client = new Client(Request::createFromGlobals(), $renderer, $this->publicKeyPath);
 
         //1. test forced pick
@@ -62,7 +62,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
     {
         require_once PROJECT_ROOT . '/domain1/app/config/config.php';
 
-        $renderer = new Client\LoginHelper\Renderer\HTML\HTMLRenderer();
+        $renderer = new Client\LoginHelper\Renderer\HTML\HTMLRendererFactory();
         $client = new Client(Request::createFromGlobals(), $renderer, $this->publicKeyPath);
 
         //1. test empty request uri
@@ -89,7 +89,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
 
     public function testGetUser()
     {
-        $renderer = new Client\LoginHelper\Renderer\HTML\HTMLRenderer();
+        $renderer = new Client\LoginHelper\Renderer\HTML\HTMLRendererFactory();
         $client = new Client(Request::createFromGlobals(), $renderer, $this->publicKeyPath);
         $query = \Database::$pdo->prepare("SELECT * FROM users WHERE id = 1");
         $query->execute();

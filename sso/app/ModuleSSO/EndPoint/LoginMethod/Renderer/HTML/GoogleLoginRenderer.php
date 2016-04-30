@@ -1,7 +1,7 @@
 <?php
 namespace ModuleSSO\EndPoint\LoginMethod\Renderer\HTML;
 
-class GoogleLoginRenderer extends HTMLRenderer
+class GoogleLoginRenderer extends HTMLRendererFactory
 {
     /**
      * {@inheritdoc}

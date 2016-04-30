@@ -114,7 +114,7 @@ class Client extends \ModuleSSO
     public function setLoginHelper(Client\LoginHelper $loginHelper)
     {
         $this->loginHelper = $loginHelper;
-        $this->loginHelper->renderer = $this->renderer->selectRenderer($this->loginHelper);
+        $this->loginHelper->renderer = $this->renderer->getRenderer($this->loginHelper);
     }
 
     /**
@@ -154,7 +154,7 @@ class Client extends \ModuleSSO
             } else {
                 $this->loginHelper = new HTTP\NoScriptHelper();
             }
-            $this->loginHelper->renderer = $this->renderer->selectRenderer($this->loginHelper);
+            $this->loginHelper->renderer = $this->renderer->getRenderer($this->loginHelper);
             return;
         }
         
@@ -165,7 +165,7 @@ class Client extends \ModuleSSO
             $loginHelper = new $helper();
             if($loginHelper->isSupported()) {
                 $this->loginHelper = $loginHelper;
-                $this->loginHelper->renderer = $this->renderer->selectRenderer($this->loginHelper);
+                $this->loginHelper->renderer = $this->renderer->getRenderer($this->loginHelper);
                 break;
             }
         } 

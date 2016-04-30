@@ -16,14 +16,14 @@ use ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
  * Class HTMLRenderer
  * @package ModuleSSO\EndPoint\LoginMethod\Renderer\HTML
  */
-class HTMLRenderer implements IRenderer
+class HTMLRendererFactory implements IRenderer
 {
     /**
      * {@inheritdoc}
      * @param LoginMethod $loginMethod
      * @return CORSLoginRenderer|DirectLoginRenderer|FacebookLoginRenderer|GoogleLoginRenderer|IframeLoginRenderer|NoScriptLoginRenderer
      */
-    public function selectRenderer(LoginMethod $loginMethod)
+    public function getRenderer(LoginMethod $loginMethod)
     {
         if($loginMethod instanceof DirectLogin) {
             return new DirectLoginRenderer();

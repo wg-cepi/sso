@@ -5,7 +5,7 @@ namespace ModuleSSO\EndPoint\LoginMethod\Renderer\HTML;
  * Class FacebookLoginRenderer
  * @package ModuleSSO\EndPoint\LoginMethod\Renderer\HTML
  */
-class FacebookLoginRenderer extends HTMLRenderer
+class FacebookLoginRenderer extends HTMLRendererFactory
 {
     /**
      * {@inheritdoc}

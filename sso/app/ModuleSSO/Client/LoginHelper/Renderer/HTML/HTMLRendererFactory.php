@@ -13,7 +13,7 @@ use ModuleSSO\Client\LoginHelper\ThirdParty\GoogleHelper;
  * Class HTMLRenderer
  * @package ModuleSSO\Client\LoginHelper\Renderer\HTML
  */
-class HTMLRenderer implements IRenderer
+class HTMLRendererFactory implements IRenderer
 {
     /**
      * {@inheritdoc}
@@ -31,7 +31,7 @@ class HTMLRenderer implements IRenderer
      * @param LoginHelper $loginHelper
      * @return CORSHelperRenderer|FacebookHelperRenderer|GoogleHelperRenderer|IframeHelperRenderer|NoScriptHelperRenderer
      */
-    public function selectRenderer(LoginHelper $loginHelper)
+    public function getRenderer(LoginHelper $loginHelper)
     {
         if($loginHelper instanceof NoScriptHelper) {
             return new NoScriptHelperRenderer();

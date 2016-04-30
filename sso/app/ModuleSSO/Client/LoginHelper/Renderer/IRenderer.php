@@ -29,5 +29,5 @@ interface IRenderer
      * @param LoginHelper $loginHelper
      * @return mixed
      */
-    public function selectRenderer(LoginHelper $loginHelper);
+    public function getRenderer(LoginHelper $loginHelper);
 }

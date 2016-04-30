@@ -5,7 +5,7 @@ namespace ModuleSSO\EndPoint\LoginMethod\Renderer\HTML;
  * Class CORSLoginRenderer
  * @package ModuleSSO\EndPoint\LoginMethod\Renderer\HTML
  */
-class CORSLoginRenderer extends HTMLRenderer
+class CORSLoginRenderer extends HTMLRendererFactory
 {
     /**
      * {@inheritdoc}

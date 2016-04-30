@@ -10,13 +10,13 @@ use ModuleSSO\BrowserSniffer;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
 use Symfony\Component\HttpFoundation\Request;
-use ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRenderer;
+use ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRendererFactory;
 
 BrowserSniffer::init();
 Database::init();
 
 $request = Request::createFromGlobals();
-$renderer = new HTMLRenderer();
+$renderer = new HTMLRendererFactory();
 
 $endPoint = new EndPoint($request ,$renderer);
 $endPoint->pickLoginMethod();

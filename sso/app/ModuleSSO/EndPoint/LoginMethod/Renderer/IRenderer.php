@@ -28,5 +28,5 @@ interface IRenderer
      * @param LoginMethod $loginMethod
      * @return mixed
      */
-    public function selectRenderer(LoginMethod $loginMethod);
+    public function getRenderer(LoginMethod $loginMethod);
 }

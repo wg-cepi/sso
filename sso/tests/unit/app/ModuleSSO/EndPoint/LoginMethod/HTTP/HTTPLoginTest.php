@@ -3,7 +3,7 @@
 use \ModuleSSO\EndPoint\LoginMethod\HTTP\NoScriptLogin;
 use ModuleSSO\Cookie;
 use Symfony\Component\HttpFoundation\Request;
-use  \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRenderer;
+use  \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRendererFactory;
 
 class HTTPLoginTest extends PHPUnit_Framework_TestCase
 {

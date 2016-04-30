@@ -6,7 +6,7 @@ class EndPointTest extends PHPUnit_Framework_TestCase
 
     public function testPickLoginMethod()
     {
-        $renderer = new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRenderer();
+        $renderer = new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRendererFactory();
         $endPoint = new ModuleSSO\EndPoint(Request::createFromGlobals(), $renderer);
 
         $_GET['m'] = 1;
@@ -48,7 +48,7 @@ class EndPointTest extends PHPUnit_Framework_TestCase
 
     public function testRun()
     {
-        $renderer = new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRenderer();
+        $renderer = new \ModuleSSO\EndPoint\LoginMethod\Renderer\HTML\HTMLRendererFactory();
         $request = Request::createFromGlobals();
 
         $endPoint = new ModuleSSO\EndPoint($request, $renderer);
