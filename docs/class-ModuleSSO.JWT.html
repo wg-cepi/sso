@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>Class ModuleSSO\JWT</title>
+
+	<link rel="stylesheet" href="resources/style.css?e99947befd7bf673c6b43ff75e9e0f170c88a60e">
+
+</head>
+
+<body>
+<div id="left">
+	<div id="menu">
+		<a href="index.html" title="Overview"><span>Overview</span></a>
+
+
+		<div id="groups">
+				<h3>Namespaces</h3>
+			<ul>
+				<li class="active">
+					<a href="namespace-ModuleSSO.html">
+						ModuleSSO<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.Client.html">
+						Client<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.html">
+						LoginHelper<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.HTTP.html">
+						HTTP					</a>
+
+						</li>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.Other.html">
+						Other					</a>
+
+						</li>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.Renderer.html">
+						Renderer<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.Renderer.HTML.html">
+						HTML					</a>
+
+						</li>
+							</ul></li>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.ThirdParty.html">
+						ThirdParty					</a>
+
+						</li>
+							</ul></li></ul></li>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.html">
+						EndPoint<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.html">
+						LoginMethod<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.HTTP.html">
+						HTTP					</a>
+
+						</li>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.Other.html">
+						Other					</a>
+
+						</li>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.Renderer.html">
+						Renderer<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.Renderer.HTML.html">
+						HTML					</a>
+
+						</li>
+							</ul></li>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.ThirdParty.html">
+						ThirdParty					</a>
+
+						</li>
+							</ul></li></ul></li></ul></li>
+				<li>
+					<a href="namespace-None.html">
+						None					</a>
+
+						</li>
+			</ul>
+		</div>
+
+		<hr>
+
+
+		<div id="elements">
+			<h3>Classes</h3>
+			<ul>
+				<li><a href="class-ModuleSSO.BrowserSniffer.html">BrowserSniffer</a></li>
+				<li><a href="class-ModuleSSO.Client.html">Client</a></li>
+				<li><a href="class-ModuleSSO.Cookie.html">Cookie</a></li>
+				<li><a href="class-ModuleSSO.EndPoint.html">EndPoint</a></li>
+				<li class="active"><a href="class-ModuleSSO.JWT.html">JWT</a></li>
+				<li><a href="class-ModuleSSO.Messages.html">Messages</a></li>
+			</ul>
+
+
+
+			<h3>Exceptions</h3>
+			<ul>
+				<li><a href="class-ModuleSSO.EJWTException.html">EJWTException</a></li>
+			</ul>
+
+
+		</div>
+	</div>
+</div>
+
+<div id="splitter"></div>
+
+<div id="right">
+<div id="rightInner">
+	<form id="search">
+		<input type="hidden" name="cx" value="">
+		<input type="hidden" name="ie" value="UTF-8">
+		<input type="text" name="q" class="text" placeholder="Search">
+	</form>
+
+	<div id="navigation">
+		<ul>
+			<li>
+				<a href="index.html" title="Overview"><span>Overview</span></a>
+			</li>
+			<li>
+				<a href="namespace-ModuleSSO.html" title="Summary of ModuleSSO"><span>Namespace</span></a>
+			</li>
+			<li class="active">
+<span>Class</span>			</li>
+		</ul>
+		<ul>
+		</ul>
+		<ul>
+		</ul>
+	</div>
+
+<div id="content" class="class">
+	<h1>Class JWT</h1>
+
+
+	<div class="description">
+	<p>Class JWT</p>
+	</div>
+
+
+
+
+
+
+
+
+
+	<div class="info">
+		
+		
+		<b>Namespace:</b> <a href="namespace-ModuleSSO.html">ModuleSSO</a><br>
+		<b>Package:</b> ModuleSSO<br>
+
+			<b>Located at</b> <a href="source-class-ModuleSSO.JWT.html#14-134" title="Go to source code">ModuleSSO/JWT.php</a>
+		<br>
+	</div>
+
+
+
+	<table class="summary methods" id="methods">
+	<caption>Methods summary</caption>
+	<tr data-order="__construct" id="___construct">
+
+		<td class="attributes"><code>
+			 public 
+
+			
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#___construct">#</a>
+		<code><a href="source-class-ModuleSSO.JWT.html#59-77" title="Go to source code">__construct</a>( <span>string <var>$domain</var> = CFG_JWT_ISSUER</span>, <span>string <var>$issuer</var> = CFG_JWT_ISSUER</span>, <span>null <var>$expiration</var> = <span class="php-keyword1">null</span></span>, <span>null <var>$issuedAt</var> = <span class="php-keyword1">null</span></span>, <span>null <var>$notBefore</var> = <span class="php-keyword1">null</span></span>, <span>null <var>$privKeyPath</var> = <span class="php-keyword1">null</span></span> )</code>
+
+		<div class="description short">
+			<p>JWT constructor</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>JWT constructor</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$domain</var></dt>
+					<dd></dd>
+					<dt><var>$issuer</var></dt>
+					<dd></dd>
+					<dt><var>$expiration</var></dt>
+					<dd></dd>
+					<dt><var>$issuedAt</var></dt>
+					<dd></dd>
+					<dt><var>$notBefore</var></dt>
+					<dd></dd>
+					<dt><var>$privKeyPath</var></dt>
+					<dd></dd>
+				</dl></div>
+
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="generate" id="_generate">
+
+		<td class="attributes"><code>
+			 public 
+
+			string
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_generate">#</a>
+		<code><a href="source-class-ModuleSSO.JWT.html#79-133" title="Go to source code">generate</a>( <span>array <var>$values</var></span> )</code>
+
+		<div class="description short">
+			<p>Generates and returns JWT based on input values and config variables</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Generates and returns JWT based on input values and config variables</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$values</var></dt>
+					<dd></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					string<br>$token
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					Exception
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	</table>
+
+
+
+
+
+
+
+
+
+
+
+
+	<table class="summary properties" id="properties">
+	<caption>Properties summary</caption>
+	<tr data-order="issuer" id="$issuer">
+		<td class="attributes"><code>
+			public  
+			null|string
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-ModuleSSO.JWT.html#20-23" title="Go to source code"><var>$issuer</var></a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#$issuer" class="anchor">#</a>
+				<code><span class="php-keyword1">null</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="audience" id="$audience">
+		<td class="attributes"><code>
+			public  
+			string|null
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-ModuleSSO.JWT.html#25-28" title="Go to source code"><var>$audience</var></a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#$audience" class="anchor">#</a>
+				<code><span class="php-keyword1">null</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="expiration" id="$expiration">
+		<td class="attributes"><code>
+			public  
+			integer|null
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-ModuleSSO.JWT.html#30-33" title="Go to source code"><var>$expiration</var></a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#$expiration" class="anchor">#</a>
+				<code><span class="php-keyword1">null</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="notBefore" id="$notBefore">
+		<td class="attributes"><code>
+			public  
+			integer|null
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-ModuleSSO.JWT.html#35-38" title="Go to source code"><var>$notBefore</var></a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#$notBefore" class="anchor">#</a>
+				<code><span class="php-keyword1">null</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="issuedAt" id="$issuedAt">
+		<td class="attributes"><code>
+			public  
+			integer|null
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-ModuleSSO.JWT.html#40-43" title="Go to source code"><var>$issuedAt</var></a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#$issuedAt" class="anchor">#</a>
+				<code><span class="php-keyword1">null</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="token" id="$token">
+		<td class="attributes"><code>
+			public  
+			string|null
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-ModuleSSO.JWT.html#45-48" title="Go to source code"><var>$token</var></a>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#$token" class="anchor">#</a>
+				<code><span class="php-keyword1">null</span></code>
+			</div>
+		</td>
+	</tr>
+	</table>
+
+
+
+
+
+
+</div>
+
+	<div id="footer">
+		 API documentation generated by <a href="http://apigen.org">ApiGen</a>
+	</div>
+</div>
+</div>
+<script src="resources/combined.js"></script>
+<script src="elementlist.js"></script>
+</body>
+</html>

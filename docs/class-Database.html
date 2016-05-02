@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>Class Database</title>
+
+	<link rel="stylesheet" href="resources/style.css?e99947befd7bf673c6b43ff75e9e0f170c88a60e">
+
+</head>
+
+<body>
+<div id="left">
+	<div id="menu">
+		<a href="index.html" title="Overview"><span>Overview</span></a>
+
+
+		<div id="groups">
+				<h3>Namespaces</h3>
+			<ul>
+				<li>
+					<a href="namespace-ModuleSSO.html">
+						ModuleSSO<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.Client.html">
+						Client<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.html">
+						LoginHelper<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.HTTP.html">
+						HTTP					</a>
+
+						</li>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.Other.html">
+						Other					</a>
+
+						</li>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.Renderer.html">
+						Renderer<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.Renderer.HTML.html">
+						HTML					</a>
+
+						</li>
+							</ul></li>
+				<li>
+					<a href="namespace-ModuleSSO.Client.LoginHelper.ThirdParty.html">
+						ThirdParty					</a>
+
+						</li>
+							</ul></li></ul></li>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.html">
+						EndPoint<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.html">
+						LoginMethod<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.HTTP.html">
+						HTTP					</a>
+
+						</li>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.Other.html">
+						Other					</a>
+
+						</li>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.Renderer.html">
+						Renderer<span></span>
+					</a>
+
+						<ul>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.Renderer.HTML.html">
+						HTML					</a>
+
+						</li>
+							</ul></li>
+				<li>
+					<a href="namespace-ModuleSSO.EndPoint.LoginMethod.ThirdParty.html">
+						ThirdParty					</a>
+
+						</li>
+							</ul></li></ul></li></ul></li>
+				<li class="active">
+					<a href="namespace-None.html">
+						None					</a>
+
+						</li>
+			</ul>
+		</div>
+
+		<hr>
+
+
+		<div id="elements">
+			<h3>Classes</h3>
+			<ul>
+				<li class="active"><a href="class-Database.html">Database</a></li>
+				<li><a href="class-JavaScriptRedirectResponse.html">JavaScriptRedirectResponse</a></li>
+				<li><a href="class-Logger.html">Logger</a></li>
+				<li><a href="class-ModuleSSO.html">ModuleSSO</a></li>
+			</ul>
+
+
+
+
+
+			<h3>Functions</h3>
+			<ul>
+				<li><a href="function-getClassName.html">getClassName</a></li>
+				<li><a href="function-print_pre.html">print_pre</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div id="splitter"></div>
+
+<div id="right">
+<div id="rightInner">
+	<form id="search">
+		<input type="hidden" name="cx" value="">
+		<input type="hidden" name="ie" value="UTF-8">
+		<input type="text" name="q" class="text" placeholder="Search">
+	</form>
+
+	<div id="navigation">
+		<ul>
+			<li>
+				<a href="index.html" title="Overview"><span>Overview</span></a>
+			</li>
+			<li>
+				<a href="namespace-None.html" title="Summary of None"><span>Namespace</span></a>
+			</li>
+			<li class="active">
+<span>Class</span>			</li>
+		</ul>
+		<ul>
+		</ul>
+		<ul>
+		</ul>
+	</div>
+
+<div id="content" class="class">
+	<h1>Class Database</h1>
+
+
+	<div class="description">
+	<p>Class Database</p>
+	</div>
+
+
+
+
+
+
+
+
+
+	<div class="info">
+		
+		
+		
+		
+
+				<b>Used by:</b>
+				<code><a href="class-ModuleSSO.Client.html#_getUser">ModuleSSO\Client::getUser()</a></code><br>
+			<b>Located at</b> <a href="source-class-Database.html#3-30" title="Go to source code">Database.php</a>
+		<br>
+	</div>
+
+
+
+	<table class="summary methods" id="methods">
+	<caption>Methods summary</caption>
+	<tr data-order="init" id="_init">
+
+		<td class="attributes"><code>
+			 public static
+
+			
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_init">#</a>
+		<code><a href="source-class-Database.html#11-29" title="Go to source code">init</a>( <span>string <var>$dbName</var> = CFG_SQL_DBNAME</span>, <span>string <var>$sqlHost</var> = CFG_SQL_HOST</span>, <span>string <var>$user</var> = CFG_SQL_USERNAME</span>, <span>string <var>$password</var> = CFG_SQL_PASSWORD</span> )</code>
+
+		<div class="description short">
+			<p>Initializes database environment.
+If no parameters are passed, parameters from config are used</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Initializes database environment.
+If no parameters are passed, parameters from config are used</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$dbName</var></dt>
+					<dd>Name of database</dd>
+					<dt><var>$sqlHost</var></dt>
+					<dd>Name of host</dd>
+					<dt><var>$user</var></dt>
+					<dd>Name of user</dd>
+					<dt><var>$password</var></dt>
+					<dd>User's password</dd>
+				</dl></div>
+
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	</table>
+
+
+
+
+
+
+
+
+
+
+
+
+	<table class="summary properties" id="properties">
+	<caption>Properties summary</caption>
+	<tr data-order="pdo" id="$pdo">
+		<td class="attributes"><code>
+			public static 
+			PDO
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-Database.html#8-9" title="Go to source code"><var>$pdo</var></a>
+
+			<div class="description short">
+				<p>$pdo</p>
+			</div>
+
+			<div class="description detailed hidden">
+				<p>$pdo</p>
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#$pdo" class="anchor">#</a>
+				<code><span class="php-keyword1">null</span></code>
+			</div>
+		</td>
+	</tr>
+	</table>
+
+
+
+
+
+
+</div>
+
+	<div id="footer">
+		 API documentation generated by <a href="http://apigen.org">ApiGen</a>
+	</div>
+</div>
+</div>
+<script src="resources/combined.js"></script>
+<script src="elementlist.js"></script>
+</body>
+</html>
