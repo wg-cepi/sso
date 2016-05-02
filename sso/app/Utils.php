@@ -22,7 +22,7 @@ function getClassName($fullClassName)
 }
 
 /**
- * Dumps variable, wrapped by HTML <pre> tag
+ * Dumps variable, wrapped by HTML pre tag
  *
  * @param $var
  */

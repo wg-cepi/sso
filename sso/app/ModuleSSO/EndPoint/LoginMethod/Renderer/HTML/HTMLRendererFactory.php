@@ -11,7 +11,7 @@ use ModuleSSO\EndPoint\LoginMethod\Other\CORSLogin;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty\FacebookLogin;
 use ModuleSSO\EndPoint\LoginMethod\ThirdParty\GoogleLogin;
 
-
+class ELoginRendererNotBound extends \Exception {}
 /**
  * Class HTMLRenderer
  * @package ModuleSSO\EndPoint\LoginMethod\Renderer\HTML
@@ -22,6 +22,7 @@ class HTMLRendererFactory implements IRenderer
      * {@inheritdoc}
      * @param LoginMethod $loginMethod
      * @return CORSLoginRenderer|DirectLoginRenderer|FacebookLoginRenderer|GoogleLoginRenderer|IframeLoginRenderer|NoScriptLoginRenderer
+     * @throws ELoginRendererNotBound()
      */
     public function getRenderer(LoginMethod $loginMethod)
     {
@@ -37,6 +38,8 @@ class HTMLRendererFactory implements IRenderer
             return new FacebookLoginRenderer();
         } else if($loginMethod instanceof GoogleLogin) {
             return new GoogleLoginRenderer();
+        } else {
+            throw new ELoginRendererNotBound();
         }
     }
 

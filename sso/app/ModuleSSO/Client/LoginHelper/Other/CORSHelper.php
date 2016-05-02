@@ -13,16 +13,6 @@ class CORSHelper extends LoginHelper
     /**
      * {@inheritdoc}
      *
-     * @param string $continue
-     */
-    public function showLogin($continue = '')
-    {
-       $this->renderer->renderLogin();
-    }
-
-    /**
-     * {@inheritdoc}
-     *
      * @return string
      */
     public function appendScripts()

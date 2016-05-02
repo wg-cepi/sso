@@ -9,7 +9,9 @@ use ModuleSSO\EndPoint\LoginMethod;
  */
 abstract class ThirdPartyLogin extends LoginMethod
 {
-    /** @@var string Name of code parameter in URL */
+    /**
+     * @var string Name of code parameter in URL
+     */
     const CODE_KEY = 'code';
 
     /**

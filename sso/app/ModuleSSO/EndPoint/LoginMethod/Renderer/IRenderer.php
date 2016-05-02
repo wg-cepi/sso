@@ -4,6 +4,10 @@ namespace ModuleSSO\EndPoint\LoginMethod\Renderer;
 
 use ModuleSSO\EndPoint\LoginMethod;
 
+/**
+ * Interface IRenderer
+ * @package ModuleSSO\EndPoint\LoginMethod\Renderer
+ */
 interface IRenderer
 {
     /**

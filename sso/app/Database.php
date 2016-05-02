@@ -9,7 +9,7 @@ class Database
     public static $pdo = null;
 
     /**
-     * Initializes database environment
+     * Initializes database environment.
      * If no parameters are passed, parameters from config are used
      *
      * @param string $dbName Name of database

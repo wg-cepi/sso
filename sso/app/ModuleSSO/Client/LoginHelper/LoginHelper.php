@@ -42,5 +42,17 @@ abstract class LoginHelper
     {
         return true;
     }
+
+
+    /**
+     * Passes parameter for rendering of login element to renderer
+     *
+     * @param string $continue
+     *
+     */
+    public function showLogin($continue = '')
+    {
+        $this->renderer->renderLogin(array('continueUrl' => $continue));
+    }
 }
 

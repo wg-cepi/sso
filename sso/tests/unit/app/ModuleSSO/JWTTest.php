@@ -46,7 +46,7 @@ class JWTTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Exception
+     * @expectedException \ModuleSSO\EJWTException
      * @expectedExceptionMessage Bad or empty argument
      */
     public function testGenerateBadParam()

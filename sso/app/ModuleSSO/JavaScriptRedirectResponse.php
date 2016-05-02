@@ -11,6 +11,11 @@ class JavaScriptRedirectResponse extends \Symfony\Component\HttpFoundation\Redir
         return "<script>window.parent.location = '" . $this->targetUrl . "';</script>";
     }
 
+    /**
+     * Echos instance of JavaScriptRedirectResponse.
+     *
+     * @uses __toString()
+     */
     public function send()
     {
         echo $this;

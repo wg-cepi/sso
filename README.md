@@ -27,7 +27,7 @@ Also works on Linux, you will need LAMP or PHP + MySQL + Apache.
     }
     ```
 
-5. In `sso/config.php` configure
+5. In [sso/app/config.php](sso/app/config.php) configure
     * `CFG_SQL_HOST`
     * `CFG_SQL_DBNAME`
     * `CFG_SQL_USERNAME`
@@ -36,13 +36,9 @@ Also works on Linux, you will need LAMP or PHP + MySQL + Apache.
 6. Create database (use name in `CFG_SQL_DBNAME`) and import [SQL dump](dumps/sso.sql)
 
 6. Access http://sso.local. You should see Webgarden SSO endpoint.
-7. You have 3 pre-created users
+7. You have 2 pre-created users
     1. Email: joe@example.com, pass: joe
     2. Email: bob@example.com, pass bob
-    3. User for FB or Google login
-        * email: testsso@wgz.cz
-        * google pass: test1234//
-        * facebook pass: test1234
 
 ## Playing with SSO
 ### Login scenario

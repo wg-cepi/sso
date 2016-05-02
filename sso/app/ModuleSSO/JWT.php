@@ -6,6 +6,12 @@ use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 
 /**
+ * Class EJWTException
+ * @package ModuleSSO
+ */
+class EJWTException extends \Exception {}
+
+/**
  * Class JWT
  * @package ModuleSSO
  */
@@ -81,7 +87,7 @@ class JWT
     public function generate($values)
     {
         if(!is_array($values) || empty($values)) {
-            throw new \Exception('Bad or empty argument');
+            throw new EJWTException('Bad or empty argument');
         }
 
         $signer = new Sha256();

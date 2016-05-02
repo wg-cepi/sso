@@ -7,12 +7,5 @@ namespace ModuleSSO\Client\LoginHelper\ThirdParty;
  */
 class FacebookHelper extends ThirdPartyHelper
 {
-    /**
-     * {@inheritdoc}
-     * @param string $continue
-     */
-    public function showLogin($continue = '')
-    {
-       $this->renderer->renderLogin();
-    }
+
 }

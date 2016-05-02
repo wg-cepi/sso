@@ -10,6 +10,12 @@ use ModuleSSO\Client\LoginHelper\ThirdParty\FacebookHelper;
 use ModuleSSO\Client\LoginHelper\ThirdParty\GoogleHelper;
 
 /**
+ * Class EHelperRendererNotBound
+ * @package ModuleSSO\Client\LoginHelper\Renderer\HTML
+ */
+class EHelperRendererNotBound extends \Exception {}
+
+/**
  * Class HTMLRenderer
  * @package ModuleSSO\Client\LoginHelper\Renderer\HTML
  */
@@ -30,6 +36,7 @@ class HTMLRendererFactory implements IRenderer
      * {@inheritdoc}
      * @param LoginHelper $loginHelper
      * @return CORSHelperRenderer|FacebookHelperRenderer|GoogleHelperRenderer|IframeHelperRenderer|NoScriptHelperRenderer
+     * @throws EHelperRendererNotBound()
      */
     public function getRenderer(LoginHelper $loginHelper)
     {
@@ -43,6 +50,8 @@ class HTMLRendererFactory implements IRenderer
             return new FacebookHelperRenderer();
         } else if($loginHelper instanceof GoogleHelper) {
             return new GoogleHelperRenderer();
+        } else {
+            throw new EHelperRendererNotBound();
         }
     }
 }

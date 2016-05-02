@@ -19,10 +19,13 @@ class CORSLogin extends LoginMethod
     /**
      * If email and password field are set i $_GET returns JSON with JWT, otherwise returns just JSON with status and code
      *
-     * @throws \Exception
+     * @overrides LoginMethod::setOnLoginRequest()
      *
+     * @uses CORSLogin::getOrigin()
+     * @uses CORSLogin::originIsValid()
      * @uses LoginMethod::setOrUpdateSSOCookie()
      * @uses JWT::generate()
+     * @uses JsonResponse::create()
      */
     public function setOnLoginRequest()
     {
@@ -61,6 +64,10 @@ class CORSLogin extends LoginMethod
      *
      * Checks origin of request.
      * Binds loginListener or checkCookieListener if origin host is allowed
+     *
+     * @uses CORSLogin::setOnLoginRequest()
+     * @uses CORSLogin::setOnCheckCookieRequest()
+     * @uses JsonResponse::create()
      */
     public function perform()
     {
@@ -88,8 +95,8 @@ class CORSLogin extends LoginMethod
     /**
      * Checks if SSO cookie is set and tries to get user from that cookie
      *
-     * @throws \Exception
-     *
+     * @uses CORSLogin::getOrigin()
+     * @uses CORSLogin::originIsValid()
      * @uses LoginMethod::getUserFromCookie()
      * @uses JWT::generate()
      */
@@ -113,7 +120,7 @@ class CORSLogin extends LoginMethod
     }
 
     /**
-     * Gets origin from HTTP_ORIGIN or HTTP_HOST
+     * Obtains origin from HTTP_ORIGIN or HTTP_HOST
      *
      * @return mixed|null|string
      */

@@ -11,16 +11,14 @@ use ModuleSSO\Messages;
 abstract class HTTPLogin extends LoginMethod
 {
     /**
-     * Listens for $_GET parameters and performs appropriate commands
+     * Listens for $_GET parameters and performs appropriate commands.
      *
-     * If email and password are set in $_GET, method creates SSO cookie and redirects user with generated token
-     * If continue key is set in $_GET, method updates SSO cookie and redirects user with generated token
-     * If relog key is set in $_GET, method shows login form
-     * If none of conditions mentioned above is met, method checks if SSO cookie is set and tries to obtain user, otherwise method shows login form
+     * If email and password are set in $_GET, method creates SSO cookie and redirects user with generated token.
+     * If continue key is set in $_GET, method updates SSO cookie and redirects user with generated token.
+     * If relog key is set in $_GET, method shows login form.
+     * If none of conditions mentioned above is met, method checks if SSO cookie is set and tries to obtain user, otherwise method shows login form.
      *
-     * @uses \ModuleSSO::LOGIN_KEY
-     * @uses \ModuleSSO::RELOG_KEY
-     * @uses \ModuleSSO\Cookie::SECURE_SSO_COOKIE
+     * @uses Messages::insert()
      */
     public function setOnLoginRequest()
     {
@@ -55,7 +53,9 @@ abstract class HTTPLogin extends LoginMethod
     }
 
     /**
-     * Generates HTML login form for NoScript login and Iframe login
+     * Passes data for needed for rendering HTML login form
+     *
+     * @uses \ModuleSSO\EndPoint\LoginHelper\Renderer\IRenderer::renderLoginForm()
      */
     public function showLoginForm()
     {
@@ -71,7 +71,6 @@ abstract class HTTPLogin extends LoginMethod
      * Generates user information in HTML
      *
      * @param $user
-     * @return string HTML containing info about user
      */
     public function showContinueOrRelog($user)
     {
@@ -86,8 +85,6 @@ abstract class HTTPLogin extends LoginMethod
 
     /**
      * If user exists, method shows user info, otherwise shows login form
-     *
-     * @return string HTML string
      *
      * @uses LoginMethod::showContinueOrRelog()
      * @uses LoginMethod::showLoginForm()

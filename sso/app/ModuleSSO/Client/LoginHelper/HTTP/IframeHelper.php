@@ -9,7 +9,6 @@ class IframeHelper extends HTTPHelper
 {
     /**
      * {@inheritdoc}
-     * @param string $continue
      */
     public function showLogin($continue = '')
     {
@@ -18,6 +17,7 @@ class IframeHelper extends HTTPHelper
 
     /**
      * {@inheritdoc}
+     *
      * @return string
      */
     public function appendStyles()
